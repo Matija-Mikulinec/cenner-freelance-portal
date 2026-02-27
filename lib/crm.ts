@@ -1,7 +1,7 @@
 
 import { auth } from './firebase';
 
-const API_BASE = 'https://api.cenner.io';
+const API_BASE = 'http://g4c88sockcck4gwkskg04s4s.109.123.247.194.sslip.io';
 
 // Helper to handle API requests with Firebase Auth headers
 const sendToBackend = async (endpoint: string, method: string, body?: any) => {
