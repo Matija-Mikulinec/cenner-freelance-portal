@@ -4,9 +4,10 @@ import { useNavigate } from 'react-router-dom';
 // Renamed File icon to FileIcon to avoid collision with global browser File type
 import { Upload, Link as LinkIcon, FileText, CheckCircle2, AlertTriangle, ShieldCheck, X, File as FileIcon, ArrowRight, Loader2 } from 'lucide-react';
 import NeuralBackground from '../components/NeuralBackground';
-import { auth, updateProfile } from '../lib/firebase';
+import { useAuth } from '../contexts/AuthContext';
 
 const CreatorOnboarding: React.FC = () => {
+  const { updateUser } = useAuth();
   const [links, setLinks] = useState<string[]>(['']);
   const [files, setFiles] = useState<{ name: string; type: string; size: number }[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -70,8 +71,8 @@ const CreatorOnboarding: React.FC = () => {
       // Mock API call to submit application
       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      // Update local user state via firebase mock
-      await updateProfile(auth.currentUser, { creatorStatus: 'pending' });
+      // Update local user state
+      updateUser({ creatorStatus: 'pending' } as any);
       
       setIsSuccess(true);
     } catch (err: any) {

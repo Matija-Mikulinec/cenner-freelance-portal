@@ -3,11 +3,11 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Check, Zap, Globe, Cpu, Crown, Star, Rocket, Sparkles } from 'lucide-react';
 import NeuralBackground from '../components/NeuralBackground';
-import { auth } from '../lib/firebase';
+import { useAuth } from '../contexts/AuthContext';
 
 const Subscription: React.FC = () => {
   const navigate = useNavigate();
-  const currentUser = auth.currentUser;
+  const { user: currentUser } = useAuth();
 
   const tiers = [
     {

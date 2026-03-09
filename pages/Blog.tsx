@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import { useData } from '../contexts/DataContext';
 import { BlogComment, BlogPost } from '../types';
-import { auth } from '../lib/firebase';
+import { useAuth } from '../contexts/AuthContext';
 import { CATEGORIES } from '../constants';
 
 const VoteControl: React.FC<{ votes: number; orientation?: 'vertical' | 'horizontal' }> = ({ votes, orientation = 'vertical' }) => {
@@ -105,7 +105,7 @@ const Blog: React.FC = () => {
   const [newPost, setNewPost] = useState({ title: '', category: CATEGORIES[0], content: '' });
 
   const navigate = useNavigate();
-  const currentUser = auth.currentUser;
+  const { user: currentUser } = useAuth();
   const isVerified = currentUser?.creatorStatus === 'approved';
 
   const sortedPosts = useMemo(() => {
@@ -121,8 +121,8 @@ const Blog: React.FC = () => {
       title: newPost.title,
       content: newPost.content,
       category: newPost.category,
-      author: currentUser.displayName || 'Anonymous',
-      authorAvatar: currentUser.photoURL || '',
+      author: currentUser.name || 'Anonymous',
+      authorAvatar: currentUser.avatar || '',
       timestamp: 'Just now',
       votes: 0,
       commentCount: 0

@@ -1,0 +1,110 @@
+
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://api.cenner.hr/api/v1/portal';
+const CRM_BASE = import.meta.env.VITE_CRM_API_BASE || 'https://api.cenner.hr';
+
+function getToken(): string | null {
+  return localStorage.getItem('cenner_token');
+}
+
+async function request<T>(
+  endpoint: string,
+  method: string = 'GET',
+  body?: unknown,
+): Promise<T> {
+  const headers: HeadersInit = { 'Content-Type': 'application/json' };
+  const token = getToken();
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+
+  const res = await fetch(`${API_BASE}${endpoint}`, {
+    method,
+    headers,
+    body: body !== undefined ? JSON.stringify(body) : undefined,
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: res.statusText }));
+    throw new Error(err.error || `HTTP ${res.status}`);
+  }
+  return res.json();
+}
+
+export const API = {
+  // ── Auth ──────────────────────────────────────────────────────────────
+  register: (data: { email: string; password: string; name: string; mobile?: string }) =>
+    request<{ token: string; user: any }>('/auth/register', 'POST', data),
+
+  login: (email: string, password: string) =>
+    request<{ token: string; user: any }>('/auth/login', 'POST', { email, password }),
+
+  // Returns fresh user data from DB (used on startup to sync stale localStorage)
+  me: () => request<any>('/auth/me', 'GET'),
+
+  requestPasswordReset: (email: string) =>
+    request<{ success: boolean }>('/auth/request-password-reset', 'POST', { email }),
+
+  resetPassword: (token: string, newPassword: string) =>
+    request<{ success: boolean }>('/auth/reset-password', 'POST', { token, newPassword }),
+
+  verifyEmail: (token: string) =>
+    request<{ success: boolean }>('/auth/verify-email', 'POST', { token }),
+
+  sendPhoneOtp: (phone: string) =>
+    request<{ success: boolean }>('/auth/send-phone-otp', 'POST', { phone }),
+
+  verifyPhoneOtp: (phone: string, code: string) =>
+    request<{ success: boolean }>('/auth/verify-phone-otp', 'POST', { phone, code }),
+
+  // ── Profile ───────────────────────────────────────────────────────────
+  getProfile: (id: string) => request<any>(`/profile/${id}`),
+
+  updateProfile: (id: string, data: Partial<any>) =>
+    request<any>(`/profile/${id}`, 'PUT', data),
+
+  // ── Listings ──────────────────────────────────────────────────────────
+  getListings: (category?: string) =>
+    request<any[]>(`/listings${category ? `?category=${encodeURIComponent(category)}` : ''}`),
+
+  createListing: (data: any) => request<any>('/listings', 'POST', data),
+
+  updateListing: (id: string, data: any) =>
+    request<any>(`/listings/${id}`, 'PUT', data),
+
+  deleteListing: (id: string) =>
+    request<{ success: boolean }>(`/listings/${id}`, 'DELETE'),
+
+  // ── Jobs ──────────────────────────────────────────────────────────────
+  getJobs: (category?: string) =>
+    request<any[]>(`/jobs${category ? `?category=${encodeURIComponent(category)}` : ''}`),
+
+  createJob: (data: any) => request<any>('/jobs', 'POST', data),
+
+  updateJob: (id: string, data: any) =>
+    request<any>(`/jobs/${id}`, 'PUT', data),
+
+  deleteJob: (id: string) =>
+    request<{ success: boolean }>(`/jobs/${id}`, 'DELETE'),
+
+  // ── Blog posts ────────────────────────────────────────────────────────
+  getPosts: () => request<any[]>('/posts'),
+
+  createPost: (data: any) => request<any>('/posts', 'POST', data),
+
+  updatePost: (id: string, data: any) =>
+    request<any>(`/posts/${id}`, 'PUT', data),
+
+  deletePost: (id: string) =>
+    request<{ success: boolean }>(`/posts/${id}`, 'DELETE'),
+
+  // ── Contact form ─────────────────────────────────────────────────────
+  contact: (data: { name: string; email: string; subject: string; message: string }) =>
+    request<{ success: boolean }>('/contact', 'POST', data),
+
+  // ── Analytics (fire-and-forget) ───────────────────────────────────────
+  trackTraffic: (path: string, userId?: string) => {
+    fetch(`${CRM_BASE}/api/v1/analytics/traffic`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ path, userId: userId || null, userAgent: navigator.userAgent }),
+    }).catch(() => {});
+  },
+};

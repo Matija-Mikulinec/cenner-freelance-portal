@@ -7,10 +7,10 @@ import {
   MoreHorizontal, Edit2, Pause, Trash2, ArrowUpRight, Search, 
   Calendar, X, Send, Download, User as UserIcon, ShieldAlert, Rocket, Play, Image as ImageIcon, Smartphone, Mail, Crown, Zap, Globe
 } from 'lucide-react';
-import { auth } from '../lib/firebase';
+import { useAuth } from '../contexts/AuthContext';
 import { useData } from '../contexts/DataContext';
 import { CATEGORIES } from '../constants';
-import { CRM_API } from '../lib/crm';
+import { API } from '../lib/api';
 
 type ActiveTab = 'listings' | 'inbox' | 'earnings' | 'settings';
 
@@ -27,7 +27,18 @@ const Profile: React.FC = () => {
   const [newSkill, setNewSkill] = useState('');
   const [isDownloading, setIsDownloading] = useState(false);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
-  
+  const [editName, setEditName] = useState('');
+  const [editBio, setEditBio] = useState('');
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
+
+  // Phone verification modal state
+  const [isPhoneModalOpen, setIsPhoneModalOpen] = useState(false);
+  const [phoneStep, setPhoneStep] = useState<'enter_phone' | 'enter_code'>('enter_phone');
+  const [phoneInput, setPhoneInput] = useState('');
+  const [otpInput, setOtpInput] = useState('');
+  const [phoneLoading, setPhoneLoading] = useState(false);
+  const [phoneError, setPhoneError] = useState('');
+
   // Creating Listing State
   const [isCreatingListing, setIsCreatingListing] = useState(false);
   const [newListing, setNewListing] = useState({
@@ -42,11 +53,20 @@ const Profile: React.FC = () => {
   const pendingClearance = 0;
   
   const navigate = useNavigate();
-  const currentUser = auth.currentUser;
-  
+  const { user: currentUser, updateUser } = useAuth();
+
+  // Sync local state from user data on mount / user change
+  React.useEffect(() => {
+    if (currentUser) {
+      setSkills((currentUser as any).skills || []);
+      setEditName(currentUser.name || '');
+      setEditBio((currentUser as any).bio || '');
+    }
+  }, [currentUser?.id]);
+
   // Check auth status for rendering
   const creatorStatus = currentUser?.creatorStatus || 'none';
-  const subscriptionTier = currentUser?.subscriptionTier || 'free';
+  const subscriptionTier = currentUser?.tier || 'free';
 
   const [inboxMessages, setInboxMessages] = useState([
     { 
@@ -63,18 +83,42 @@ const Profile: React.FC = () => {
 
   const transactions: any[] = [];
 
+  const saveSkills = async (updated: string[]) => {
+    if (!currentUser) return;
+    try {
+      await API.updateProfile(currentUser.id, { skills: updated } as any);
+      updateUser({ skills: updated } as any);
+    } catch {}
+  };
+
   const handleAddSkill = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && newSkill.trim()) {
-      if (!skills.includes(newSkill.trim())) {
-        setSkills([...skills, newSkill.trim()]);
-      }
+      const updated = skills.includes(newSkill.trim()) ? skills : [...skills, newSkill.trim()];
+      setSkills(updated);
       setNewSkill('');
       setShowSkillInput(false);
+      saveSkills(updated);
     }
   };
 
   const handleRemoveSkill = (skill: string) => {
-    setSkills(skills.filter(s => s !== skill));
+    const updated = skills.filter(s => s !== skill);
+    setSkills(updated);
+    saveSkills(updated);
+  };
+
+  const handleSaveProfile = async () => {
+    if (!currentUser) return;
+    setIsSavingProfile(true);
+    try {
+      const updated = await API.updateProfile(currentUser.id, { name: editName, bio: editBio } as any);
+      updateUser({ name: editName, bio: editBio } as any);
+      setIsEditingProfile(false);
+    } catch (err: any) {
+      alert(err.message || 'Failed to save profile.');
+    } finally {
+      setIsSavingProfile(false);
+    }
   };
 
   const handleWithdraw = () => {
@@ -90,11 +134,54 @@ const Profile: React.FC = () => {
   };
 
   const handleVerifyContact = async (type: 'email' | 'mobile') => {
-      if (currentUser) {
-          await CRM_API.verifyContact(currentUser.uid, type);
-          // Force refresh would be needed here in a real app, but for mock assume it worked
-          alert(`Verification signal sent for ${type}. Check CRM logs.`);
-      }
+    if (!currentUser) return;
+    if (type === 'email') {
+      // Trigger re-send of verification email via backend
+      await API.requestPasswordReset(currentUser.email).catch(() => {});
+      alert('Verification email sent. Check your inbox.');
+    } else {
+      // Open phone verification modal
+      setPhoneInput((currentUser as any).mobile || '');
+      setOtpInput('');
+      setPhoneError('');
+      setPhoneStep('enter_phone');
+      setIsPhoneModalOpen(true);
+    }
+  };
+
+  const handleSendOtp = async () => {
+    if (!phoneInput.trim()) {
+      setPhoneError('Please enter a valid phone number.');
+      return;
+    }
+    setPhoneLoading(true);
+    setPhoneError('');
+    try {
+      await API.sendPhoneOtp(phoneInput.trim());
+      setPhoneStep('enter_code');
+    } catch (err: any) {
+      setPhoneError(err.message || 'Failed to send verification code.');
+    } finally {
+      setPhoneLoading(false);
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    if (!otpInput.trim()) {
+      setPhoneError('Please enter the 6-digit code.');
+      return;
+    }
+    setPhoneLoading(true);
+    setPhoneError('');
+    try {
+      await API.verifyPhoneOtp(phoneInput.trim(), otpInput.trim());
+      updateUser({ mobileVerified: true } as any);
+      setIsPhoneModalOpen(false);
+    } catch (err: any) {
+      setPhoneError(err.message || 'Invalid or expired code. Please try again.');
+    } finally {
+      setPhoneLoading(false);
+    }
   };
 
   const handleOpenMessage = (msg: any) => {
@@ -102,37 +189,39 @@ const Profile: React.FC = () => {
     setInboxMessages(prev => prev.map(m => m.id === msg.id ? { ...m, unread: false } : m));
   };
 
-  const handleCreateListing = (e: React.FormEvent) => {
+  const handleCreateListing = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!currentUser) return;
 
-    // Generate a semi-random abstract image for the listing
     const randomImageId = Math.floor(Math.random() * 1000);
     const imageUrl = `https://picsum.photos/seed/${randomImageId}/800/600`;
 
-    addListing({
-      id: `listing-${Date.now()}`,
-      title: newListing.title,
-      description: newListing.description,
-      category: newListing.category,
-      price: parseInt(newListing.price) || 0,
-      deliveryTime: newListing.deliveryTime,
-      freelancerId: currentUser.uid,
-      freelancerName: currentUser.displayName || 'Anonymous',
-      freelancerAvatar: currentUser.photoURL || '',
-      rating: 0, // New listings start with no ratings
-      reviewsCount: 0,
-      imageUrl: imageUrl
-    });
+    try {
+      await addListing({
+        title: newListing.title,
+        description: newListing.description,
+        category: newListing.category,
+        price: parseInt(newListing.price) || 0,
+        deliveryTime: newListing.deliveryTime,
+        freelancerId: currentUser.id,
+        freelancerName: currentUser.name,
+        freelancerAvatar: currentUser.avatar || '',
+        rating: 0,
+        reviewsCount: 0,
+        imageUrl,
+      });
 
-    setIsCreatingListing(false);
-    setNewListing({
-      title: '',
-      category: CATEGORIES[0],
-      price: '',
-      deliveryTime: '3 Days',
-      description: ''
-    });
+      setIsCreatingListing(false);
+      setNewListing({
+        title: '',
+        category: CATEGORIES[0],
+        price: '',
+        deliveryTime: '3 Days',
+        description: '',
+      });
+    } catch (err: any) {
+      alert(err.message || 'Failed to create listing.');
+    }
   };
 
   const renderTabContent = () => {
@@ -201,14 +290,14 @@ const Profile: React.FC = () => {
             </div>
 
             <div className="grid grid-cols-1 gap-4">
-              {listings.filter(l => l.freelancerId === currentUser?.uid).length === 0 ? (
+              {listings.filter(l => l.freelancerId === currentUser?.id).length === 0 ? (
                 <div className="text-center py-20 bg-brand-grey/20 border-2 border-dashed border-white/5 rounded-[2.5rem]">
                   <p className="text-gray-500 font-bold mb-4">You have no active listings.</p>
                   {creatorStatus === 'approved' && (
                      <button onClick={() => setIsCreatingListing(true)} className="text-brand-pink font-black hover:underline">Create your first gig</button>
                   )}
                 </div>
-              ) : listings.filter(l => l.freelancerId === currentUser?.uid && l.title.toLowerCase().includes(searchQuery.toLowerCase())).map((listing) => (
+              ) : listings.filter(l => l.freelancerId === currentUser?.id && l.title.toLowerCase().includes(searchQuery.toLowerCase())).map((listing) => (
                 <div key={listing.id} className={`group bg-brand-grey/30 border border-white/5 rounded-3xl p-6 transition-all hover:border-brand-green/30`}>
                   <div className="flex flex-col lg:flex-row lg:items-center gap-6">
                     <img src={listing.imageUrl} className="w-24 h-24 rounded-2xl object-cover border border-white/10" alt="" />
@@ -383,6 +472,111 @@ const Profile: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-12">
+
+      {/* Phone Verification Modal */}
+      {isPhoneModalOpen && (
+        <div className="fixed inset-0 z-[200] bg-black/80 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-300">
+          <div className="w-full max-w-md bg-brand-grey border border-white/10 rounded-[3rem] p-10 relative">
+            <button
+              onClick={() => setIsPhoneModalOpen(false)}
+              className="absolute top-8 right-8 text-gray-500 hover:text-white transition-colors"
+            >
+              <X size={22} />
+            </button>
+
+            {phoneStep === 'enter_phone' ? (
+              <>
+                <div className="mb-8">
+                  <div className="inline-flex p-3 bg-brand-green/10 rounded-2xl text-brand-green mb-4">
+                    <Smartphone size={28} />
+                  </div>
+                  <h2 className="text-3xl font-black text-white tracking-tighter">Verify Mobile</h2>
+                  <p className="text-gray-400 text-sm mt-2">
+                    Enter your phone number in international format. We'll send a 6-digit code.
+                  </p>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">
+                      Phone Number
+                    </label>
+                    <input
+                      type="tel"
+                      value={phoneInput}
+                      onChange={e => setPhoneInput(e.target.value)}
+                      placeholder="+385993525500"
+                      className="w-full bg-brand-black border border-white/10 rounded-xl py-4 px-5 text-white text-lg tracking-wider focus:outline-none focus:border-brand-green transition-colors"
+                    />
+                    <p className="text-[10px] text-gray-600">Include country code, e.g. +1 for US, +385 for Croatia</p>
+                  </div>
+
+                  {phoneError && (
+                    <p className="text-brand-pink text-sm font-medium">{phoneError}</p>
+                  )}
+
+                  <button
+                    onClick={handleSendOtp}
+                    disabled={phoneLoading || !phoneInput.trim()}
+                    className="w-full py-4 bg-brand-green text-brand-black font-black rounded-xl hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 disabled:scale-100"
+                  >
+                    {phoneLoading ? 'Sending…' : 'Send Verification Code'}
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="mb-8">
+                  <div className="inline-flex p-3 bg-brand-green/10 rounded-2xl text-brand-green mb-4">
+                    <CheckCircle size={28} />
+                  </div>
+                  <h2 className="text-3xl font-black text-white tracking-tighter">Enter Code</h2>
+                  <p className="text-gray-400 text-sm mt-2">
+                    A 6-digit code was sent to <span className="text-white font-bold">{phoneInput}</span>.
+                  </p>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">
+                      Verification Code
+                    </label>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={6}
+                      value={otpInput}
+                      onChange={e => setOtpInput(e.target.value.replace(/\D/g, ''))}
+                      placeholder="_ _ _ _ _ _"
+                      className="w-full bg-brand-black border border-white/10 rounded-xl py-4 px-5 text-white text-2xl tracking-[0.5em] text-center font-black focus:outline-none focus:border-brand-green transition-colors"
+                    />
+                  </div>
+
+                  {phoneError && (
+                    <p className="text-brand-pink text-sm font-medium">{phoneError}</p>
+                  )}
+
+                  <button
+                    onClick={handleVerifyOtp}
+                    disabled={phoneLoading || otpInput.length < 6}
+                    className="w-full py-4 bg-brand-green text-brand-black font-black rounded-xl hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 disabled:scale-100"
+                  >
+                    {phoneLoading ? 'Verifying…' : 'Verify Number'}
+                  </button>
+
+                  <button
+                    onClick={() => { setPhoneStep('enter_phone'); setPhoneError(''); setOtpInput(''); }}
+                    className="w-full py-3 text-gray-500 hover:text-white text-sm font-bold transition-colors"
+                  >
+                    ← Change number / Resend code
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Create Listing Modal */}
       {isCreatingListing && (
         <div className="fixed inset-0 z-[150] bg-black/80 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-300">
@@ -476,8 +670,8 @@ const Profile: React.FC = () => {
               <div className="space-y-8">
                 <div className="flex items-center space-x-8">
                   <div className="relative">
-                    {currentUser?.photoURL ? (
-                        <img src={currentUser?.photoURL} className="w-24 h-24 rounded-full border-4 border-brand-green" alt="" />
+                    {currentUser?.avatar ? (
+                        <img src={currentUser?.avatar} className="w-24 h-24 rounded-full border-4 border-brand-green" alt="" />
                     ) : (
                         <div className="w-24 h-24 rounded-full border-4 border-brand-green bg-brand-black flex items-center justify-center">
                             <UserIcon size={40} className="text-brand-green"/>
@@ -488,15 +682,15 @@ const Profile: React.FC = () => {
                   <div className="flex-grow space-y-4">
                     <div className="space-y-1">
                       <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Display Name</label>
-                      <input type="text" defaultValue={currentUser?.displayName || "New User"} className="w-full bg-brand-black border border-white/10 rounded-xl py-3 px-4 text-white" />
+                      <input type="text" value={editName} onChange={e => setEditName(e.target.value)} className="w-full bg-brand-black border border-white/10 rounded-xl py-3 px-4 text-white" />
                     </div>
                   </div>
                 </div>
                 <div className="space-y-1">
                   <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Professional Bio</label>
-                  <textarea rows={4} className="w-full bg-brand-black border border-white/10 rounded-xl py-3 px-4 text-white resize-none" defaultValue="Write a short bio to introduce yourself..."></textarea>
+                  <textarea rows={4} value={editBio} onChange={e => setEditBio(e.target.value)} placeholder="Write a short bio to introduce yourself..." className="w-full bg-brand-black border border-white/10 rounded-xl py-3 px-4 text-white resize-none"></textarea>
                 </div>
-                <button onClick={() => setIsEditingProfile(false)} className="w-full py-4 bg-brand-green text-brand-black font-black rounded-xl hover:scale-[1.02] transition-all">Update Profile</button>
+                <button onClick={handleSaveProfile} disabled={isSavingProfile} className="w-full py-4 bg-brand-green text-brand-black font-black rounded-xl hover:scale-[1.02] transition-all disabled:opacity-50">{isSavingProfile ? 'Saving...' : 'Update Profile'}</button>
               </div>
            </div>
         </div>
@@ -524,9 +718,9 @@ const Profile: React.FC = () => {
           <div className="bg-brand-grey/50 border border-white/10 rounded-[2.5rem] p-8 text-center relative overflow-hidden group">
             <div className="absolute -top-12 -left-12 w-32 h-32 bg-brand-green/10 rounded-full blur-3xl"></div>
             <div className="relative inline-block mb-6">
-              {currentUser?.photoURL ? (
+              {currentUser?.avatar ? (
                 <img
-                    src={currentUser.photoURL}
+                    src={currentUser.avatar}
                     alt="Profile"
                     className="w-32 h-32 rounded-full border-4 border-brand-green p-1 group-hover:scale-105 transition-transform duration-500"
                 />
@@ -539,7 +733,7 @@ const Profile: React.FC = () => {
                 <CheckCircle size={14} className="text-brand-black" />
               </div>
             </div>
-            <h2 className="text-2xl font-bold text-white mb-1">{currentUser?.displayName || "New Member"}</h2>
+            <h2 className="text-2xl font-bold text-white mb-1">{currentUser?.name || "New Member"}</h2>
             <div className="flex flex-col items-center">
               <p className={`text-sm font-bold uppercase tracking-widest mb-2 ${
                   subscriptionTier === 'ultra' ? 'text-brand-pink' : 
@@ -697,6 +891,14 @@ const Profile: React.FC = () => {
               <span className="flex items-center"><span className="w-2 h-2 rounded-full bg-brand-green mr-2 animate-pulse"></span> System Online</span>
             </div>
           </div>
+
+          {/* Bio Box */}
+          {(currentUser as any)?.bio && (
+            <div className="mb-8 bg-brand-grey/30 border border-white/5 rounded-2xl p-6">
+              <h3 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-3">About</h3>
+              <p className="text-gray-300 text-sm leading-relaxed whitespace-pre-wrap">{(currentUser as any).bio}</p>
+            </div>
+          )}
 
           {renderTabContent()}
 

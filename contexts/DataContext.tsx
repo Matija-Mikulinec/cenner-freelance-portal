@@ -1,81 +1,83 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { ServiceListing, JobPosting, BlogPost } from '../types';
-import { MOCK_LISTINGS, MOCK_JOBS, MOCK_BLOG_POSTS } from '../constants';
+import { API } from '../lib/api';
 
 interface DataContextType {
   listings: ServiceListing[];
   jobs: JobPosting[];
   blogPosts: BlogPost[];
-  addListing: (listing: ServiceListing) => void;
-  addJob: (job: JobPosting) => void;
-  addBlogPost: (post: BlogPost) => void;
+  loading: boolean;
+  addListing: (listing: Omit<ServiceListing, 'id'>) => Promise<ServiceListing>;
+  addJob: (job: Omit<JobPosting, 'id'>) => Promise<JobPosting>;
+  addBlogPost: (post: Omit<BlogPost, 'id'>) => Promise<BlogPost>;
+  updateListing: (id: string, data: Partial<ServiceListing>) => Promise<ServiceListing>;
+  deleteListing: (id: string) => Promise<void>;
   getListingById: (id: string) => ServiceListing | undefined;
+  refreshListings: () => Promise<void>;
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
-const STORAGE_KEYS = {
-  LISTINGS: 'cenner_db_listings',
-  JOBS: 'cenner_db_jobs',
-  POSTS: 'cenner_db_posts'
-};
-
 export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Initialize state from LocalStorage or fallback to empty arrays
-  const [listings, setListings] = useState<ServiceListing[]>(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.LISTINGS);
-    return saved ? JSON.parse(saved) : MOCK_LISTINGS;
-  });
-
-  const [jobs, setJobs] = useState<JobPosting[]>(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.JOBS);
-    return saved ? JSON.parse(saved) : MOCK_JOBS;
-  });
-
-  const [blogPosts, setBlogPosts] = useState<BlogPost[]>(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.POSTS);
-    return saved ? JSON.parse(saved) : MOCK_BLOG_POSTS;
-  });
-
-  // Persistence Effects
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.LISTINGS, JSON.stringify(listings));
-  }, [listings]);
+  const [listings, setListings] = useState<ServiceListing[]>([]);
+  const [jobs, setJobs] = useState<JobPosting[]>([]);
+  const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.JOBS, JSON.stringify(jobs));
-  }, [jobs]);
+    Promise.all([API.getListings(), API.getJobs(), API.getPosts()])
+      .then(([l, j, p]) => {
+        setListings(l);
+        setJobs(j);
+        setBlogPosts(p);
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, []);
 
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.POSTS, JSON.stringify(blogPosts));
-  }, [blogPosts]);
-
-  const addListing = (listing: ServiceListing) => {
+  const addListing = async (data: Omit<ServiceListing, 'id'>): Promise<ServiceListing> => {
+    const listing = await API.createListing(data);
     setListings(prev => [listing, ...prev]);
+    return listing;
   };
 
-  const addJob = (job: JobPosting) => {
+  const addJob = async (data: Omit<JobPosting, 'id'>): Promise<JobPosting> => {
+    const job = await API.createJob(data);
     setJobs(prev => [job, ...prev]);
+    return job;
   };
 
-  const addBlogPost = (post: BlogPost) => {
+  const addBlogPost = async (data: Omit<BlogPost, 'id'>): Promise<BlogPost> => {
+    const post = await API.createPost(data);
     setBlogPosts(prev => [post, ...prev]);
+    return post;
   };
 
-  const getListingById = (id: string) => {
-    return listings.find(l => l.id === id);
+  const updateListing = async (id: string, data: Partial<ServiceListing>): Promise<ServiceListing> => {
+    const listing = await API.updateListing(id, data);
+    setListings(prev => prev.map(l => l.id === id ? listing : l));
+    return listing;
+  };
+
+  const deleteListing = async (id: string): Promise<void> => {
+    await API.deleteListing(id);
+    setListings(prev => prev.filter(l => l.id !== id));
+  };
+
+  const getListingById = (id: string) => listings.find(l => l.id === id);
+
+  const refreshListings = async () => {
+    const l = await API.getListings();
+    setListings(l);
   };
 
   return (
-    <DataContext.Provider value={{ 
-      listings, 
-      jobs, 
-      blogPosts, 
-      addListing, 
-      addJob, 
-      addBlogPost,
-      getListingById 
+    <DataContext.Provider value={{
+      listings, jobs, blogPosts, loading,
+      addListing, addJob, addBlogPost,
+      updateListing, deleteListing,
+      getListingById, refreshListings,
     }}>
       {children}
     </DataContext.Provider>

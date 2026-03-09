@@ -1,15 +1,8 @@
 
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Mail, Lock, User, Github, ArrowRight, Phone, AlertCircle, CheckCircle, ChevronDown, Facebook } from 'lucide-react';
-import { 
-  auth, 
-  googleProvider, 
-  signInWithPopup, 
-  signInWithEmailAndPassword, 
-  createUserWithEmailAndPassword, 
-  updateProfile 
-} from '../lib/firebase';
+import { Mail, Lock, User, Github, ArrowRight, Phone, AlertCircle, ChevronDown, Facebook } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 
 const COUNTRY_CODES = [
   { code: '+1', country: 'US', flag: '🇺🇸' },
@@ -54,9 +47,10 @@ const Auth: React.FC = () => {
   const [showCountrySelector, setShowCountrySelector] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  
+
   const navigate = useNavigate();
   const location = useLocation();
+  const { login, register, loginWithGoogle } = useAuth();
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,36 +61,30 @@ const Auth: React.FC = () => {
 
     try {
       if (isLogin) {
-        await signInWithEmailAndPassword(auth, email, password);
+        await login(email, password);
       } else {
         const fullPhone = `${selectedCountry.code}${phone}`;
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        await updateProfile(userCredential.user, {
-          displayName: username,
-          mobile: fullPhone,
-          mobileVerified: false // CRM logic: needs verification later
-        });
-        console.log("Saving phone number to user record:", fullPhone);
+        await register({ email, password, name: username, mobile: fullPhone });
       }
       navigate(from, { replace: true });
     } catch (err: any) {
       console.error(err);
-      setError(err.message || "An authentication error occurred.");
+      setError(err.message || 'An authentication error occurred.');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSocialAuth = async (provider: string) => {
+  const handleGoogleAuth = async () => {
     setError(null);
     setLoading(true);
     const from = (location.state as any)?.from || '/profile';
     try {
-      await signInWithPopup(auth, googleProvider);
+      await loginWithGoogle();
       navigate(from, { replace: true });
     } catch (err: any) {
       console.error(err);
-      setError(err.message || `${provider} authentication failed.`);
+      setError(err.message || 'Google authentication failed.');
     } finally {
       setLoading(false);
     }
@@ -111,9 +99,9 @@ const Auth: React.FC = () => {
               {isLogin ? 'Welcome Back' : 'Create Account'}
             </h2>
             <p className="text-gray-500 font-medium">
-              {isLogin 
-                ? 'The elite network is waiting for your return.' 
-                : 'Join the world\'s most exclusive freelance ecosystem.'}
+              {isLogin
+                ? 'The elite network is waiting for your return.'
+                : "Join the world's most exclusive freelance ecosystem."}
             </p>
           </div>
 
@@ -141,7 +129,7 @@ const Auth: React.FC = () => {
                     />
                   </div>
                 </div>
-                
+
                 <div className="space-y-1">
                   <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest pl-1">Phone Number</label>
                   <div className="flex space-x-2 relative">
@@ -154,7 +142,7 @@ const Auth: React.FC = () => {
                         <span>{selectedCountry.flag}</span>
                         <ChevronDown size={14} className="text-gray-500" />
                       </button>
-                      
+
                       {showCountrySelector && (
                         <div className="absolute top-full left-0 mt-2 w-48 bg-brand-grey border border-white/10 rounded-xl shadow-2xl z-50 py-1 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
                           <div className="max-h-48 overflow-y-auto custom-scrollbar">
@@ -177,7 +165,7 @@ const Auth: React.FC = () => {
                         </div>
                       )}
                     </div>
-                    
+
                     <div className="relative flex-grow">
                       <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" size={18} />
                       <input
@@ -193,7 +181,7 @@ const Auth: React.FC = () => {
                 </div>
               </div>
             )}
-            
+
             <div className="space-y-1">
               <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest pl-1">Email Address</label>
               <div className="relative">
@@ -245,7 +233,7 @@ const Auth: React.FC = () => {
 
           <div className="grid grid-cols-3 gap-3">
             <button
-              onClick={() => handleSocialAuth('Google')}
+              onClick={handleGoogleAuth}
               disabled={loading}
               className="flex items-center justify-center space-x-2 py-3.5 border border-white/10 rounded-xl text-white hover:bg-white/5 active:scale-95 transition-all group"
             >
@@ -258,17 +246,17 @@ const Auth: React.FC = () => {
               <span className="text-xs font-bold hidden sm:inline">Google</span>
             </button>
             <button
-              onClick={() => handleSocialAuth('Facebook')}
               disabled={loading}
-              className="flex items-center justify-center space-x-2 py-3.5 border border-white/10 rounded-xl text-white hover:bg-white/5 active:scale-95 transition-all group"
+              className="flex items-center justify-center space-x-2 py-3.5 border border-white/10 rounded-xl text-white hover:bg-white/5 active:scale-95 transition-all group opacity-50 cursor-not-allowed"
+              title="Coming soon"
             >
               <Facebook size={16} className="text-[#1877F2]" />
               <span className="text-xs font-bold hidden sm:inline">Facebook</span>
             </button>
             <button
-              onClick={() => handleSocialAuth('Github')}
               disabled={loading}
-              className="flex items-center justify-center space-x-2 py-3.5 border border-white/10 rounded-xl text-white hover:bg-white/5 active:scale-95 transition-all group"
+              className="flex items-center justify-center space-x-2 py-3.5 border border-white/10 rounded-xl text-white hover:bg-white/5 active:scale-95 transition-all group opacity-50 cursor-not-allowed"
+              title="Coming soon"
             >
               <Github size={16} />
               <span className="text-xs font-bold hidden sm:inline">Github</span>
@@ -276,7 +264,7 @@ const Auth: React.FC = () => {
           </div>
 
           <p className="mt-10 text-center text-sm text-gray-500">
-            {isLogin ? "New to the platform?" : "Already a member?"}
+            {isLogin ? 'New to the platform?' : 'Already a member?'}
             <button
               onClick={() => {
                 setIsLogin(!isLogin);

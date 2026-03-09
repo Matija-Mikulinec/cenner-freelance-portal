@@ -1,15 +1,33 @@
 
 import React, { useState } from 'react';
-// Fixed missing 'CheckCircle' import
-import { Send, MapPin, Mail, Phone, MessageSquare, CheckCircle } from 'lucide-react';
+import { Send, MapPin, Mail, Phone, MessageSquare, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import { API } from '../lib/api';
 
 const Contact: React.FC = () => {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [subject, setSubject] = useState('General Inquiry');
+  const [message, setMessage] = useState('');
+  const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
-    setTimeout(() => setSubmitted(false), 5000);
+    setLoading(true);
+    setError('');
+    try {
+      await API.contact({ name, email, subject, message });
+      setSubmitted(true);
+      setName('');
+      setEmail('');
+      setMessage('');
+      setTimeout(() => setSubmitted(false), 6000);
+    } catch (err: any) {
+      setError(err.message || 'Failed to send message. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -32,7 +50,7 @@ const Contact: React.FC = () => {
                 <p className="text-gray-500 text-sm">partners@cenner.io</p>
               </div>
             </div>
-            
+
             <div className="flex items-start space-x-4">
               <div className="p-3 bg-brand-pink/10 rounded-2xl text-brand-pink">
                 <MapPin size={24} />
@@ -68,12 +86,21 @@ const Contact: React.FC = () => {
 
         <div className="lg:col-span-3">
           <form onSubmit={handleSubmit} className="bg-white/[0.02] border border-white/10 rounded-3xl p-8 md:p-12 space-y-6">
+            {error && (
+              <div className="flex items-center gap-2 p-4 bg-red-900/20 border border-red-500/20 rounded-xl text-red-400 text-sm">
+                <AlertCircle size={16} />
+                {error}
+              </div>
+            )}
+
             <div className="grid md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-400">Your Name</label>
                 <input
                   required
                   type="text"
+                  value={name}
+                  onChange={e => setName(e.target.value)}
                   placeholder="John Doe"
                   className="w-full bg-brand-black border border-white/10 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-brand-green transition-colors"
                 />
@@ -83,15 +110,21 @@ const Contact: React.FC = () => {
                 <input
                   required
                   type="email"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
                   placeholder="john@example.com"
                   className="w-full bg-brand-black border border-white/10 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-brand-green transition-colors"
                 />
               </div>
             </div>
-            
+
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-400">Subject</label>
-              <select className="w-full bg-brand-black border border-white/10 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-brand-green transition-colors">
+              <select
+                value={subject}
+                onChange={e => setSubject(e.target.value)}
+                className="w-full bg-brand-black border border-white/10 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-brand-green transition-colors"
+              >
                 <option>General Inquiry</option>
                 <option>Support Request</option>
                 <option>Billing Question</option>
@@ -104,22 +137,29 @@ const Contact: React.FC = () => {
               <textarea
                 required
                 rows={5}
+                value={message}
+                onChange={e => setMessage(e.target.value)}
                 placeholder="How can we help you today?"
                 className="w-full bg-brand-black border border-white/10 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-brand-green transition-colors resize-none"
               ></textarea>
             </div>
 
             <button
-              disabled={submitted}
+              disabled={loading || submitted}
               type="submit"
               className={`w-full py-4 rounded-xl font-bold flex items-center justify-center space-x-2 transition-all ${
                 submitted ? 'bg-brand-green text-brand-black' : 'bg-brand-pink text-white hover:bg-opacity-90'
-              }`}
+              } disabled:opacity-70 disabled:cursor-not-allowed`}
             >
               {submitted ? (
                 <>
                   <CheckCircle size={20} />
                   <span>Message Sent Successfully</span>
+                </>
+              ) : loading ? (
+                <>
+                  <Loader2 size={20} className="animate-spin" />
+                  <span>Sending...</span>
                 </>
               ) : (
                 <>
