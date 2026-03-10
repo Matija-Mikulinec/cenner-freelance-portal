@@ -1,6 +1,6 @@
 
-import React, { useEffect } from 'react';
-import { HashRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import React from 'react';
+import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout';
 import Home from './pages/Home';
 import Marketplace from './pages/Marketplace';
@@ -19,20 +19,8 @@ import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsOfService from './pages/TermsOfService';
 import Cookies from './pages/Cookies';
 import ScrollToTop from './components/ScrollToTop';
-import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { AuthProvider } from './contexts/AuthContext';
 import { DataProvider } from './contexts/DataContext';
-import { API } from './lib/api';
-
-const AnalyticsTracker = () => {
-  const location = useLocation();
-  const { user } = useAuth();
-
-  useEffect(() => {
-    API.trackTraffic(location.pathname, user?.id);
-  }, [location, user]);
-
-  return null;
-};
 
 const App: React.FC = () => {
   return (
@@ -40,7 +28,6 @@ const App: React.FC = () => {
       <DataProvider>
         <Router>
           <ScrollToTop />
-          <AnalyticsTracker />
           <Layout>
             <Routes>
               <Route path="/" element={<Home />} />

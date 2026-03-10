@@ -99,12 +99,4 @@ export const API = {
   contact: (data: { name: string; email: string; subject: string; message: string }) =>
     request<{ success: boolean }>('/contact', 'POST', data),
 
-  // ── Analytics (fire-and-forget) ───────────────────────────────────────
-  trackTraffic: (path: string, userId?: string) => {
-    fetch(`${CRM_BASE}/api/v1/analytics/traffic`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ path, userId: userId || null, userAgent: navigator.userAgent }),
-    }).catch(() => {});
-  },
 };
