@@ -73,7 +73,7 @@ const Technology: React.FC = () => {
                 {cat.techs.map((t) => (
                   <div
                     key={t.name}
-                    className={`group p-7 bg-brand-grey/40 border ${t.border} rounded-3xl hover:bg-white/5 transition-all duration-300 flex flex-col gap-4`}
+                    className={`group p-7 bg-brand-grey/80 backdrop-blur-sm border ${t.border} rounded-3xl hover:bg-white/10 transition-all duration-300 flex flex-col gap-4`}
                   >
                     <div className={`w-12 h-12 ${t.bg} rounded-2xl flex items-center justify-center ${t.color} group-hover:scale-110 transition-transform duration-300`}>
                       {t.icon}
