@@ -21,7 +21,7 @@ const CLIENT_PROJECTS = [
     category: 'Real Estate',
     deliverable: 'Premium real estate portal for a Croatian luxury property agency — property listings, search, agent profiles, and multilingual support.',
     tags: ['Web', 'Real Estate', 'Multilingual'],
-    logo: '/logos/selectedrealestate.png',
+    logo: '/logos/selectedrealestate.webp',
     accentLight: 'rgba(201,168,112,0.08)',
   },
 ];
