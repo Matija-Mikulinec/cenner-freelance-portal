@@ -66,7 +66,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const aboutDropdownItems = [
     { label: 'About Us', path: '/about', desc: 'Our mission & story' },
     { label: 'Previous Projects', path: '/projects', desc: "Work we've delivered" },
-    { label: 'Technology', path: '/about#technology', desc: 'The stack powering Cenner' },
+    { label: 'Technology', path: '/technology', desc: 'The stack powering Cenner' },
   ];
 
   return (

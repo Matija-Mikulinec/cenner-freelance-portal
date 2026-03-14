@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Target, Eye, ArrowRight, Code2, Code, Atom, Zap, Globe, Workflow, Server, Palette, Brain, GraduationCap } from 'lucide-react';
+import { Target, Eye, ArrowRight, Zap } from 'lucide-react';
 
 const About: React.FC = () => {
   return (
@@ -78,84 +78,20 @@ const About: React.FC = () => {
         </div>
       </section>
 
-      {/* Tech Stack Section */}
-      <section id="technology" className="mb-40 scroll-mt-24">
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <div className="inline-flex items-center space-x-2 bg-brand-green/10 border border-brand-green/20 rounded-full px-5 py-2 mb-6 text-[10px] font-black uppercase tracking-[0.3em] text-brand-green">
-            <Zap size={12} />
-            <span>Our Stack</span>
+      {/* Technology teaser */}
+      <section className="mb-40">
+        <div className="bg-gradient-to-br from-brand-grey/60 to-brand-black border border-white/5 rounded-[3rem] p-12 md:p-16 flex flex-col md:flex-row items-center justify-between gap-8">
+          <div>
+            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-brand-green mb-3">Our Stack</p>
+            <h2 className="text-3xl md:text-4xl font-black text-white tracking-tighter mb-3">Technology We Work With</h2>
+            <p className="text-gray-500 max-w-lg">From React and n8n to server setup and Affinity Design — see every tool we bring to the table.</p>
           </div>
-          <h2 className="text-4xl font-black text-white mb-4 tracking-tight">Technology We Work With</h2>
-          <p className="text-gray-500 text-lg">Every tool selected for reliability, speed, and real-world results.</p>
-        </div>
-
-        {/* Category: Web Development */}
-        <div className="mb-10">
-          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-600 mb-5 pl-1">Web Development</p>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-            {[
-              { icon: <Code2 size={22} />, name: 'HTML', desc: 'Semantic, accessible markup', color: 'text-orange-400', bg: 'bg-orange-500/10', border: 'border-orange-500/10' },
-              { icon: <Palette size={22} />, name: 'CSS', desc: 'Custom styling & animations', color: 'text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/10' },
-              { icon: <Code size={22} />, name: 'JavaScript', desc: 'Dynamic web interactions', color: 'text-yellow-400', bg: 'bg-yellow-500/10', border: 'border-yellow-500/10' },
-              { icon: <Atom size={22} />, name: 'React', desc: 'Component-driven UIs', color: 'text-cyan-400', bg: 'bg-cyan-500/10', border: 'border-cyan-500/10' },
-              { icon: <Zap size={22} />, name: 'Vite', desc: 'Lightning-fast dev builds', color: 'text-purple-400', bg: 'bg-purple-500/10', border: 'border-purple-500/10' },
-            ].map((t) => (
-              <div key={t.name} className={`group p-6 bg-brand-grey/40 border ${t.border} rounded-3xl hover:bg-white/5 transition-all duration-300 flex flex-col gap-3`}>
-                <div className={`w-11 h-11 ${t.bg} rounded-2xl flex items-center justify-center ${t.color} group-hover:scale-110 transition-transform`}>
-                  {t.icon}
-                </div>
-                <div>
-                  <p className="text-sm font-black text-white">{t.name}</p>
-                  <p className="text-[11px] text-gray-600 mt-0.5 leading-snug">{t.desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Category: CMS & Platforms */}
-        <div className="mb-10">
-          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-600 mb-5 pl-1">CMS & Platforms</p>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-            {[
-              { icon: <Globe size={22} />, name: 'WordPress', desc: 'Custom themes, plugins & shops', color: 'text-blue-300', bg: 'bg-blue-400/10', border: 'border-blue-400/10' },
-              { icon: <Workflow size={22} />, name: 'n8n', desc: 'Workflow & process automation', color: 'text-brand-green', bg: 'bg-brand-green/10', border: 'border-brand-green/10' },
-              { icon: <Brain size={22} />, name: 'AI Integration', desc: 'LLMs embedded into products', color: 'text-brand-pink', bg: 'bg-brand-pink/10', border: 'border-brand-pink/10' },
-              { icon: <GraduationCap size={22} />, name: 'AI & WP Training', desc: 'Teaching teams to use AI tools & WordPress', color: 'text-amber-400', bg: 'bg-amber-500/10', border: 'border-amber-500/10' },
-            ].map((t) => (
-              <div key={t.name} className={`group p-6 bg-brand-grey/40 border ${t.border} rounded-3xl hover:bg-white/5 transition-all duration-300 flex flex-col gap-3`}>
-                <div className={`w-11 h-11 ${t.bg} rounded-2xl flex items-center justify-center ${t.color} group-hover:scale-110 transition-transform`}>
-                  {t.icon}
-                </div>
-                <div>
-                  <p className="text-sm font-black text-white">{t.name}</p>
-                  <p className="text-[11px] text-gray-600 mt-0.5 leading-snug">{t.desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Category: Infrastructure & Design */}
-        <div>
-          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-600 mb-5 pl-1">Infrastructure & Design</p>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-            {[
-              { icon: <Server size={22} />, name: 'Server Setup', desc: 'VPS configuration, DNS, SSL, nginx', color: 'text-green-400', bg: 'bg-green-500/10', border: 'border-green-500/10' },
-              { icon: <Server size={22} />, name: 'Website Deployment', desc: 'End-to-end hosting & go-live', color: 'text-teal-400', bg: 'bg-teal-500/10', border: 'border-teal-500/10' },
-              { icon: <Palette size={22} />, name: 'Affinity Design', desc: 'Brand identity, graphics & print', color: 'text-rose-400', bg: 'bg-rose-500/10', border: 'border-rose-500/10' },
-            ].map((t) => (
-              <div key={t.name} className={`group p-6 bg-brand-grey/40 border ${t.border} rounded-3xl hover:bg-white/5 transition-all duration-300 flex flex-col gap-3`}>
-                <div className={`w-11 h-11 ${t.bg} rounded-2xl flex items-center justify-center ${t.color} group-hover:scale-110 transition-transform`}>
-                  {t.icon}
-                </div>
-                <div>
-                  <p className="text-sm font-black text-white">{t.name}</p>
-                  <p className="text-[11px] text-gray-600 mt-0.5 leading-snug">{t.desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
+          <Link
+            to="/technology"
+            className="shrink-0 flex items-center gap-3 px-8 py-4 bg-brand-green text-brand-black font-black rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-xl shadow-brand-green/10 text-sm uppercase tracking-widest"
+          >
+            View Stack <Zap size={16} />
+          </Link>
         </div>
       </section>
 
