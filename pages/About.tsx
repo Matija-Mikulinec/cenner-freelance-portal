@@ -1,61 +1,65 @@
 
 import React from 'react';
-import { Target, Shield, Cpu, Zap, Eye, ExternalLink, CheckCircle2 } from 'lucide-react';
+import { Target, Shield, Cpu, Zap, Eye, ExternalLink, CheckCircle2, ArrowUpRight } from 'lucide-react';
 
-const PROJECTS = [
+// ── Real client logos ────────────────────────────────────────────────────────
+
+const MarubosFoodLogo: React.FC<{ className?: string }> = ({ className }) => (
+  <svg viewBox="0 0 300 88" xmlns="http://www.w3.org/2000/svg" className={className} aria-label="Marubosfood">
+    {/* Circle badge */}
+    <circle cx="44" cy="44" r="42" fill="#5C2D0B" />
+    {/* MF serif letters */}
+    <text x="44" y="53" textAnchor="middle" fill="white" fontSize="24" fontFamily="Georgia,'Times New Roman',serif" fontWeight="700" letterSpacing="-1">MF</text>
+    {/* Brand name */}
+    <text x="97" y="40" fill="#5C2D0B" fontSize="30" fontFamily="Georgia,'Times New Roman',serif" fontStyle="italic" fontWeight="700">Marubos</text>
+    <text x="97" y="70" fill="#5C2D0B" fontSize="26" fontFamily="Georgia,'Times New Roman',serif" fontStyle="italic">food</text>
+  </svg>
+);
+
+const SelectedRealEstateLogo: React.FC<{ className?: string }> = ({ className }) => (
+  <svg viewBox="0 0 240 72" xmlns="http://www.w3.org/2000/svg" className={className} aria-label="Selected Real Estate">
+    {/* Geometric diamond/maze mark */}
+    <g transform="translate(0 4)">
+      {/* Outer rotated square */}
+      <rect x="7" y="7" width="50" height="50" rx="2" transform="rotate(45 32 32)" fill="none" stroke="#C9A870" strokeWidth="4.5" />
+      {/* Inner rotated square */}
+      <rect x="17" y="17" width="30" height="30" rx="1" transform="rotate(45 32 32)" fill="none" stroke="#C9A870" strokeWidth="3.5" />
+      {/* Corner cut lines to form labyrinth effect */}
+      <line x1="32" y1="1" x2="32" y2="14" stroke="#C9A870" strokeWidth="4.5" />
+      <line x1="32" y1="50" x2="32" y2="63" stroke="#C9A870" strokeWidth="4.5" />
+      <line x1="1" y1="32" x2="14" y2="32" stroke="#C9A870" strokeWidth="4.5" />
+      <line x1="50" y1="32" x2="63" y2="32" stroke="#C9A870" strokeWidth="4.5" />
+    </g>
+    {/* Company name */}
+    <text x="82" y="30" fill="#C9A870" fontSize="13" fontFamily="'Helvetica Neue',Arial,sans-serif" fontWeight="300" letterSpacing="3">SELECTED</text>
+    <text x="82" y="50" fill="#C9A870" fontSize="13" fontFamily="'Helvetica Neue',Arial,sans-serif" fontWeight="300" letterSpacing="2.5">REAL ESTATE</text>
+  </svg>
+);
+
+// ── Featured client projects ─────────────────────────────────────────────────
+
+const CLIENT_PROJECTS = [
   {
-    title: 'FinTrack Dashboard',
-    client: 'Zagreb FinTech Startup',
-    category: 'Development',
-    color: 'brand-green',
-    deliverable: 'Real-time trading analytics platform with WebSocket data feeds and algorithmic alerts.',
-    result: 'Launched in 6 weeks · 12k daily active users',
-    tags: ['React', 'Node.js', 'WebSocket'],
+    id: 'marubosfood',
+    title: 'Marubosfood',
+    url: 'https://marubosfood.com',
+    category: 'Food & E-commerce',
+    deliverable: 'Full-stack web presence and e-commerce platform for a premium Croatian food brand — product catalogue, online ordering, and brand identity.',
+    tags: ['Web', 'E-commerce', 'Branding'],
+    logo: MarubosFoodLogo,
+    accentColor: '#5C2D0B',
+    accentLight: 'rgba(92,45,11,0.08)',
   },
   {
-    title: 'NovaBrand Identity',
-    client: 'Fashion Label, Milan',
-    category: 'Design',
-    color: 'brand-pink',
-    deliverable: 'Full visual identity system — logo, typography, packaging guidelines and social kit.',
-    result: '3x brand recall after relaunch · featured in Dezeen',
-    tags: ['Branding', 'Figma', 'Motion'],
-  },
-  {
-    title: 'Logistics AI Engine',
-    client: 'EU Distribution Co.',
-    category: 'AI / ML',
-    color: 'brand-green',
-    deliverable: 'Predictive routing model cutting delivery times using real-time traffic + warehouse data.',
-    result: '22% reduction in last-mile costs',
-    tags: ['Python', 'TensorFlow', 'GCP'],
-  },
-  {
-    title: 'CryptoVault App',
-    client: 'Anonymous Fund',
-    category: 'Mobile',
-    color: 'brand-pink',
-    deliverable: 'iOS/Android cold-storage wallet with biometric auth and multi-sig approval flows.',
-    result: 'Passed third-party security audit · App Store featured',
-    tags: ['React Native', 'Rust', 'HSM'],
-  },
-  {
-    title: 'Cenner Community Portal',
-    client: 'Internal · Cenner HR',
-    category: 'Full-Stack',
-    color: 'brand-green',
-    deliverable: "The very platform you're on — KYC, listings, escrow, subscription tiers.",
-    result: 'Production since 2025 · Growing daily',
-    tags: ['React', 'Prisma', 'Stripe'],
-  },
-  {
-    title: 'Broadcast CMS',
-    client: 'Regional TV Network',
-    category: 'Development',
-    color: 'brand-pink',
-    deliverable: 'Headless CMS for live news publishing with CDN-backed video transcoding pipeline.',
-    result: '99.98% uptime across 3 broadcast regions',
-    tags: ['Next.js', 'FFmpeg', 'CloudFront'],
+    id: 'selectedrealestate',
+    title: 'Selected Real Estate',
+    url: 'https://selectedrealestate.hr',
+    category: 'Real Estate',
+    deliverable: 'Premium real estate portal for a Croatian luxury property agency — property listings, search, agent profiles, and multilingual support.',
+    tags: ['Web', 'Real Estate', 'Multilingual'],
+    logo: SelectedRealEstateLogo,
+    accentColor: '#C9A870',
+    accentLight: 'rgba(201,168,112,0.08)',
   },
 ];
 
@@ -165,35 +169,61 @@ const About: React.FC = () => {
             <span>Delivered Work</span>
           </div>
           <h2 className="text-4xl md:text-5xl font-black text-white mb-6 tracking-tighter">Previous Projects</h2>
-          <p className="text-gray-500 text-lg">A selection of work facilitated through the Cenner network — from early-stage startups to enterprise clients.</p>
+          <p className="text-gray-500 text-lg">Real work delivered through the Cenner network — visit the live sites below.</p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {PROJECTS.map((project, i) => (
-            <div key={i} className="group relative bg-brand-grey/40 border border-white/5 rounded-[2.5rem] p-8 hover:border-white/10 hover:bg-white/[0.03] transition-all duration-300 overflow-hidden">
-              <div className={`absolute top-0 right-0 w-40 h-40 bg-${project.color}/5 rounded-full blur-[80px] -mr-20 -mt-20 group-hover:bg-${project.color}/10 transition-all`}></div>
-              <div className="relative z-10">
-                <div className="flex items-start justify-between mb-6">
-                  <div>
-                    <span className={`text-[9px] font-black uppercase tracking-[0.3em] text-${project.color}`}>{project.category}</span>
-                    <h3 className="text-xl font-black text-white mt-1">{project.title}</h3>
-                    <p className="text-[10px] text-gray-600 font-bold mt-1">{project.client}</p>
+        <div className="grid md:grid-cols-2 gap-8">
+          {CLIENT_PROJECTS.map((project) => {
+            const Logo = project.logo;
+            return (
+              <a
+                key={project.id}
+                href={project.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group relative bg-brand-grey/40 border border-white/5 rounded-[2.5rem] p-10 hover:border-white/10 transition-all duration-300 overflow-hidden flex flex-col"
+                style={{ '--accent': project.accentColor, '--accent-light': project.accentLight } as React.CSSProperties}
+              >
+                {/* Glow blob — only appears on hover via group */}
+                <div
+                  className="absolute top-0 right-0 w-64 h-64 rounded-full blur-[100px] -mr-32 -mt-32 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                  style={{ background: project.accentLight }}
+                />
+
+                <div className="relative z-10 flex flex-col h-full">
+                  {/* Logo — grayscale at rest, full color on hover */}
+                  <div className="mb-8 h-16 flex items-center [&>svg]:transition-all [&>svg]:duration-500 [&>svg]:grayscale [&>svg]:brightness-50 group-hover:[&>svg]:grayscale-0 group-hover:[&>svg]:brightness-100">
+                    <Logo className="max-h-14 w-auto" />
                   </div>
-                  <ExternalLink size={16} className="text-gray-700 group-hover:text-gray-500 transition-colors shrink-0 mt-1" />
+
+                  {/* Category */}
+                  <span className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-600 mb-2">{project.category}</span>
+
+                  {/* Title */}
+                  <h3 className="text-2xl font-black text-white mb-4 tracking-tight group-hover:text-white transition-colors">
+                    {project.title}
+                  </h3>
+
+                  {/* Description */}
+                  <p className="text-gray-400 text-sm leading-relaxed mb-8 flex-1">{project.deliverable}</p>
+
+                  {/* Tags + link row */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex flex-wrap gap-2">
+                      {project.tags.map(tag => (
+                        <span key={tag} className="px-3 py-1 bg-white/5 border border-white/5 rounded-full text-[10px] font-bold text-gray-500">{tag}</span>
+                      ))}
+                    </div>
+                    <div
+                      className="w-10 h-10 rounded-full flex items-center justify-center border border-white/10 text-gray-600 group-hover:border-white/20 group-hover:text-white transition-all shrink-0 ml-4"
+                    >
+                      <ArrowUpRight size={16} />
+                    </div>
+                  </div>
                 </div>
-                <p className="text-gray-400 text-sm leading-relaxed mb-6">{project.deliverable}</p>
-                <div className={`text-[10px] font-bold text-${project.color} mb-5 flex items-center gap-2`}>
-                  <CheckCircle2 size={12} />
-                  {project.result}
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {project.tags.map(tag => (
-                    <span key={tag} className="px-3 py-1 bg-white/5 border border-white/5 rounded-full text-[10px] font-bold text-gray-500">{tag}</span>
-                  ))}
-                </div>
-              </div>
-            </div>
-          ))}
+              </a>
+            );
+          })}
         </div>
       </section>
 
