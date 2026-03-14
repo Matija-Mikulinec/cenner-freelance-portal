@@ -99,4 +99,32 @@ export const API = {
   contact: (data: { name: string; email: string; subject: string; message: string }) =>
     request<{ success: boolean }>('/contact', 'POST', data),
 
+  // ── KYC (Stripe Identity) ─────────────────────────────────────────────────
+  createKycSession: () =>
+    request<{ clientSecret: string }>('/kyc/create-session', 'POST'),
+
+  getKycStatus: () =>
+    request<{ kycVerified: boolean; creatorStatus: string; sessionId: string | null }>('/kyc/status'),
+
+  // ── Portfolio ─────────────────────────────────────────────────────────────
+  getPortfolio: (userId: string) =>
+    request<any[]>(`/portfolio/${userId}`),
+
+  addPortfolioItem: (formData: FormData): Promise<any> => {
+    const token = getToken();
+    const headers: HeadersInit = {};
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    return fetch(`${API_BASE}/portfolio`, { method: 'POST', headers, body: formData })
+      .then(async res => {
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({ error: res.statusText }));
+          throw new Error(err.error || `HTTP ${res.status}`);
+        }
+        return res.json();
+      });
+  },
+
+  deletePortfolioItem: (itemId: string) =>
+    request<{ success: boolean }>(`/portfolio/${itemId}`, 'DELETE'),
+
 };

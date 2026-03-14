@@ -12,6 +12,7 @@ export interface AuthUser {
   bio?: string;
   skills?: string[];
   creatorStatus?: string;
+  kycVerified?: boolean;
   tier?: string;
   emailVerified: boolean;
   mobileVerified: boolean;

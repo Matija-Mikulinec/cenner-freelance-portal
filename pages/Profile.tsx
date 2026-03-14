@@ -1,18 +1,19 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  Settings, CreditCard, MessageSquare, Briefcase, PlusCircle, 
-  TrendingUp, Clock, CheckCircle, AlertCircle, MoreVertical, 
-  MoreHorizontal, Edit2, Pause, Trash2, ArrowUpRight, Search, 
-  Calendar, X, Send, Download, User as UserIcon, ShieldAlert, Rocket, Play, Image as ImageIcon, Smartphone, Mail, Crown, Zap, Globe
+import {
+  Settings, CreditCard, MessageSquare, Briefcase, PlusCircle,
+  TrendingUp, Clock, CheckCircle, AlertCircle, MoreVertical,
+  MoreHorizontal, Edit2, Pause, Trash2, ArrowUpRight, Search,
+  Calendar, X, Send, Download, User as UserIcon, ShieldAlert, Rocket, Play, Image as ImageIcon, Smartphone, Mail, Crown, Zap, Globe,
+  Upload, Loader2, ExternalLink, ShieldCheck
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useData } from '../contexts/DataContext';
 import { CATEGORIES } from '../constants';
 import { API } from '../lib/api';
 
-type ActiveTab = 'listings' | 'inbox' | 'earnings' | 'settings';
+type ActiveTab = 'listings' | 'inbox' | 'earnings' | 'settings' | 'portfolio';
 
 const Profile: React.FC = () => {
   const { listings, addListing } = useData();
@@ -49,9 +50,19 @@ const Profile: React.FC = () => {
     description: ''
   });
 
+  // Portfolio state
+  const [portfolioItems, setPortfolioItems] = useState<any[]>([]);
+  const [portfolioLoading, setPortfolioLoading] = useState(false);
+  const [portfolioError, setPortfolioError] = useState('');
+  const [portfolioTitle, setPortfolioTitle] = useState('');
+  const [portfolioDescription, setPortfolioDescription] = useState('');
+  const [portfolioFile, setPortfolioFile] = useState<File | null>(null);
+  const [isAddingPortfolio, setIsAddingPortfolio] = useState(false);
+  const portfolioFileRef = useRef<HTMLInputElement>(null);
+
   const availableBalance = 0;
   const pendingClearance = 0;
-  
+
   const navigate = useNavigate();
   const { user: currentUser, updateUser } = useAuth();
 
@@ -64,8 +75,17 @@ const Profile: React.FC = () => {
     }
   }, [currentUser?.id]);
 
+  // Load portfolio when tab is active
+  React.useEffect(() => {
+    if (activeTab === 'portfolio' && currentUser?.id) {
+      API.getPortfolio(currentUser.id).then(setPortfolioItems).catch(() => {});
+    }
+  }, [activeTab, currentUser?.id]);
+
   // Check auth status for rendering
   const creatorStatus = currentUser?.creatorStatus || 'none';
+  const kycVerified = currentUser?.kycVerified ?? false;
+  const canCreateListings = kycVerified || creatorStatus === 'approved';
   const subscriptionTier = currentUser?.tier || 'free';
 
   const [inboxMessages, setInboxMessages] = useState([
@@ -189,6 +209,41 @@ const Profile: React.FC = () => {
     setInboxMessages(prev => prev.map(m => m.id === msg.id ? { ...m, unread: false } : m));
   };
 
+  const handlePortfolioUpload = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!portfolioTitle.trim()) {
+      setPortfolioError('Title is required.');
+      return;
+    }
+    setIsAddingPortfolio(true);
+    setPortfolioError('');
+    try {
+      const formData = new FormData();
+      formData.append('title', portfolioTitle.trim());
+      if (portfolioDescription.trim()) formData.append('description', portfolioDescription.trim());
+      if (portfolioFile) formData.append('file', portfolioFile);
+      const newItem = await API.addPortfolioItem(formData);
+      setPortfolioItems(prev => [newItem, ...prev]);
+      setPortfolioTitle('');
+      setPortfolioDescription('');
+      setPortfolioFile(null);
+      if (portfolioFileRef.current) portfolioFileRef.current.value = '';
+    } catch (err: any) {
+      setPortfolioError(err.message || 'Failed to add portfolio item.');
+    } finally {
+      setIsAddingPortfolio(false);
+    }
+  };
+
+  const handlePortfolioDelete = async (itemId: string) => {
+    try {
+      await API.deletePortfolioItem(itemId);
+      setPortfolioItems(prev => prev.filter(i => i.id !== itemId));
+    } catch (err: any) {
+      alert(err.message || 'Failed to delete item.');
+    }
+  };
+
   const handleCreateListing = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!currentUser) return;
@@ -229,35 +284,35 @@ const Profile: React.FC = () => {
       case 'listings':
         return (
           <div className="space-y-6 animate-in fade-in duration-500">
-            {/* Creator Verification Alert */}
-            {creatorStatus === 'none' && (
+            {/* KYC / Verification Alert */}
+            {!canCreateListings && creatorStatus !== 'pending' && (
               <div className="p-8 bg-brand-pink/10 border border-brand-pink/20 rounded-[2rem] flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
                 <div className="flex items-start space-x-4">
                   <div className="p-3 bg-brand-pink/20 rounded-2xl text-brand-pink">
-                    <Rocket size={24} />
+                    <ShieldCheck size={24} />
                   </div>
                   <div>
-                    <h4 className="text-white font-bold text-lg">Ready to sell?</h4>
-                    <p className="text-gray-400 text-sm font-medium">Complete your creator onboarding to start offering services to our global network.</p>
+                    <h4 className="text-white font-bold text-lg">Identity Verification Required</h4>
+                    <p className="text-gray-400 text-sm font-medium">All users must verify their identity to create listings and offer services.</p>
                   </div>
                 </div>
-                <button 
+                <button
                   onClick={() => navigate('/creator-onboarding')}
                   className="px-8 py-3 bg-brand-pink text-white font-black rounded-xl text-xs uppercase tracking-widest hover:scale-105 transition-all shadow-lg shadow-brand-pink/20 shrink-0"
                 >
-                  Start Verification
+                  Verify Identity
                 </button>
               </div>
             )}
 
-            {creatorStatus === 'pending' && (
+            {creatorStatus === 'pending' && !kycVerified && (
               <div className="p-8 bg-brand-green/5 border border-brand-green/10 rounded-[2rem] flex items-center space-x-4 mb-8">
                 <div className="p-3 bg-brand-green/10 rounded-2xl text-brand-green animate-pulse">
                   <Clock size={24} />
                 </div>
                 <div>
-                  <h4 className="text-white font-bold text-lg">Neural Review in Progress</h4>
-                  <p className="text-gray-400 text-sm font-medium">Your portfolio is being verified. Creation of new listings is temporarily locked.</p>
+                  <h4 className="text-white font-bold text-lg">Verification In Progress</h4>
+                  <p className="text-gray-400 text-sm font-medium">Your identity is being reviewed. Listings will unlock once verified.</p>
                 </div>
               </div>
             )}
@@ -274,12 +329,12 @@ const Profile: React.FC = () => {
                 />
               </div>
               <div className="flex items-center space-x-3">
-                <button 
+                <button
                   onClick={() => setIsCreatingListing(true)}
-                  disabled={creatorStatus !== 'approved'}
+                  disabled={!canCreateListings}
                   className={`flex items-center space-x-2 px-6 py-3 font-black rounded-xl text-sm transition-all ${
-                    creatorStatus === 'approved' 
-                    ? 'bg-brand-green text-brand-black hover:scale-105' 
+                    canCreateListings
+                    ? 'bg-brand-green text-brand-black hover:scale-105'
                     : 'bg-white/5 text-gray-600 cursor-not-allowed border border-white/5'
                   }`}
                 >
@@ -293,7 +348,7 @@ const Profile: React.FC = () => {
               {listings.filter(l => l.freelancerId === currentUser?.id).length === 0 ? (
                 <div className="text-center py-20 bg-brand-grey/20 border-2 border-dashed border-white/5 rounded-[2.5rem]">
                   <p className="text-gray-500 font-bold mb-4">You have no active listings.</p>
-                  {creatorStatus === 'approved' && (
+                  {canCreateListings && (
                      <button onClick={() => setIsCreatingListing(true)} className="text-brand-pink font-black hover:underline">Create your first gig</button>
                   )}
                 </div>
@@ -463,6 +518,120 @@ const Profile: React.FC = () => {
                 </table>
               )}
             </div>
+          </div>
+        );
+      case 'portfolio':
+        return (
+          <div className="space-y-8 animate-in fade-in duration-500">
+            {/* Upload Form */}
+            <div className="bg-brand-grey/60 border border-white/10 rounded-[2rem] p-8">
+              <h3 className="text-xl font-bold text-white mb-6">Add Portfolio Item</h3>
+              <form onSubmit={handlePortfolioUpload} className="space-y-4">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Title *</label>
+                  <input
+                    type="text"
+                    required
+                    maxLength={200}
+                    value={portfolioTitle}
+                    onChange={e => setPortfolioTitle(e.target.value)}
+                    placeholder="e.g. E-commerce UX Redesign"
+                    className="w-full bg-brand-black border border-white/10 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-brand-green transition-all"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Description</label>
+                  <textarea
+                    rows={3}
+                    maxLength={1000}
+                    value={portfolioDescription}
+                    onChange={e => setPortfolioDescription(e.target.value)}
+                    placeholder="Briefly describe this work..."
+                    className="w-full bg-brand-black border border-white/10 rounded-xl py-3 px-4 text-white resize-none focus:outline-none focus:border-brand-green transition-all"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Image / PDF (max 10MB)</label>
+                  <label className="flex items-center gap-4 cursor-pointer group">
+                    <div className="flex-grow bg-brand-black border border-white/10 border-dashed rounded-xl py-4 px-5 text-sm text-gray-500 group-hover:border-brand-green group-hover:text-gray-300 transition-all flex items-center gap-3">
+                      <Upload size={18} />
+                      <span>{portfolioFile ? portfolioFile.name : 'Choose file or drag here'}</span>
+                    </div>
+                    <input
+                      ref={portfolioFileRef}
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp,application/pdf"
+                      className="hidden"
+                      onChange={e => setPortfolioFile(e.target.files?.[0] || null)}
+                    />
+                  </label>
+                </div>
+                {portfolioError && (
+                  <p className="text-brand-pink text-sm font-medium">{portfolioError}</p>
+                )}
+                <button
+                  type="submit"
+                  disabled={isAddingPortfolio || !portfolioTitle.trim()}
+                  className="flex items-center gap-2 px-6 py-3 bg-brand-green text-brand-black font-black rounded-xl hover:scale-105 active:scale-95 transition-all disabled:opacity-50"
+                >
+                  {isAddingPortfolio ? <Loader2 size={16} className="animate-spin" /> : <PlusCircle size={16} />}
+                  <span>Add Item</span>
+                </button>
+              </form>
+            </div>
+
+            {/* Portfolio Grid */}
+            {portfolioItems.length === 0 ? (
+              <div className="text-center py-20 bg-brand-grey/20 border-2 border-dashed border-white/5 rounded-[2.5rem]">
+                <ImageIcon size={40} className="text-gray-700 mx-auto mb-4" />
+                <p className="text-gray-500 font-bold">No portfolio items yet. Add your first piece above.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {portfolioItems.map(item => (
+                  <div key={item.id} className="group bg-brand-grey/30 border border-white/5 rounded-2xl overflow-hidden hover:border-brand-green/30 transition-all">
+                    {item.imageUrl && (
+                      <div className="aspect-video bg-brand-black overflow-hidden">
+                        <img
+                          src={`${import.meta.env.VITE_CRM_API_BASE || 'https://api.cenner.hr'}${item.imageUrl}`}
+                          alt={item.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                      </div>
+                    )}
+                    {!item.imageUrl && item.fileUrl && (
+                      <div className="aspect-video bg-brand-black flex items-center justify-center">
+                        <ExternalLink size={32} className="text-gray-600" />
+                      </div>
+                    )}
+                    <div className="p-5">
+                      <h4 className="text-white font-bold text-sm mb-1 truncate">{item.title}</h4>
+                      {item.description && (
+                        <p className="text-gray-500 text-xs line-clamp-2">{item.description}</p>
+                      )}
+                      <div className="mt-4 flex items-center justify-between">
+                        {item.fileUrl && (
+                          <a
+                            href={`${import.meta.env.VITE_CRM_API_BASE || 'https://api.cenner.hr'}${item.fileUrl}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-[10px] font-bold text-brand-green hover:underline flex items-center gap-1"
+                          >
+                            <ExternalLink size={10} /> View File
+                          </a>
+                        )}
+                        <button
+                          onClick={() => handlePortfolioDelete(item.id)}
+                          className="ml-auto p-2 text-gray-600 hover:text-red-400 transition-colors rounded-lg hover:bg-red-500/10"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         );
       default:
@@ -742,16 +911,20 @@ const Profile: React.FC = () => {
                   {subscriptionTier} Node
               </p>
               
-              {creatorStatus === 'pending' && (
+              {canCreateListings ? (
                 <span className="inline-flex items-center space-x-1 px-3 py-1 bg-brand-green/10 text-brand-green text-[9px] font-black uppercase tracking-widest rounded-full mb-6">
+                  <ShieldCheck size={10} />
+                  <span>Identity Verified</span>
+                </span>
+              ) : creatorStatus === 'pending' ? (
+                <span className="inline-flex items-center space-x-1 px-3 py-1 bg-brand-green/10 text-brand-green text-[9px] font-black uppercase tracking-widest rounded-full mb-6 animate-pulse">
                   <ShieldAlert size={10} />
                   <span>Verification Pending</span>
                 </span>
-              )}
-              {creatorStatus === 'approved' && (
-                <span className="inline-flex items-center space-x-1 px-3 py-1 bg-brand-green/10 text-brand-green text-[9px] font-black uppercase tracking-widest rounded-full mb-6">
-                  <CheckCircle size={10} />
-                  <span>Verified Creator</span>
+              ) : (
+                <span className="inline-flex items-center space-x-1 px-3 py-1 bg-brand-pink/10 text-brand-pink text-[9px] font-black uppercase tracking-widest rounded-full mb-6">
+                  <ShieldAlert size={10} />
+                  <span>Unverified</span>
                 </span>
               )}
             </div>
@@ -798,6 +971,17 @@ const Profile: React.FC = () => {
                 </div>
                 <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3 text-sm text-gray-400">
+                        <ShieldCheck size={16} />
+                        <span>KYC</span>
+                    </div>
+                    {canCreateListings ? (
+                        <CheckCircle size={16} className="text-brand-green" />
+                    ) : (
+                        <button onClick={() => navigate('/creator-onboarding')} className="text-[10px] font-bold text-brand-pink hover:underline">Verify</button>
+                    )}
+                </div>
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3 text-sm text-gray-400">
                         <Crown size={16} />
                         <span>Sub Level</span>
                     </div>
@@ -813,6 +997,7 @@ const Profile: React.FC = () => {
             <nav className="flex flex-col">
               {[
                 { id: 'listings', icon: <Briefcase size={18} />, label: "Manage Listings" },
+                { id: 'portfolio', icon: <ImageIcon size={18} />, label: "Portfolio" },
                 { id: 'inbox', icon: <MessageSquare size={18} />, label: "Messages", badge: inboxMessages.filter(m => m.unread).length },
                 { id: 'earnings', icon: <CreditCard size={18} />, label: "Financials" },
                 { id: 'settings', icon: <Settings size={18} />, label: "Global Settings" },

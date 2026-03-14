@@ -9,16 +9,20 @@ export interface User {
   bio?: string;
   skills?: string[];
   creatorStatus?: 'none' | 'pending' | 'approved' | 'rejected';
+  kycVerified?: boolean;
   subscriptionTier?: 'free' | 'pro' | 'ultra';
   emailVerified?: boolean;
   mobileVerified?: boolean;
 }
 
-export interface CreatorApplication {
-  userId: string;
-  portfolioLinks: string[];
-  portfolioFiles: string[]; // Base64 or URLs
-  submittedAt: string;
+export interface PortfolioItem {
+  id: string;
+  title: string;
+  description?: string;
+  imageUrl?: string;
+  fileUrl?: string;
+  fileType?: string;
+  createdAt: string;
 }
 
 export interface ServiceListing {

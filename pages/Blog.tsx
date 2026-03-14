@@ -106,7 +106,7 @@ const Blog: React.FC = () => {
 
   const navigate = useNavigate();
   const { user: currentUser } = useAuth();
-  const isVerified = currentUser?.creatorStatus === 'approved';
+  const isVerified = currentUser?.kycVerified || currentUser?.creatorStatus === 'approved';
 
   const sortedPosts = useMemo(() => {
     return [...blogPosts].sort((a, b) => b.votes - a.votes);
