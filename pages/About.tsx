@@ -1,6 +1,63 @@
 
 import React from 'react';
-import { Target, Users, Rocket, Award, Shield, Cpu, Zap, Globe, Eye, Compass } from 'lucide-react';
+import { Target, Shield, Cpu, Zap, Eye, ExternalLink, CheckCircle2 } from 'lucide-react';
+
+const PROJECTS = [
+  {
+    title: 'FinTrack Dashboard',
+    client: 'Zagreb FinTech Startup',
+    category: 'Development',
+    color: 'brand-green',
+    deliverable: 'Real-time trading analytics platform with WebSocket data feeds and algorithmic alerts.',
+    result: 'Launched in 6 weeks · 12k daily active users',
+    tags: ['React', 'Node.js', 'WebSocket'],
+  },
+  {
+    title: 'NovaBrand Identity',
+    client: 'Fashion Label, Milan',
+    category: 'Design',
+    color: 'brand-pink',
+    deliverable: 'Full visual identity system — logo, typography, packaging guidelines and social kit.',
+    result: '3x brand recall after relaunch · featured in Dezeen',
+    tags: ['Branding', 'Figma', 'Motion'],
+  },
+  {
+    title: 'Logistics AI Engine',
+    client: 'EU Distribution Co.',
+    category: 'AI / ML',
+    color: 'brand-green',
+    deliverable: 'Predictive routing model cutting delivery times using real-time traffic + warehouse data.',
+    result: '22% reduction in last-mile costs',
+    tags: ['Python', 'TensorFlow', 'GCP'],
+  },
+  {
+    title: 'CryptoVault App',
+    client: 'Anonymous Fund',
+    category: 'Mobile',
+    color: 'brand-pink',
+    deliverable: 'iOS/Android cold-storage wallet with biometric auth and multi-sig approval flows.',
+    result: 'Passed third-party security audit · App Store featured',
+    tags: ['React Native', 'Rust', 'HSM'],
+  },
+  {
+    title: 'Cenner Community Portal',
+    client: 'Internal · Cenner HR',
+    category: 'Full-Stack',
+    color: 'brand-green',
+    deliverable: "The very platform you're on — KYC, listings, escrow, subscription tiers.",
+    result: 'Production since 2025 · Growing daily',
+    tags: ['React', 'Prisma', 'Stripe'],
+  },
+  {
+    title: 'Broadcast CMS',
+    client: 'Regional TV Network',
+    category: 'Development',
+    color: 'brand-pink',
+    deliverable: 'Headless CMS for live news publishing with CDN-backed video transcoding pipeline.',
+    result: '99.98% uptime across 3 broadcast regions',
+    tags: ['Next.js', 'FFmpeg', 'CloudFront'],
+  },
+];
 
 const About: React.FC = () => {
   return (
@@ -78,7 +135,7 @@ const About: React.FC = () => {
       </section>
 
       {/* Tech Stack / Innovation Section */}
-      <section className="mb-40">
+      <section id="technology" className="mb-40 scroll-mt-24">
         <div className="text-center max-w-3xl mx-auto mb-20">
           <h2 className="text-4xl font-bold text-white mb-6 tracking-tight">The Technological Edge</h2>
           <p className="text-gray-500 text-lg">We've integrated a proprietary stack to ensure seamless collaboration at any scale.</p>
@@ -95,6 +152,46 @@ const About: React.FC = () => {
               </div>
               <h3 className="text-2xl font-bold text-white mb-4">{item.title}</h3>
               <p className="text-gray-500 text-sm leading-relaxed">{item.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Previous Projects Section */}
+      <section id="projects" className="mb-40 scroll-mt-24">
+        <div className="text-center max-w-3xl mx-auto mb-20">
+          <div className="inline-flex items-center space-x-2 bg-brand-pink/10 border border-brand-pink/20 rounded-full px-5 py-2 mb-6 text-[10px] font-black uppercase tracking-[0.3em] text-brand-pink">
+            <CheckCircle2 size={12} />
+            <span>Delivered Work</span>
+          </div>
+          <h2 className="text-4xl md:text-5xl font-black text-white mb-6 tracking-tighter">Previous Projects</h2>
+          <p className="text-gray-500 text-lg">A selection of work facilitated through the Cenner network — from early-stage startups to enterprise clients.</p>
+        </div>
+
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {PROJECTS.map((project, i) => (
+            <div key={i} className="group relative bg-brand-grey/40 border border-white/5 rounded-[2.5rem] p-8 hover:border-white/10 hover:bg-white/[0.03] transition-all duration-300 overflow-hidden">
+              <div className={`absolute top-0 right-0 w-40 h-40 bg-${project.color}/5 rounded-full blur-[80px] -mr-20 -mt-20 group-hover:bg-${project.color}/10 transition-all`}></div>
+              <div className="relative z-10">
+                <div className="flex items-start justify-between mb-6">
+                  <div>
+                    <span className={`text-[9px] font-black uppercase tracking-[0.3em] text-${project.color}`}>{project.category}</span>
+                    <h3 className="text-xl font-black text-white mt-1">{project.title}</h3>
+                    <p className="text-[10px] text-gray-600 font-bold mt-1">{project.client}</p>
+                  </div>
+                  <ExternalLink size={16} className="text-gray-700 group-hover:text-gray-500 transition-colors shrink-0 mt-1" />
+                </div>
+                <p className="text-gray-400 text-sm leading-relaxed mb-6">{project.deliverable}</p>
+                <div className={`text-[10px] font-bold text-${project.color} mb-5 flex items-center gap-2`}>
+                  <CheckCircle2 size={12} />
+                  {project.result}
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {project.tags.map(tag => (
+                    <span key={tag} className="px-3 py-1 bg-white/5 border border-white/5 rounded-full text-[10px] font-bold text-gray-500">{tag}</span>
+                  ))}
+                </div>
+              </div>
             </div>
           ))}
         </div>

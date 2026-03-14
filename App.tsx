@@ -18,6 +18,10 @@ import Subscription from './pages/Subscription';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsOfService from './pages/TermsOfService';
 import Cookies from './pages/Cookies';
+import Dashboard from './pages/Dashboard';
+import FreelancerProfile from './pages/FreelancerProfile';
+import Orders from './pages/Orders';
+import Messages from './pages/Messages';
 import ScrollToTop from './components/ScrollToTop';
 import { AuthProvider } from './contexts/AuthContext';
 import { DataProvider } from './contexts/DataContext';
@@ -46,6 +50,10 @@ const App: React.FC = () => {
               <Route path="/privacy" element={<PrivacyPolicy />} />
               <Route path="/terms" element={<TermsOfService />} />
               <Route path="/cookies" element={<Cookies />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/freelancer/:id" element={<FreelancerProfile />} />
+              <Route path="/orders" element={<Orders />} />
+              <Route path="/messages" element={<Messages />} />
             </Routes>
           </Layout>
         </Router>

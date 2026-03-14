@@ -92,18 +92,23 @@ const Marketplace: React.FC = () => {
         <div>
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-xs font-black text-white uppercase tracking-[0.2em]">Budget Threshold</h3>
-            <span className="text-brand-green font-black text-sm">€{priceRange}</span>
+            <span className="text-brand-green font-black text-lg">€{priceRange.toLocaleString()}</span>
           </div>
-          <input
-            type="range"
-            min="50"
-            max="5000"
-            step="50"
-            value={priceRange}
-            onChange={(e) => setPriceRange(parseInt(e.target.value))}
-            className="w-full h-1.5 bg-brand-black border border-white/5 rounded-lg appearance-none cursor-pointer accent-brand-green"
-          />
-          <div className="flex justify-between mt-2 text-[10px] font-bold text-gray-600 uppercase">
+          <div className="relative py-3">
+            <input
+              type="range"
+              min="50"
+              max="5000"
+              step="50"
+              value={priceRange}
+              onChange={(e) => setPriceRange(parseInt(e.target.value))}
+              className="cenner-slider w-full cursor-pointer"
+              style={{
+                '--slider-pct': `${((priceRange - 50) / (5000 - 50)) * 100}%`,
+              } as React.CSSProperties}
+            />
+          </div>
+          <div className="flex justify-between text-[10px] font-bold text-gray-600 uppercase">
             <span>€50</span>
             <span>€5000+</span>
           </div>

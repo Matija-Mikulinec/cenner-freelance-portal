@@ -1,7 +1,13 @@
 
-import React, { useState } from 'react';
-import { Send, MapPin, Mail, Phone, MessageSquare, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import React, { useState, useCallback } from 'react';
+import { Send, MapPin, Mail, Phone, MessageSquare, CheckCircle, AlertCircle, Loader2, RefreshCw } from 'lucide-react';
 import { API } from '../lib/api';
+
+function generateCaptcha() {
+  const a = Math.floor(Math.random() * 12) + 1;
+  const b = Math.floor(Math.random() * 12) + 1;
+  return { a, b, answer: a + b };
+}
 
 const Contact: React.FC = () => {
   const [name, setName] = useState('');
@@ -11,9 +17,24 @@ const Contact: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
+  const [captcha, setCaptcha] = useState(generateCaptcha);
+  const [captchaInput, setCaptchaInput] = useState('');
+  const [captchaError, setCaptchaError] = useState(false);
+
+  const refreshCaptcha = useCallback(() => {
+    setCaptcha(generateCaptcha());
+    setCaptchaInput('');
+    setCaptchaError(false);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (parseInt(captchaInput, 10) !== captcha.answer) {
+      setCaptchaError(true);
+      refreshCaptcha();
+      return;
+    }
+    setCaptchaError(false);
     setLoading(true);
     setError('');
     try {
@@ -22,6 +43,7 @@ const Contact: React.FC = () => {
       setName('');
       setEmail('');
       setMessage('');
+      refreshCaptcha();
       setTimeout(() => setSubmitted(false), 6000);
     } catch (err: any) {
       setError(err.message || 'Failed to send message. Please try again.');
@@ -142,6 +164,36 @@ const Contact: React.FC = () => {
                 placeholder="How can we help you today?"
                 className="w-full bg-brand-black border border-white/10 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-brand-green transition-colors resize-none"
               ></textarea>
+            </div>
+
+            {/* Math Captcha */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-400">
+                Verification — What is <span className="text-white font-black">{captcha.a} + {captcha.b}</span>?
+              </label>
+              <div className="flex gap-3">
+                <input
+                  required
+                  type="number"
+                  value={captchaInput}
+                  onChange={e => { setCaptchaInput(e.target.value); setCaptchaError(false); }}
+                  placeholder="Answer"
+                  className={`flex-1 bg-brand-black border rounded-xl py-3 px-4 text-white focus:outline-none transition-colors ${captchaError ? 'border-red-500/60 focus:border-red-500' : 'border-white/10 focus:border-brand-green'}`}
+                />
+                <button
+                  type="button"
+                  onClick={refreshCaptcha}
+                  className="px-4 py-3 border border-white/10 rounded-xl text-gray-500 hover:text-white hover:border-white/20 transition-colors"
+                  title="New question"
+                >
+                  <RefreshCw size={16} />
+                </button>
+              </div>
+              {captchaError && (
+                <p className="text-red-400 text-xs font-medium flex items-center gap-1.5">
+                  <AlertCircle size={12} /> Incorrect answer. A new question has been generated.
+                </p>
+              )}
             </div>
 
             <button
