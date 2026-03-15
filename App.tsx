@@ -24,6 +24,7 @@ import Orders from './pages/Orders';
 import Messages from './pages/Messages';
 import Projects from './pages/Projects';
 import Technology from './pages/Technology';
+import Match from './pages/Match';
 import ScrollToTop from './components/ScrollToTop';
 import { AuthProvider } from './contexts/AuthContext';
 import { DataProvider } from './contexts/DataContext';
@@ -58,6 +59,7 @@ const App: React.FC = () => {
               <Route path="/messages" element={<Messages />} />
               <Route path="/projects" element={<Projects />} />
               <Route path="/technology" element={<Technology />} />
+              <Route path="/match" element={<Match />} />
             </Routes>
           </Layout>
         </Router>

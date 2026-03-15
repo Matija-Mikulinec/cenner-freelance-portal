@@ -57,7 +57,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   const navLinks = [
     { name: 'Marketplace', path: '/marketplace' },
-    { name: 'Subscription', path: '/subscription' },
+    { name: 'Match', path: '/match' },
     { name: 'Services', path: '/services' },
     { name: 'Blog', path: '/blog' },
     { name: 'Contact', path: '/contact' },
