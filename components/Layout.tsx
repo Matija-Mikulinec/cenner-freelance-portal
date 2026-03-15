@@ -21,32 +21,31 @@ const LANGUAGES = [
 ];
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen]         = useState(false);
   const [isPermissionModalOpen, setIsPermissionModalOpen] = useState(false);
-  const [isLangOpen, setIsLangOpen] = useState(false);
-  const [isAboutOpen, setIsAboutOpen] = useState(false);
-  const [selectedLang, setSelectedLang] = useState(() => localStorage.getItem('cenner_lang') || 'EN');
+  const [isLangOpen, setIsLangOpen]         = useState(false);
+  const [isAboutOpen, setIsAboutOpen]       = useState(false);
+  const [isMarketOpen, setIsMarketOpen]     = useState(false);
+  const [selectedLang, setSelectedLang]     = useState(() => localStorage.getItem('cenner_lang') || 'EN');
   const { user, logout } = useAuth();
 
   const location = useLocation();
   const navigate = useNavigate();
-  const langRef = useRef<HTMLDivElement>(null);
-  const aboutRef = useRef<HTMLDivElement>(null);
+  const langRef    = useRef<HTMLDivElement>(null);
+  const aboutRef   = useRef<HTMLDivElement>(null);
+  const marketRef  = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (langRef.current && !langRef.current.contains(e.target as Node)) setIsLangOpen(false);
-      if (aboutRef.current && !aboutRef.current.contains(e.target as Node)) setIsAboutOpen(false);
+    const handler = (e: MouseEvent) => {
+      if (langRef.current   && !langRef.current.contains(e.target as Node))   setIsLangOpen(false);
+      if (aboutRef.current  && !aboutRef.current.contains(e.target as Node))  setIsAboutOpen(false);
+      if (marketRef.current && !marketRef.current.contains(e.target as Node)) setIsMarketOpen(false);
     };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
   }, []);
 
-  const handleLogout = async () => {
-    logout();
-    navigate('/');
-  };
-
+  const handleLogout = async () => { logout(); navigate('/'); };
   const handleLangSelect = (code: string) => {
     setSelectedLang(code);
     localStorage.setItem('cenner_lang', code);
@@ -55,27 +54,31 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   const currentLang = LANGUAGES.find(l => l.code === selectedLang) || LANGUAGES[0];
 
+  // Plain top-level links (no dropdown)
   const navLinks = [
-    { name: 'Marketplace', path: '/marketplace' },
-    { name: 'Match', path: '/match' },
-    { name: 'Services', path: '/services' },
-    { name: 'Blog', path: '/blog' },
-    { name: 'Contact', path: '/contact' },
+    { name: 'Services',  path: '/services' },
+    { name: 'Pricing',   path: '/subscription' },
+    { name: 'Blog',      path: '/blog' },
+    { name: 'Contact',   path: '/contact' },
+  ];
+
+  const marketDropdownItems = [
+    { label: 'Marketplace', path: '/marketplace', desc: 'Browse all freelancer listings' },
+    { label: 'Job Matching', path: '/match',       desc: 'Find jobs that match your skills' },
   ];
 
   const aboutDropdownItems = [
-    { label: 'About Us', path: '/about', desc: 'Our mission & story' },
-    { label: 'Previous Projects', path: '/projects', desc: "Work we've delivered" },
-    { label: 'Technology', path: '/technology', desc: 'The stack powering Cenner' },
+    { label: 'About Us',          path: '/about',       desc: 'Our mission & story' },
+    { label: 'Previous Projects', path: '/projects',    desc: "Work we've delivered" },
+    { label: 'Technology',        path: '/technology',  desc: 'The stack powering Cenner' },
   ];
+
+  const isMarketActive = ['/marketplace', '/match'].includes(location.pathname);
+  const isAboutActive  = ['/about', '/projects', '/technology'].includes(location.pathname);
 
   return (
     <div className="min-h-screen flex flex-col relative transition-colors duration-300 bg-brand-black text-white">
-      <PermissionModal
-        isOpen={isPermissionModalOpen}
-        onClose={() => setIsPermissionModalOpen(false)}
-      />
-
+      <PermissionModal isOpen={isPermissionModalOpen} onClose={() => setIsPermissionModalOpen(false)} />
       <ChatWidget />
 
       {/* Navbar */}
@@ -89,13 +92,39 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center space-x-8">
+
+              {/* Marketplace Dropdown */}
+              <div ref={marketRef} className="relative">
+                <button
+                  onClick={() => setIsMarketOpen(v => !v)}
+                  className={`flex items-center gap-1 text-[10px] font-black uppercase tracking-[0.25em] transition-all hover:text-brand-green ${isMarketActive ? 'text-brand-green' : 'text-gray-400'}`}
+                >
+                  Marketplace
+                  <ChevronDown size={12} className={`transition-transform duration-200 ${isMarketOpen ? 'rotate-180' : ''}`} />
+                </button>
+                {isMarketOpen && (
+                  <div className="absolute top-full left-1/2 -translate-x-1/2 mt-3 w-52 bg-brand-grey border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-1 duration-200">
+                    {marketDropdownItems.map(item => (
+                      <Link
+                        key={item.label}
+                        to={item.path}
+                        onClick={() => setIsMarketOpen(false)}
+                        className="block px-5 py-3.5 hover:bg-white/5 transition-colors group/item"
+                      >
+                        <div className="text-xs font-bold text-white group-hover/item:text-brand-green transition-colors">{item.label}</div>
+                        <div className="text-[10px] text-gray-600 mt-0.5">{item.desc}</div>
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Plain links */}
               {navLinks.map((link) => (
                 <Link
                   key={link.name}
                   to={link.path}
-                  className={`text-[10px] font-black uppercase tracking-[0.25em] transition-all hover:text-brand-green ${
-                    location.pathname === link.path ? 'text-brand-green' : 'text-gray-400'
-                  }`}
+                  className={`text-[10px] font-black uppercase tracking-[0.25em] transition-all hover:text-brand-green ${location.pathname === link.path ? 'text-brand-green' : 'text-gray-400'}`}
                 >
                   {link.name}
                 </Link>
@@ -105,14 +134,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               <div ref={aboutRef} className="relative">
                 <button
                   onClick={() => setIsAboutOpen(v => !v)}
-                  className={`flex items-center gap-1 text-[10px] font-black uppercase tracking-[0.25em] transition-all hover:text-brand-green ${
-                    location.pathname === '/about' ? 'text-brand-green' : 'text-gray-400'
-                  }`}
+                  className={`flex items-center gap-1 text-[10px] font-black uppercase tracking-[0.25em] transition-all hover:text-brand-green ${isAboutActive ? 'text-brand-green' : 'text-gray-400'}`}
                 >
                   About
                   <ChevronDown size={12} className={`transition-transform duration-200 ${isAboutOpen ? 'rotate-180' : ''}`} />
                 </button>
-
                 {isAboutOpen && (
                   <div className="absolute top-full left-1/2 -translate-x-1/2 mt-3 w-52 bg-brand-grey border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-1 duration-200">
                     {aboutDropdownItems.map(item => (
@@ -130,7 +156,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 )}
               </div>
 
-              <div className="h-6 w-px bg-white/10 mx-2"></div>
+              <div className="h-6 w-px bg-white/10 mx-2" />
 
               {user ? (
                 <div className="flex items-center space-x-5 pl-4">
@@ -173,7 +199,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   <span className="text-[10px] font-black uppercase tracking-widest">{currentLang.code}</span>
                   <ChevronDown size={10} className={`transition-transform duration-200 ${isLangOpen ? 'rotate-180' : ''}`} />
                 </button>
-
                 {isLangOpen && (
                   <div className="absolute top-full right-0 mt-3 w-40 bg-brand-grey border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-1 duration-200">
                     {LANGUAGES.map(lang => (
@@ -196,7 +221,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
             {/* Mobile Toggle */}
             <div className="md:hidden flex items-center gap-3">
-              {/* Mobile Language Selector */}
               <div ref={langRef} className="relative">
                 <button
                   onClick={() => setIsLangOpen(v => !v)}
@@ -226,32 +250,38 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="md:hidden bg-brand-black border-b border-white/10 pb-8 px-6 space-y-4">
-            {navLinks.map((link) => (
+          <div className="md:hidden bg-brand-black border-b border-white/10 pb-8 px-6 space-y-1">
+            {/* Marketplace group */}
+            <p className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-700 pt-5 pb-1">Marketplace</p>
+            {marketDropdownItems.map(item => (
+              <Link key={item.label} to={item.path} onClick={() => setIsMenuOpen(false)} className="block py-2.5 text-base font-bold text-white border-b border-white/5 pl-2">{item.label}</Link>
+            ))}
+            {/* Plain links */}
+            {navLinks.map(link => (
               <Link key={link.name} to={link.path} onClick={() => setIsMenuOpen(false)} className="block py-3 text-lg font-bold text-white border-b border-white/5">{link.name}</Link>
             ))}
-            <div className="border-b border-white/5">
-              {aboutDropdownItems.map(item => (
-                <Link key={item.label} to={item.path} onClick={() => setIsMenuOpen(false)} className="block py-3 text-base font-semibold text-gray-300 pl-4">{item.label}</Link>
-              ))}
+            {/* About group */}
+            <p className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-700 pt-4 pb-1">Company</p>
+            {aboutDropdownItems.map(item => (
+              <Link key={item.label} to={item.path} onClick={() => setIsMenuOpen(false)} className="block py-2.5 text-base font-semibold text-gray-300 pl-2">{item.label}</Link>
+            ))}
+            {/* User links */}
+            <div className="pt-3 border-t border-white/5">
+              {user ? (
+                <>
+                  <Link to="/dashboard" onClick={() => setIsMenuOpen(false)} className="block py-3 text-lg font-bold text-brand-green">Dashboard</Link>
+                  <Link to="/messages"  onClick={() => setIsMenuOpen(false)} className="block py-3 text-lg font-bold text-white">Messages</Link>
+                  <Link to="/orders"    onClick={() => setIsMenuOpen(false)} className="block py-3 text-lg font-bold text-white">Orders</Link>
+                </>
+              ) : (
+                <Link to="/auth" onClick={() => setIsMenuOpen(false)} className="block py-3 text-lg font-bold text-brand-pink">Login / Signup</Link>
+              )}
             </div>
-            {user ? (
-              <>
-                <Link to="/dashboard" onClick={() => setIsMenuOpen(false)} className="block py-3 text-lg font-bold text-brand-green">Dashboard</Link>
-                <Link to="/messages" onClick={() => setIsMenuOpen(false)} className="block py-3 text-lg font-bold text-white">Messages</Link>
-                <Link to="/orders" onClick={() => setIsMenuOpen(false)} className="block py-3 text-lg font-bold text-white">Orders</Link>
-              </>
-            ) : (
-              <Link to="/auth" onClick={() => setIsMenuOpen(false)} className="block py-3 text-lg font-bold text-brand-pink">Login / Signup</Link>
-            )}
           </div>
         )}
       </nav>
 
-      <main className="flex-grow">
-        {children}
-      </main>
-
+      <main className="flex-grow">{children}</main>
       <Footer />
     </div>
   );
