@@ -1251,7 +1251,7 @@ const Profile: React.FC = () => {
                 { id: 'portfolio', icon: <ImageIcon size={18} />, label: "Portfolio" },
                 { id: 'inbox', icon: <MessageSquare size={18} />, label: "Messages", badge: inboxMessages.filter(m => m.unread).length },
                 { id: 'earnings', icon: <CreditCard size={18} />, label: "Financials" },
-                { id: 'settings', icon: <Settings size={18} />, label: "Global Settings" },
+                { id: 'settings', icon: <Settings size={18} />, label: "Settings" },
               ].map((item) => (
                 <button
                   key={item.id}

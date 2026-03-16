@@ -1,7 +1,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, User as UserIcon, LogOut, ChevronDown, Briefcase, MessageSquare, Settings, CreditCard, UserCheck } from 'lucide-react';
+import { Menu, X, User as UserIcon, LogOut, ChevronDown, Briefcase, MessageSquare, UserCheck } from 'lucide-react';
 import PermissionModal from './PermissionModal';
 import ChatWidget from './ChatWidget';
 import Footer from './Footer';
@@ -202,14 +202,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                             <Briefcase size={15} className="text-gray-500" />
                             Orders
                           </Link>
-                          <Link to="/profile?tab=settings" onClick={() => setIsProfileOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-colors">
-                            <Settings size={15} className="text-gray-500" />
-                            Account settings
-                          </Link>
-                          <Link to="/profile?tab=settings&section=billing" onClick={() => setIsProfileOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-colors">
-                            <CreditCard size={15} className="text-gray-500" />
-                            Billing and payments
-                          </Link>
                         </div>
 
                         <div className="border-t border-white/10" />
@@ -349,7 +341,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   <Link to="/dashboard" onClick={() => setIsMenuOpen(false)} className="block py-2.5 text-base font-bold text-brand-green">Dashboard</Link>
                   <Link to="/messages"  onClick={() => setIsMenuOpen(false)} className="block py-2.5 text-base font-bold text-white">Messages</Link>
                   <Link to="/orders"    onClick={() => setIsMenuOpen(false)} className="block py-2.5 text-base font-bold text-white">Orders</Link>
-                  <Link to="/profile?tab=settings" onClick={() => setIsMenuOpen(false)} className="block py-2.5 text-base font-bold text-white">Account settings</Link>
                   <button onClick={handleLogout} className="block py-2.5 text-base font-bold text-brand-pink w-full text-left">Sign out</button>
                 </>
               ) : (
