@@ -5,7 +5,7 @@ import {
   Settings, CreditCard, MessageSquare, Briefcase, PlusCircle,
   TrendingUp, Clock, CheckCircle, AlertCircle, MoreVertical,
   MoreHorizontal, Edit2, Pause, Trash2, ArrowUpRight, Search,
-  Calendar, X, Send, Download, User as UserIcon, ShieldAlert, Rocket, Play, Image as ImageIcon, Smartphone, Mail, Crown, Zap, Globe,
+  Calendar, X, Download, User as UserIcon, ShieldAlert, Rocket, Play, Image as ImageIcon, Smartphone, Mail, Crown, Zap, Globe,
   Upload, Loader2, ExternalLink, ShieldCheck, MapPin
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
@@ -414,12 +414,6 @@ const Profile: React.FC = () => {
                     </div>
                   </div>
                 ))}
-             </div>
-             <div className="p-6 bg-brand-black/20 border-t border-white/5">
-                <div className="relative">
-                  <input type="text" placeholder="Type your reply..." className="w-full bg-brand-black/50 border border-white/10 rounded-xl py-4 pl-6 pr-14 text-white focus:outline-none focus:border-brand-green" />
-                  <button className="absolute right-3 top-1/2 -translate-y-1/2 p-2.5 bg-brand-pink text-white rounded-lg hover:scale-105 transition-all"><Send size={18} /></button>
-                </div>
              </div>
           </div>
         ) : (
