@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ShieldCheck, CheckCircle2, Clock, XCircle, Loader2, ArrowRight, AlertTriangle, UserCheck } from 'lucide-react';
 import { loadStripe } from '@stripe/stripe-js';
 import NeuralBackground from '../components/NeuralBackground';
@@ -14,9 +14,11 @@ const stripePromise = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 const CreatorOnboarding: React.FC = () => {
   const { user: currentUser, updateUser } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [verifying, setVerifying] = useState(false);
+  // Start polling immediately if Stripe redirected back with a session_id
+  const [verifying, setVerifying] = useState(() => !!searchParams.get('session_id'));
 
   const kycVerified = currentUser?.kycVerified ?? false;
   const creatorStatus = currentUser?.creatorStatus ?? 'none';
