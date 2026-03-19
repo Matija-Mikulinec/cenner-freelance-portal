@@ -158,10 +158,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               <div ref={langRefDesktop} className="relative">
                 <button
                   onClick={() => setIsLangOpen(v => !v)}
-                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-white/10 hover:border-white/20 transition-colors text-gray-400 hover:text-white"
+                  className="flex items-center gap-2 px-3 py-2 rounded-xl border border-white/10 hover:border-white/20 transition-colors text-gray-400 hover:text-white text-[10px] font-black uppercase tracking-widest"
                 >
-                  <span className="text-base leading-none">{currentLang.flag}</span>
-                  <span className="text-[10px] font-black uppercase tracking-widest">{currentLang.code}</span>
+                  <span className="text-[13px] leading-none">{currentLang.flag}</span>
+                  <span>{currentLang.code}</span>
                   <ChevronDown size={10} className={`transition-transform duration-200 ${isLangOpen ? 'rotate-180' : ''}`} />
                 </button>
                 {isLangOpen && (
@@ -181,7 +181,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               </div>
 
               {/* Currency — always visible */}
-              <div className="flex items-center gap-1 px-3 py-2 rounded-xl border border-white/10 text-gray-400 text-[10px] font-black uppercase tracking-widest">
+              <div className="flex items-center gap-2 px-3 py-2 rounded-xl border border-white/10 text-gray-400 text-[10px] font-black uppercase tracking-widest">
                 <span>€</span>
                 <span>EUR</span>
               </div>
