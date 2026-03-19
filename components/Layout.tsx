@@ -6,6 +6,7 @@ import PermissionModal from './PermissionModal';
 import ChatWidget from './ChatWidget';
 import Footer from './Footer';
 import { useAuth } from '../contexts/AuthContext';
+import { useLanguage, useT } from '../i18n';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -27,22 +28,28 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [isAboutOpen, setIsAboutOpen]       = useState(false);
   const [isMarketOpen, setIsMarketOpen]     = useState(false);
   const [isProfileOpen, setIsProfileOpen]   = useState(false);
-  const [selectedLang, setSelectedLang]     = useState(() => localStorage.getItem('cenner_lang') || 'EN');
+  const { lang, setLang } = useLanguage();
+  const t = useT();
   const { user, logout } = useAuth();
 
   const location = useLocation();
   const navigate = useNavigate();
-  const langRef    = useRef<HTMLDivElement>(null);
+  const langRefDesktop  = useRef<HTMLDivElement>(null);
+  const langRefMobile   = useRef<HTMLDivElement>(null);
   const aboutRef   = useRef<HTMLDivElement>(null);
   const marketRef  = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
-      if (langRef.current    && !langRef.current.contains(e.target as Node))    setIsLangOpen(false);
-      if (aboutRef.current   && !aboutRef.current.contains(e.target as Node))   setIsAboutOpen(false);
-      if (marketRef.current  && !marketRef.current.contains(e.target as Node))  setIsMarketOpen(false);
-      if (profileRef.current && !profileRef.current.contains(e.target as Node)) setIsProfileOpen(false);
+      const target = e.target as Node;
+      const insideLang =
+        (langRefDesktop.current && langRefDesktop.current.contains(target)) ||
+        (langRefMobile.current  && langRefMobile.current.contains(target));
+      if (!insideLang) setIsLangOpen(false);
+      if (aboutRef.current   && !aboutRef.current.contains(target))   setIsAboutOpen(false);
+      if (marketRef.current  && !marketRef.current.contains(target))  setIsMarketOpen(false);
+      if (profileRef.current && !profileRef.current.contains(target)) setIsProfileOpen(false);
     };
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
@@ -50,29 +57,28 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   const handleLogout = async () => { setIsProfileOpen(false); logout(); navigate('/'); };
   const handleLangSelect = (code: string) => {
-    setSelectedLang(code);
-    localStorage.setItem('cenner_lang', code);
+    setLang(code);
     setIsLangOpen(false);
   };
 
-  const currentLang = LANGUAGES.find(l => l.code === selectedLang) || LANGUAGES[0];
+  const currentLang = LANGUAGES.find(l => l.code === lang) || LANGUAGES[0];
 
   const navLinks = [
-    { name: 'Services',  path: '/services' },
-    { name: 'Pricing',   path: '/subscription' },
-    { name: 'Blog',      path: '/blog' },
-    { name: 'Contact',   path: '/contact' },
+    { name: t('Services'),  path: '/services' },
+    { name: t('Pricing'),   path: '/subscription' },
+    { name: t('Blog'),      path: '/blog' },
+    { name: t('Contact'),   path: '/contact' },
   ];
 
   const marketDropdownItems = [
-    { label: 'Marketplace', path: '/marketplace', desc: 'Browse all freelancer listings' },
-    { label: 'Job Matching', path: '/match',       desc: 'Find jobs that match your skills' },
+    { label: t('Marketplace'), path: '/marketplace', desc: t('Browse all freelancer listings') },
+    { label: t('Job Matching'), path: '/match',       desc: t('Find jobs that match your skills') },
   ];
 
   const aboutDropdownItems = [
-    { label: 'About Us',          path: '/about',       desc: 'Our mission & story' },
-    { label: 'Previous Projects', path: '/projects',    desc: "Work we've delivered" },
-    { label: 'Technology',        path: '/technology',  desc: 'The stack powering Cenner' },
+    { label: t('About Us'),          path: '/about',       desc: t('Our mission & story') },
+    { label: t('Previous Projects'), path: '/projects',    desc: t("Work we've delivered") },
+    { label: t('Technology'),        path: '/technology',  desc: t('The stack powering Cenner') },
   ];
 
   const isMarketActive = ['/marketplace', '/match'].includes(location.pathname);
@@ -101,7 +107,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   onClick={() => setIsMarketOpen(v => !v)}
                   className={`flex items-center gap-1 text-[10px] font-black uppercase tracking-[0.25em] transition-all hover:text-brand-green ${isMarketActive ? 'text-brand-green' : 'text-gray-400'}`}
                 >
-                  Marketplace
+                  {t('Marketplace')}
                   <ChevronDown size={12} className={`transition-transform duration-200 ${isMarketOpen ? 'rotate-180' : ''}`} />
                 </button>
                 {isMarketOpen && (
@@ -131,7 +137,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   onClick={() => setIsAboutOpen(v => !v)}
                   className={`flex items-center gap-1 text-[10px] font-black uppercase tracking-[0.25em] transition-all hover:text-brand-green ${isAboutActive ? 'text-brand-green' : 'text-gray-400'}`}
                 >
-                  About
+                  {t('About')}
                   <ChevronDown size={12} className={`transition-transform duration-200 ${isAboutOpen ? 'rotate-180' : ''}`} />
                 </button>
                 {isAboutOpen && (
@@ -148,153 +154,125 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
               <div className="h-6 w-px bg-white/10 mx-2" />
 
+              {/* Language switcher — always visible */}
+              <div ref={langRefDesktop} className="relative">
+                <button
+                  onClick={() => setIsLangOpen(v => !v)}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-white/10 hover:border-white/20 transition-colors text-gray-400 hover:text-white"
+                >
+                  <span className="text-base leading-none">{currentLang.flag}</span>
+                  <span className="text-[10px] font-black uppercase tracking-widest">{currentLang.code}</span>
+                  <ChevronDown size={10} className={`transition-transform duration-200 ${isLangOpen ? 'rotate-180' : ''}`} />
+                </button>
+                {isLangOpen && (
+                  <div className="absolute top-full right-0 mt-3 w-40 bg-brand-grey border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-1 duration-200">
+                    {LANGUAGES.map(l => (
+                      <button key={l.code} onClick={() => handleLangSelect(l.code)}
+                        className={`w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-white/5 transition-colors ${lang === l.code ? 'text-brand-green' : 'text-gray-300'}`}>
+                        <span className="text-base">{l.flag}</span>
+                        <div>
+                          <div className="text-[10px] font-black uppercase tracking-widest">{l.code}</div>
+                          <div className="text-[10px] text-gray-600">{l.name}</div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Currency — always visible */}
+              <div className="flex items-center gap-1 px-3 py-2 rounded-xl border border-white/10 text-gray-400 text-[10px] font-black uppercase tracking-widest">
+                <span>€</span>
+                <span>EUR</span>
+              </div>
+
+              {/* Conditional: profile avatar or login button */}
               {user ? (
-                <div className="flex items-center space-x-3">
-
-                  {/* Profile dropdown */}
-                  <div ref={profileRef} className="relative">
-                    <button
-                      onClick={() => setIsProfileOpen(v => !v)}
-                      className="flex items-center gap-2 group/profile"
-                    >
-                      {user.avatar ? (
-                        <img src={user.avatar} alt="" className="w-9 h-9 rounded-full border-2 border-brand-green p-0.5 group-hover/profile:scale-110 transition-transform" />
-                      ) : (
-                        <div className="w-9 h-9 rounded-full bg-brand-grey border-2 border-brand-green flex items-center justify-center text-brand-green group-hover/profile:scale-110 transition-transform">
-                          <UserIcon size={18} />
-                        </div>
-                      )}
-                      <ChevronDown size={12} className={`text-gray-500 transition-transform duration-200 ${isProfileOpen ? 'rotate-180' : ''}`} />
-                    </button>
-
-                    {isProfileOpen && (
-                      <div className="absolute top-full right-0 mt-3 w-64 bg-[#1a1a1a] border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-1 duration-200">
-                        {/* User info */}
-                        <div className="px-4 pt-4 pb-3">
-                          <div className="flex items-center gap-3 mb-3">
-                            {user.avatar ? (
-                              <img src={user.avatar} alt="" className="w-10 h-10 rounded-full border-2 border-brand-green p-0.5" />
-                            ) : (
-                              <div className="w-10 h-10 rounded-full bg-brand-grey border-2 border-brand-green flex items-center justify-center text-brand-green">
-                                <UserIcon size={18} />
-                              </div>
-                            )}
-                            <div className="min-w-0">
-                              <p className="text-sm font-bold text-white truncate">{user.name || 'Freelancer'}</p>
-                              <p className="text-[11px] text-gray-500 truncate">{user.email}</p>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="border-t border-white/10" />
-
-                        {/* Menu items */}
-                        <div className="py-1">
-                          <Link to="/profile" onClick={() => setIsProfileOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-colors">
-                            <UserCheck size={15} className="text-gray-500" />
-                            Profile
-                          </Link>
-                          <Link to="/messages" onClick={() => setIsProfileOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-colors">
-                            <MessageSquare size={15} className="text-gray-500" />
-                            Messages
-                          </Link>
-                          <Link to="/orders" onClick={() => setIsProfileOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-colors">
-                            <Briefcase size={15} className="text-gray-500" />
-                            Orders
-                          </Link>
-                        </div>
-
-                        <div className="border-t border-white/10" />
-
-                        {/* Language & Currency */}
-                        <div className="py-1">
-                          <div ref={langRef} className="relative">
-                            <button
-                              onClick={() => setIsLangOpen(v => !v)}
-                              className="w-full flex items-center justify-between px-4 py-2.5 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-colors"
-                            >
-                              <span>{currentLang.name}</span>
-                              <ChevronDown size={12} className={`text-gray-500 transition-transform ${isLangOpen ? 'rotate-180' : ''}`} />
-                            </button>
-                            {isLangOpen && (
-                              <div className="absolute bottom-full left-0 w-full bg-[#222] border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50">
-                                {LANGUAGES.map(lang => (
-                                  <button key={lang.code} onClick={() => handleLangSelect(lang.code)}
-                                    className={`w-full flex items-center gap-2 px-4 py-2.5 text-left hover:bg-white/5 transition-colors ${selectedLang === lang.code ? 'text-brand-green' : 'text-gray-300'}`}>
-                                    <span>{lang.flag}</span>
-                                    <span className="text-xs">{lang.name}</span>
-                                  </button>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-300">
-                            <span className="text-gray-500 text-xs">€</span>
-                            EUR
-                          </div>
-                        </div>
-
-                        <div className="border-t border-white/10" />
-
-                        {/* Sign out */}
-                        <div className="py-1">
-                          <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-300 hover:text-brand-pink hover:bg-white/5 transition-colors">
-                            <LogOut size={15} className="text-gray-500" />
-                            Sign out
-                          </button>
-                        </div>
+                <div ref={profileRef} className="relative">
+                  <button
+                    onClick={() => setIsProfileOpen(v => !v)}
+                    className="flex items-center gap-2 group/profile"
+                  >
+                    {user.avatar ? (
+                      <img src={user.avatar} alt="" className="w-9 h-9 rounded-full border-2 border-brand-green p-0.5 group-hover/profile:scale-110 transition-transform" />
+                    ) : (
+                      <div className="w-9 h-9 rounded-full bg-brand-grey border-2 border-brand-green flex items-center justify-center text-brand-green group-hover/profile:scale-110 transition-transform">
+                        <UserIcon size={18} />
                       </div>
                     )}
-                  </div>
+                    <ChevronDown size={12} className={`text-gray-500 transition-transform duration-200 ${isProfileOpen ? 'rotate-180' : ''}`} />
+                  </button>
+
+                  {isProfileOpen && (
+                    <div className="absolute top-full right-0 mt-3 w-64 bg-[#1a1a1a] border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-1 duration-200">
+                      {/* User info */}
+                      <div className="px-4 pt-4 pb-3">
+                        <div className="flex items-center gap-3 mb-3">
+                          {user.avatar ? (
+                            <img src={user.avatar} alt="" className="w-10 h-10 rounded-full border-2 border-brand-green p-0.5" />
+                          ) : (
+                            <div className="w-10 h-10 rounded-full bg-brand-grey border-2 border-brand-green flex items-center justify-center text-brand-green">
+                              <UserIcon size={18} />
+                            </div>
+                          )}
+                          <div className="min-w-0">
+                            <p className="text-sm font-bold text-white truncate">{user.name || 'Freelancer'}</p>
+                            <p className="text-[11px] text-gray-500 truncate">{user.email}</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="border-t border-white/10" />
+
+                      {/* Menu items */}
+                      <div className="py-1">
+                        <Link to="/profile" onClick={() => setIsProfileOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-colors">
+                          <UserCheck size={15} className="text-gray-500" />
+                          {t('Profile')}
+                        </Link>
+                        <Link to="/messages" onClick={() => setIsProfileOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-colors">
+                          <MessageSquare size={15} className="text-gray-500" />
+                          {t('Messages')}
+                        </Link>
+                        <Link to="/orders" onClick={() => setIsProfileOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-colors">
+                          <Briefcase size={15} className="text-gray-500" />
+                          {t('Orders')}
+                        </Link>
+                      </div>
+
+                      <div className="border-t border-white/10" />
+
+                      {/* Sign out */}
+                      <div className="py-1">
+                        <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-300 hover:text-brand-pink hover:bg-white/5 transition-colors">
+                          <LogOut size={15} className="text-gray-500" />
+                          {t('Sign out')}
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               ) : (
-                <div className="flex items-center gap-4">
-                  <Link to="/auth" className="px-8 py-3 rounded-xl bg-white text-brand-black font-black text-[10px] uppercase tracking-widest hover:scale-105 transition-all">
-                    Login / Signup
-                  </Link>
-                  {/* Language Selector (logged out) */}
-                  <div ref={langRef} className="relative">
-                    <button
-                      onClick={() => setIsLangOpen(v => !v)}
-                      className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-white/10 hover:border-white/20 transition-colors text-gray-400 hover:text-white"
-                    >
-                      <span className="text-base leading-none">{currentLang.flag}</span>
-                      <span className="text-[10px] font-black uppercase tracking-widest">{currentLang.code}</span>
-                      <ChevronDown size={10} className={`transition-transform duration-200 ${isLangOpen ? 'rotate-180' : ''}`} />
-                    </button>
-                    {isLangOpen && (
-                      <div className="absolute top-full right-0 mt-3 w-40 bg-brand-grey border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-1 duration-200">
-                        {LANGUAGES.map(lang => (
-                          <button key={lang.code} onClick={() => handleLangSelect(lang.code)}
-                            className={`w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-white/5 transition-colors ${selectedLang === lang.code ? 'text-brand-green' : 'text-gray-300'}`}>
-                            <span className="text-base">{lang.flag}</span>
-                            <div>
-                              <div className="text-[10px] font-black uppercase tracking-widest">{lang.code}</div>
-                              <div className="text-[10px] text-gray-600">{lang.name}</div>
-                            </div>
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
+                <Link to="/auth" className="px-8 py-3 rounded-xl bg-white text-brand-black font-black text-[10px] uppercase tracking-widest hover:scale-105 transition-all">
+                  {t('Login / Signup')}
+                </Link>
               )}
             </div>
 
             {/* Mobile Toggle */}
             <div className="md:hidden flex items-center gap-3">
-              <div ref={langRef} className="relative">
+              <div ref={langRefMobile} className="relative">
                 <button onClick={() => setIsLangOpen(v => !v)} className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-white/10 text-gray-400">
                   <span className="text-sm">{currentLang.flag}</span>
                   <span className="text-[10px] font-black">{currentLang.code}</span>
                 </button>
                 {isLangOpen && (
                   <div className="absolute top-full right-0 mt-2 w-36 bg-brand-grey border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50">
-                    {LANGUAGES.map(lang => (
-                      <button key={lang.code} onClick={() => handleLangSelect(lang.code)}
-                        className={`w-full flex items-center gap-2 px-3 py-2.5 text-left hover:bg-white/5 ${selectedLang === lang.code ? 'text-brand-green' : 'text-gray-300'}`}>
-                        <span>{lang.flag}</span>
-                        <span className="text-[10px] font-bold">{lang.name}</span>
+                    {LANGUAGES.map(l => (
+                      <button key={l.code} onClick={() => handleLangSelect(l.code)}
+                        className={`w-full flex items-center gap-2 px-3 py-2.5 text-left hover:bg-white/5 ${lang === l.code ? 'text-brand-green' : 'text-gray-300'}`}>
+                        <span>{l.flag}</span>
+                        <span className="text-[10px] font-bold">{l.name}</span>
                       </button>
                     ))}
                   </div>
@@ -310,14 +288,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         {/* Mobile Menu */}
         {isMenuOpen && (
           <div className="md:hidden bg-brand-black border-b border-white/10 pb-8 px-6 space-y-1">
-            <p className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-700 pt-5 pb-1">Marketplace</p>
+            <p className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-700 pt-5 pb-1">{t('Marketplace')}</p>
             {marketDropdownItems.map(item => (
               <Link key={item.label} to={item.path} onClick={() => setIsMenuOpen(false)} className="block py-2.5 text-base font-bold text-white border-b border-white/5 pl-2">{item.label}</Link>
             ))}
             {navLinks.map(link => (
               <Link key={link.name} to={link.path} onClick={() => setIsMenuOpen(false)} className="block py-3 text-lg font-bold text-white border-b border-white/5">{link.name}</Link>
             ))}
-            <p className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-700 pt-4 pb-1">Company</p>
+            <p className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-700 pt-4 pb-1">{t('Company')}</p>
             {aboutDropdownItems.map(item => (
               <Link key={item.label} to={item.path} onClick={() => setIsMenuOpen(false)} className="block py-2.5 text-base font-semibold text-gray-300 pl-2">{item.label}</Link>
             ))}
@@ -337,14 +315,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                       <p className="text-[10px] text-gray-500">{user.email}</p>
                     </div>
                   </div>
-                  <Link to="/profile"   onClick={() => setIsMenuOpen(false)} className="block py-2.5 text-base font-bold text-white">Profile</Link>
-                  <Link to="/dashboard" onClick={() => setIsMenuOpen(false)} className="block py-2.5 text-base font-bold text-brand-green">Dashboard</Link>
-                  <Link to="/messages"  onClick={() => setIsMenuOpen(false)} className="block py-2.5 text-base font-bold text-white">Messages</Link>
-                  <Link to="/orders"    onClick={() => setIsMenuOpen(false)} className="block py-2.5 text-base font-bold text-white">Orders</Link>
-                  <button onClick={handleLogout} className="block py-2.5 text-base font-bold text-brand-pink w-full text-left">Sign out</button>
+                  <Link to="/profile"   onClick={() => setIsMenuOpen(false)} className="block py-2.5 text-base font-bold text-white">{t('Profile')}</Link>
+                  <Link to="/dashboard" onClick={() => setIsMenuOpen(false)} className="block py-2.5 text-base font-bold text-brand-green">{t('Dashboard')}</Link>
+                  <Link to="/messages"  onClick={() => setIsMenuOpen(false)} className="block py-2.5 text-base font-bold text-white">{t('Messages')}</Link>
+                  <Link to="/orders"    onClick={() => setIsMenuOpen(false)} className="block py-2.5 text-base font-bold text-white">{t('Orders')}</Link>
+                  <button onClick={handleLogout} className="block py-2.5 text-base font-bold text-brand-pink w-full text-left">{t('Sign out')}</button>
                 </>
               ) : (
-                <Link to="/auth" onClick={() => setIsMenuOpen(false)} className="block py-3 text-lg font-bold text-brand-pink">Login / Signup</Link>
+                <Link to="/auth" onClick={() => setIsMenuOpen(false)} className="block py-3 text-lg font-bold text-brand-pink">{t('Login / Signup')}</Link>
               )}
             </div>
           </div>

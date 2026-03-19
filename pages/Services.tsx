@@ -6,6 +6,7 @@ import {
   Code, Palette, Globe, Cpu, ArrowRight,
   CheckCircle, Sparkles, Zap, Layers, Server
 } from 'lucide-react';
+import { useT } from '../i18n';
 
 type Feature = { name: string; detail: string };
 
@@ -132,6 +133,7 @@ const serviceCategories: Service[] = [
 ];
 
 const Services: React.FC = () => {
+  const t = useT();
   return (
     <div className="relative min-h-screen bg-brand-black">
       <SEO
@@ -145,7 +147,7 @@ const Services: React.FC = () => {
         <div className="text-center max-w-4xl mx-auto mb-24">
           <div className="inline-flex items-center space-x-2 bg-brand-green/10 border border-brand-green/20 rounded-full px-5 py-2 mb-10 text-[10px] font-black uppercase tracking-[0.3em] text-brand-green">
             <Sparkles size={14} />
-            <span>Cenner Core Services</span>
+            <span>{t('Cenner Core Services')}</span>
           </div>
           <h1 className="text-6xl md:text-8xl font-black text-white mb-10 tracking-tighter leading-[0.85]">
             Built by <br />
@@ -154,7 +156,7 @@ const Services: React.FC = () => {
             </span>
           </h1>
           <p className="text-xl md:text-2xl text-gray-400 font-medium leading-relaxed">
-            Everything we offer is done in-house — no outsourcing, no middlemen. You work directly with the people building your project.
+            {t('Everything we offer is done in-house — no outsourcing, no middlemen. You work directly with the people building your project.')}
           </p>
         </div>
 
@@ -178,10 +180,10 @@ const Services: React.FC = () => {
               </div>
 
               <h2 className={`text-4xl font-black text-white mb-4 tracking-tight group-hover:text-${service.accent === 'green' ? 'brand-green' : 'brand-pink'} transition-colors`}>
-                {service.title}
+                {t(service.title)}
               </h2>
               <p className="text-gray-400 mb-10 text-base leading-relaxed">
-                {service.description}
+                {t(service.description)}
               </p>
 
               {/* Features with detail */}
@@ -202,14 +204,14 @@ const Services: React.FC = () => {
 
               <div className="pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-6">
                 <div>
-                  <p className="text-[10px] font-black text-gray-600 uppercase tracking-widest mb-1">Starting from</p>
-                  <p className="text-3xl font-black text-white">{service.price}</p>
+                  <p className="text-[10px] font-black text-gray-600 uppercase tracking-widest mb-1">{t('Starting at')}</p>
+                  <p className="text-3xl font-black text-white">{t(service.price)}</p>
                 </div>
                 <Link
                   to="/contact"
                   className={`w-full sm:w-auto px-10 py-4 ${service.accent === 'green' ? 'bg-brand-green text-brand-black shadow-brand-green/20' : 'bg-brand-pink text-white shadow-brand-pink/20'} font-black rounded-2xl flex items-center justify-center gap-3 hover:scale-105 transition-all shadow-xl`}
                 >
-                  Get a Quote
+                  {t('Request a Quote')}
                   <ArrowRight size={18} />
                 </Link>
               </div>
@@ -219,14 +221,14 @@ const Services: React.FC = () => {
 
         {/* Process Roadmap */}
         <section className="py-24 mb-32 border-y border-white/5">
-          <h3 className="text-4xl font-black text-white text-center mb-20 tracking-tighter">How It Works</h3>
+          <h3 className="text-4xl font-black text-white text-center mb-20 tracking-tighter">{t('How It Works')}</h3>
           <div className="grid md:grid-cols-4 gap-12 relative">
             <div className="hidden md:block absolute top-10 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
             {[
-              { step: '01', title: 'Discovery Call', desc: 'We talk through what you need, your timeline, and your budget. No obligation.' },
-              { step: '02', title: 'Proposal & Quote', desc: 'We send a clear scope, timeline, and fixed price — no hidden extras.' },
-              { step: '03', title: 'Build & Review', desc: 'We build in stages and share progress. You give feedback until it is right.' },
-              { step: '04', title: 'Delivery & Support', desc: 'We hand everything over clean and stay available for questions after launch.' },
+              { step: '01', title: t('Discovery Call'), desc: 'We talk through what you need, your timeline, and your budget. No obligation.' },
+              { step: '02', title: t('Proposal & Quote'), desc: 'We send a clear scope, timeline, and fixed price — no hidden extras.' },
+              { step: '03', title: t('Build & Review'), desc: 'We build in stages and share progress. You give feedback until it is right.' },
+              { step: '04', title: t('Delivery & Support'), desc: 'We hand everything over clean and stay available for questions after launch.' },
             ].map((item, i) => (
               <div key={i} className="relative z-10 text-center group">
                 <div className="w-20 h-20 bg-brand-grey border border-white/10 rounded-full flex items-center justify-center mx-auto mb-8 group-hover:border-brand-pink transition-colors">
@@ -242,9 +244,9 @@ const Services: React.FC = () => {
         {/* Advantage Banner */}
         <div className="grid md:grid-cols-3 gap-12 p-16 bg-brand-black border border-white/10 rounded-[4rem] text-center shadow-2xl">
           {[
-            { icon: <Zap className="text-brand-green" />, title: 'Direct Communication', desc: 'You talk to the people actually doing the work — not account managers or project coordinators.' },
-            { icon: <Layers className="text-brand-pink" />, title: 'Fixed Pricing', desc: 'Every project is quoted upfront. No hourly billing surprises, no scope creep without agreement.' },
-            { icon: <Server className="text-brand-green" />, title: 'We Handle Hosting Too', desc: 'Need a server set up or a site deployed? We do that as part of the service, not as an extra.' },
+            { icon: <Zap className="text-brand-green" />, title: t('Direct Communication'), desc: 'You talk to the people actually doing the work — not account managers or project coordinators.' },
+            { icon: <Layers className="text-brand-pink" />, title: t('Fixed Pricing'), desc: 'Every project is quoted upfront. No hourly billing surprises, no scope creep without agreement.' },
+            { icon: <Server className="text-brand-green" />, title: t('We Handle Hosting Too'), desc: 'Need a server set up or a site deployed? We do that as part of the service, not as an extra.' },
           ].map((adv, i) => (
             <div key={i} className="space-y-4">
               <div className="w-14 h-14 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-6">{adv.icon}</div>

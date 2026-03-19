@@ -4,6 +4,7 @@ import { MessageSquare, Search, Send, User, ArrowLeft, Loader2 } from 'lucide-re
 import { useAuth } from '../contexts/AuthContext';
 import { API } from '../lib/api';
 import NeuralBackground from '../components/NeuralBackground';
+import { useT } from '../i18n';
 
 interface Conversation {
   id: string;
@@ -26,6 +27,7 @@ interface Message {
 const Messages: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const t = useT();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selected, setSelected] = useState<Conversation | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -109,12 +111,12 @@ const Messages: React.FC = () => {
         {/* Sidebar */}
         <div className={`flex flex-col border-r border-white/5 bg-brand-black/60 backdrop-blur-xl ${selected ? 'hidden md:flex w-80' : 'flex w-full md:w-80'}`}>
           <div className="p-5 border-b border-white/5">
-            <h1 className="text-xl font-black text-white mb-4">Messages</h1>
+            <h1 className="text-xl font-black text-white mb-4">{t('Messages')}</h1>
             <div className="relative">
               <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-600" />
               <input
                 type="text"
-                placeholder="Search conversations..."
+                placeholder={t('Search conversations...')}
                 value={search}
                 onChange={e => setSearch(e.target.value)}
                 className="w-full bg-brand-grey/40 border border-white/5 rounded-xl py-2.5 pl-9 pr-4 text-sm text-white placeholder-gray-700 focus:outline-none focus:border-brand-green/30 transition-colors"
@@ -130,8 +132,8 @@ const Messages: React.FC = () => {
             ) : filtered.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full text-center p-8">
                 <MessageSquare size={32} className="text-gray-700 mb-4" />
-                <p className="text-gray-600 font-bold text-sm">No conversations yet</p>
-                <p className="text-gray-700 text-xs mt-1">Messages from clients and freelancers will appear here.</p>
+                <p className="text-gray-600 font-bold text-sm">{t('No conversations yet')}</p>
+                <p className="text-gray-700 text-xs mt-1">{t('Messages from clients and freelancers will appear here.')}</p>
               </div>
             ) : (
               filtered.map(conv => (
@@ -174,8 +176,8 @@ const Messages: React.FC = () => {
               <div className="w-20 h-20 bg-brand-grey rounded-full flex items-center justify-center text-gray-600 mb-6">
                 <MessageSquare size={32} />
               </div>
-              <h2 className="text-white font-black text-xl mb-2">Select a conversation</h2>
-              <p className="text-gray-600 text-sm max-w-xs">Choose a contact on the left to start messaging.</p>
+              <h2 className="text-white font-black text-xl mb-2">{t('Select a conversation')}</h2>
+              <p className="text-gray-600 text-sm max-w-xs">{t('Choose a contact on the left to start messaging.')}</p>
             </div>
           ) : (
             <>
@@ -200,7 +202,7 @@ const Messages: React.FC = () => {
                   </div>
                 ) : messages.length === 0 ? (
                   <div className="flex flex-col items-center justify-center h-full text-center">
-                    <p className="text-gray-700 text-sm">No messages yet. Say hello!</p>
+                    <p className="text-gray-700 text-sm">{t('No messages yet. Say hello!')}</p>
                   </div>
                 ) : (
                   messages.map(msg => {
@@ -227,7 +229,7 @@ const Messages: React.FC = () => {
               <form onSubmit={handleSend} className="p-4 border-t border-white/5 bg-brand-black/60 backdrop-blur-xl flex gap-3">
                 <input
                   type="text"
-                  placeholder="Type a message..."
+                  placeholder={t('Type a message...')}
                   value={input}
                   onChange={e => setInput(e.target.value)}
                   className="flex-1 bg-brand-grey/40 border border-white/5 rounded-xl py-3 px-4 text-white placeholder-gray-700 text-sm focus:outline-none focus:border-brand-green/30 transition-colors"

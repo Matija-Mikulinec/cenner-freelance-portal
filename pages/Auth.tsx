@@ -4,6 +4,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Mail, Lock, User, Github, ArrowRight, Phone, AlertCircle, ChevronDown, Facebook } from 'lucide-react';
 import SEO from '../components/SEO';
 import { useAuth } from '../contexts/AuthContext';
+import { useT } from '../i18n';
 
 const COUNTRY_CODES = [
   { code: '+1',   country: 'US', flag: '🇺🇸' },
@@ -62,6 +63,7 @@ const COUNTRY_CODES = [
 ];
 
 const Auth: React.FC = () => {
+  const t = useT();
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -121,12 +123,12 @@ const Auth: React.FC = () => {
         <div className="bg-brand-grey/50 border border-white/10 rounded-[2.5rem] p-8 md:p-12 backdrop-blur-2xl shadow-2xl">
           <div className="text-center mb-10">
             <h2 className="text-4xl font-bold text-white mb-3 tracking-tight">
-              {isLogin ? 'Welcome Back' : 'Create Account'}
+              {isLogin ? t('Welcome Back') : t('Create Account')}
             </h2>
             <p className="text-gray-500 font-medium">
               {isLogin
-                ? 'The elite network is waiting for your return.'
-                : "Join the world's most exclusive freelance ecosystem."}
+                ? t('The elite network is waiting for your return.')
+                : t("Join the world's most exclusive freelance ecosystem.")}
             </p>
           </div>
 
@@ -141,12 +143,14 @@ const Auth: React.FC = () => {
             {!isLogin && (
               <div className="space-y-6">
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest pl-1">Username</label>
+                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest pl-1">{t('Username')}</label>
                   <div className="relative">
                     <User className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" size={18} />
                     <input
                       required
                       type="text"
+                      name="username"
+                      autoComplete="username"
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
                       className="w-full bg-brand-black border border-white/5 rounded-xl py-3.5 pl-12 pr-4 text-white focus:outline-none focus:border-brand-green transition-all"
@@ -156,7 +160,7 @@ const Auth: React.FC = () => {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest pl-1">Phone Number</label>
+                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest pl-1">{t('Phone Number')}</label>
                   <div className="flex space-x-2 relative">
                     <div className="relative">
                       <button
@@ -196,6 +200,8 @@ const Auth: React.FC = () => {
                       <input
                         required
                         type="tel"
+                        name="tel"
+                        autoComplete="tel-national"
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
                         className="w-full bg-brand-black border border-white/5 rounded-xl py-3.5 pl-12 pr-4 text-white focus:outline-none focus:border-brand-green transition-all"
@@ -208,12 +214,14 @@ const Auth: React.FC = () => {
             )}
 
             <div className="space-y-1">
-              <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest pl-1">Email Address</label>
+              <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest pl-1">{t('Email Address')}</label>
               <div className="relative">
                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" size={18} />
                 <input
                   required
                   type="email"
+                  name="email"
+                  autoComplete="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full bg-brand-black border border-white/5 rounded-xl py-3.5 pl-12 pr-4 text-white focus:outline-none focus:border-brand-green transition-all"
@@ -223,12 +231,14 @@ const Auth: React.FC = () => {
             </div>
 
             <div className="space-y-1">
-              <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest pl-1">Password</label>
+              <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest pl-1">{t('Password')}</label>
               <div className="relative">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" size={18} />
                 <input
                   required
                   type="password"
+                  name="password"
+                  autoComplete={isLogin ? 'current-password' : 'new-password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full bg-brand-black border border-white/5 rounded-xl py-3.5 pl-12 pr-4 text-white focus:outline-none focus:border-brand-green transition-all"
@@ -242,7 +252,7 @@ const Auth: React.FC = () => {
               type="submit"
               className="group w-full py-4 bg-brand-green text-brand-black font-black rounded-xl flex items-center justify-center space-x-2 hover:scale-[1.02] active:scale-95 disabled:opacity-50 transition-all shadow-[0_10px_30px_rgba(74,222,128,0.15)]"
             >
-              <span>{loading ? 'Processing...' : (isLogin ? 'Sign In Now' : 'Create My Account')}</span>
+              <span>{loading ? t('Processing...') : (isLogin ? t('Sign In Now') : t('Create My Account'))}</span>
               {!loading && <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />}
             </button>
           </form>
@@ -252,7 +262,7 @@ const Auth: React.FC = () => {
               <div className="w-full border-t border-white/5"></div>
             </div>
             <div className="relative flex justify-center text-[10px] uppercase tracking-widest">
-              <span className="bg-[#121212] px-4 text-gray-500 font-bold">Or authorize with</span>
+              <span className="bg-[#121212] px-4 text-gray-500 font-bold">{t('Or authorize with')}</span>
             </div>
           </div>
 
@@ -289,7 +299,7 @@ const Auth: React.FC = () => {
           </div>
 
           <p className="mt-10 text-center text-sm text-gray-500">
-            {isLogin ? 'New to the platform?' : 'Already a member?'}
+            {isLogin ? t('New to the platform?') : t('Already a member?')}
             <button
               onClick={() => {
                 setIsLogin(!isLogin);
@@ -297,7 +307,7 @@ const Auth: React.FC = () => {
               }}
               className="ml-2 text-brand-pink font-bold hover:text-brand-green hover:underline transition-colors"
             >
-              {isLogin ? 'Sign up' : 'Log in'}
+              {isLogin ? t('Sign up') : t('Log in')}
             </button>
           </p>
         </div>

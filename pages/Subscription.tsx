@@ -5,6 +5,7 @@ import { Check, Zap, Globe, Cpu, Crown, Star, Rocket, Sparkles } from 'lucide-re
 import NeuralBackground from '../components/NeuralBackground';
 import SEO from '../components/SEO';
 import { useAuth } from '../contexts/AuthContext';
+import { useT } from '../i18n';
 
 type Feature = {
   name: string;
@@ -159,6 +160,7 @@ const tiers: Tier[] = [
 const Subscription: React.FC = () => {
   const navigate = useNavigate();
   const { user: currentUser } = useAuth();
+  const t = useT();
 
   const handlePlanSelection = (tierId: string) => {
     if (!currentUser) {
@@ -187,14 +189,14 @@ const Subscription: React.FC = () => {
         <div className="text-center max-w-3xl mx-auto mb-20 lg:mb-28">
           <div className="inline-flex items-center space-x-2 bg-brand-green/10 border border-brand-green/20 rounded-full px-5 py-2 mb-8 text-[10px] font-black uppercase tracking-[0.3em] text-brand-green">
             <Cpu size={14} />
-            <span>Pricing</span>
+            <span>{t('Pricing')}</span>
           </div>
           <h1 className="text-5xl md:text-7xl font-black text-white mb-6 tracking-tighter leading-none">
-            Simple, <br />
-            <span className="text-brand-pink">Honest Pricing.</span>
+            {t('Simple, Honest Pricing.').split(',')[0]}, <br />
+            <span className="text-brand-pink">{t('Simple, Honest Pricing.').split(',').slice(1).join(',').trim()}</span>
           </h1>
           <p className="text-gray-400 text-lg md:text-xl font-medium leading-relaxed">
-            Pick the plan that fits where you are. Upgrade or downgrade any time — no lock-in, no surprises.
+            {t('Pick the plan that fits where you are. Upgrade or downgrade any time.')}
           </p>
         </div>
 
@@ -216,7 +218,7 @@ const Subscription: React.FC = () => {
 
               {tier.highlight && (
                 <div className="absolute top-8 right-8 px-4 py-1.5 bg-brand-green text-brand-black text-[10px] font-black uppercase tracking-widest rounded-full shadow-lg">
-                  Recommended
+                  {t('Recommended')}
                 </div>
               )}
 
@@ -229,17 +231,17 @@ const Subscription: React.FC = () => {
                 }`}>
                   {tier.icon}
                 </div>
-                <h3 className="text-3xl font-black text-white mb-1 tracking-tight">{tier.name}</h3>
+                <h3 className="text-3xl font-black text-white mb-1 tracking-tight">{t(tier.name)}</h3>
                 <p className={`text-sm font-black uppercase tracking-widest ${
                   tier.highlight ? 'text-brand-green' : tier.special ? 'text-brand-pink' : 'text-gray-500'
-                }`}>{tier.description}</p>
+                }`}>{t(tier.description)}</p>
               </div>
 
               {/* Price */}
               <div className="mb-10 relative">
                 <div className="flex items-baseline space-x-1">
                   <span className="text-5xl font-black text-white tracking-tighter">{tier.price}</span>
-                  <span className="text-gray-600 font-black uppercase text-xs tracking-widest">/ {tier.period}</span>
+                  <span className="text-gray-600 font-black uppercase text-xs tracking-widest">/ {t(tier.period)}</span>
                 </div>
               </div>
 
@@ -254,13 +256,13 @@ const Subscription: React.FC = () => {
                     : 'bg-white/5 text-white border border-white/10 hover:bg-white/10'
                 }`}
               >
-                {tier.cta}
+                {t(tier.cta)}
               </button>
 
               {/* Features with detail */}
               <div className="space-y-5 relative">
                 <p className="text-[10px] font-black uppercase tracking-[0.25em] text-gray-600 mb-2">
-                  What's included
+                  {t("What's included")}
                 </p>
                 {tier.features.map((feature, i) => (
                   <div key={i} className="flex items-start gap-3">
@@ -283,12 +285,12 @@ const Subscription: React.FC = () => {
 
         {/* Trust strip */}
         <section className="mt-32 py-20 border-y border-white/5 text-center">
-          <h2 className="text-3xl font-black text-white mb-16 tracking-tighter">Why upgrade?</h2>
+          <h2 className="text-3xl font-black text-white mb-16 tracking-tighter">{t('Why upgrade?')}</h2>
           <div className="grid md:grid-cols-3 gap-12">
             {[
-              { icon: <Star />, title: 'Protected Payments', desc: 'Every transaction runs through escrow. Money is only released when both sides agree the work is done.' },
-              { icon: <Rocket />, title: 'More Visibility', desc: 'Higher tiers rank you above free users. Clients searching for your skills will see you before the competition.' },
-              { icon: <Sparkles />, title: 'Lower Fees', desc: 'Going from Free to Ultra cuts your platform fee from 15% down to 3–5%. On €5,000 a month that is €500 extra in your pocket.' },
+              { icon: <Star />, title: t('Protected Payments'), desc: 'Every transaction runs through escrow. Money is only released when both sides agree the work is done.' },
+              { icon: <Rocket />, title: t('More Visibility'), desc: 'Higher tiers rank you above free users. Clients searching for your skills will see you before the competition.' },
+              { icon: <Sparkles />, title: t('Lower Fees'), desc: 'Going from Free to Ultra cuts your platform fee from 15% down to 3–5%. On €5,000 a month that is €500 extra in your pocket.' },
             ].map((item, i) => (
               <div key={i} className="space-y-4">
                 <div className="w-14 h-14 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-6 text-brand-green">{item.icon}</div>

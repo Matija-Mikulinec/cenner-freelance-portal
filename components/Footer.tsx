@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useT } from '../i18n';
 
 // Inline branded SVG icons (lucide doesn't include X/Facebook/Medium)
 const XIcon = () => (
@@ -49,6 +50,7 @@ const RESOURCE_LINKS = [
 ];
 
 const Footer: React.FC = () => {
+  const t = useT();
   return (
     <footer className="pt-24 border-t border-white/5 bg-brand-black/20 rounded-t-[4rem] relative z-10">
       <div className="max-w-7xl mx-auto px-4">
@@ -61,7 +63,7 @@ const Footer: React.FC = () => {
               <span className="text-2xl font-black tracking-tighter text-white">CENNER</span>
             </div>
             <p className="text-gray-500 text-sm leading-relaxed mb-8">
-              The elite protocol for high-end digital collaboration. Connecting the world's top creators.
+              {t("The elite protocol for high-end digital collaboration. Connecting the world's top creators.")}
             </p>
             <div className="flex space-x-3">
               {SOCIAL.map(({ Icon, href, label }) => (
@@ -79,12 +81,12 @@ const Footer: React.FC = () => {
 
           {/* Platform */}
           <div className="space-y-6">
-            <h5 className="text-[10px] font-black text-white uppercase tracking-[0.3em]">Platform</h5>
+            <h5 className="text-[10px] font-black text-white uppercase tracking-[0.3em]">{t('Platform')}</h5>
             <ul className="space-y-3">
               {PLATFORM_LINKS.map(({ label, path }) => (
                 <li key={label}>
                   <Link to={path} className="text-gray-500 hover:text-brand-green text-sm transition-colors">
-                    {label}
+                    {t(label)}
                   </Link>
                 </li>
               ))}
@@ -93,12 +95,12 @@ const Footer: React.FC = () => {
 
           {/* Company */}
           <div className="space-y-6">
-            <h5 className="text-[10px] font-black text-white uppercase tracking-[0.3em]">Company</h5>
+            <h5 className="text-[10px] font-black text-white uppercase tracking-[0.3em]">{t('Company')}</h5>
             <ul className="space-y-3">
               {COMPANY_LINKS.map(({ label, path }) => (
                 <li key={label}>
                   <Link to={path} className="text-gray-500 hover:text-brand-pink text-sm transition-colors">
-                    {label}
+                    {t(label)}
                   </Link>
                 </li>
               ))}
@@ -107,12 +109,12 @@ const Footer: React.FC = () => {
 
           {/* Resources */}
           <div className="space-y-6">
-            <h5 className="text-[10px] font-black text-white uppercase tracking-[0.3em]">Resources</h5>
+            <h5 className="text-[10px] font-black text-white uppercase tracking-[0.3em]">{t('Resources')}</h5>
             <ul className="space-y-3">
               {RESOURCE_LINKS.map(({ label, path }) => (
                 <li key={label}>
                   <Link to={path} className="text-gray-500 hover:text-brand-green text-sm transition-colors">
-                    {label}
+                    {t(label)}
                   </Link>
                 </li>
               ))}
@@ -122,12 +124,12 @@ const Footer: React.FC = () => {
 
         <div className="flex flex-col md:flex-row justify-between items-center py-10 border-t border-white/5 gap-6">
           <p className="text-[10px] font-black text-gray-600 uppercase tracking-widest">
-            © {new Date().getFullYear()} Cenner. All rights reserved.
+            © {new Date().getFullYear()} Cenner. {t('All rights reserved.')}
           </p>
           <div className="flex space-x-8">
-            <Link to="/privacy" className="text-[10px] font-bold text-gray-500 hover:text-white uppercase tracking-widest">Privacy</Link>
-            <Link to="/terms"   className="text-[10px] font-bold text-gray-500 hover:text-white uppercase tracking-widest">Terms</Link>
-            <Link to="/cookies" className="text-[10px] font-bold text-gray-500 hover:text-white uppercase tracking-widest">Cookies</Link>
+            <Link to="/privacy" className="text-[10px] font-bold text-gray-500 hover:text-white uppercase tracking-widest">{t('Privacy')}</Link>
+            <Link to="/terms"   className="text-[10px] font-bold text-gray-500 hover:text-white uppercase tracking-widest">{t('Terms')}</Link>
+            <Link to="/cookies" className="text-[10px] font-bold text-gray-500 hover:text-white uppercase tracking-widest">{t('Cookies')}</Link>
           </div>
         </div>
       </div>

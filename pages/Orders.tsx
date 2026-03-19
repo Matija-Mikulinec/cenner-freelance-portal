@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Briefcase, Clock, CheckCircle2, XCircle, ArrowRight, Package } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import NeuralBackground from '../components/NeuralBackground';
+import { useT } from '../i18n';
 
 type OrderStatus = 'active' | 'completed' | 'cancelled';
 
@@ -29,6 +30,7 @@ const STATUS_CONFIG: Record<OrderStatus, { label: string; color: string; icon: R
 const Orders: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const t = useT();
   const [filter, setFilter] = useState<'all' | OrderStatus>('all');
 
   useEffect(() => {
@@ -40,10 +42,10 @@ const Orders: React.FC = () => {
   const filtered = filter === 'all' ? MOCK_ORDERS : MOCK_ORDERS.filter(o => o.status === filter);
 
   const tabs: { key: 'all' | OrderStatus; label: string; count: number }[] = [
-    { key: 'all', label: 'All Orders', count: MOCK_ORDERS.length },
-    { key: 'active', label: 'Active', count: MOCK_ORDERS.filter(o => o.status === 'active').length },
-    { key: 'completed', label: 'Completed', count: MOCK_ORDERS.filter(o => o.status === 'completed').length },
-    { key: 'cancelled', label: 'Cancelled', count: MOCK_ORDERS.filter(o => o.status === 'cancelled').length },
+    { key: 'all', label: t('All Orders'), count: MOCK_ORDERS.length },
+    { key: 'active', label: t('Active'), count: MOCK_ORDERS.filter(o => o.status === 'active').length },
+    { key: 'completed', label: t('Completed'), count: MOCK_ORDERS.filter(o => o.status === 'completed').length },
+    { key: 'cancelled', label: t('Cancelled'), count: MOCK_ORDERS.filter(o => o.status === 'cancelled').length },
   ];
 
   return (
@@ -53,9 +55,9 @@ const Orders: React.FC = () => {
       <div className="relative z-10 max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-10">
-          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-brand-green mb-2">Your Activity</p>
-          <h1 className="text-4xl font-black text-white tracking-tighter">Orders</h1>
-          <p className="text-gray-500 text-sm mt-2 font-medium">Track all your active and past engagements.</p>
+          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-brand-green mb-2">{t('Your Activity')}</p>
+          <h1 className="text-4xl font-black text-white tracking-tighter">{t('Orders')}</h1>
+          <p className="text-gray-500 text-sm mt-2 font-medium">{t('Track all your active and past engagements.')}</p>
         </div>
 
         {/* Tabs */}
@@ -82,17 +84,17 @@ const Orders: React.FC = () => {
         {filtered.length === 0 ? (
           <div className="bg-brand-grey/40 border border-white/5 rounded-3xl p-16 text-center">
             <Package size={40} className="text-gray-700 mx-auto mb-5" />
-            <h3 className="text-white font-black text-xl mb-2">No orders yet</h3>
+            <h3 className="text-white font-black text-xl mb-2">{t('No orders yet')}</h3>
             <p className="text-gray-600 text-sm max-w-sm mx-auto mb-8">
               {user.role === 'freelancer'
-                ? 'Once a client places an order for your service, it will appear here.'
-                : 'Once you place an order with a freelancer, it will show up here.'}
+                ? t('Once a client places an order for your service, it will appear here.')
+                : t('Once you place an order with a freelancer, it will show up here.')}
             </p>
             <Link
               to="/marketplace"
               className="inline-flex items-center gap-2 px-8 py-4 bg-brand-green text-brand-black font-black rounded-xl text-xs uppercase tracking-widest hover:scale-105 transition-all"
             >
-              {user.role === 'freelancer' ? 'Create a Listing' : 'Browse Marketplace'}
+              {user.role === 'freelancer' ? t('Create a Listing') : t('Explore Marketplace')}
               <ArrowRight size={14} />
             </Link>
           </div>
