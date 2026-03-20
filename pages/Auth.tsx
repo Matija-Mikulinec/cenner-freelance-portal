@@ -6,6 +6,13 @@ import SEO from '../components/SEO';
 import { useAuth } from '../contexts/AuthContext';
 import { useT } from '../i18n';
 
+const SAFE_REDIRECT_PATHS = ['/profile', '/dashboard', '/marketplace', '/messages', '/orders', '/projects', '/creator-onboarding', '/subscription', '/match', '/blog', '/services'];
+function getSafeRedirect(from: unknown): string {
+  if (typeof from !== 'string') return '/profile';
+  if (SAFE_REDIRECT_PATHS.some(p => from === p || from.startsWith(p + '/'))) return from;
+  return '/profile';
+}
+
 const COUNTRY_CODES = [
   { code: '+1',   country: 'US', flag: '🇺🇸' },
   { code: '+44',  country: 'GB', flag: '🇬🇧' },
@@ -83,7 +90,7 @@ const Auth: React.FC = () => {
     setError(null);
     setLoading(true);
 
-    const from = (location.state as any)?.from || '/profile';
+    const from = getSafeRedirect((location.state as any)?.from);
 
     try {
       if (isLogin) {
@@ -104,7 +111,7 @@ const Auth: React.FC = () => {
   const handleGoogleAuth = async () => {
     setError(null);
     setLoading(true);
-    const from = (location.state as any)?.from || '/profile';
+    const from = getSafeRedirect((location.state as any)?.from);
     try {
       await loginWithGoogle();
       navigate(from, { replace: true });
