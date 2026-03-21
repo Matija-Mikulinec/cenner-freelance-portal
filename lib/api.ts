@@ -152,10 +152,59 @@ export const API = {
   getOrCreateConversation: (otherUserId: string) =>
     request<{ id: string }>('/conversations', 'POST', { otherUserId }),
 
-  getMessages: (conversationId: string) =>
-    request<any[]>(`/conversations/${conversationId}/messages`),
+  getMessages: (conversationId: string, before?: string) =>
+    request<any[]>(`/conversations/${conversationId}/messages${before ? `?before=${before}` : ''}`),
 
   sendMessage: (conversationId: string, content: string) =>
     request<any>(`/conversations/${conversationId}/messages`, 'POST', { content }),
+
+  startConversation: (userId: string) =>
+    request<any>('/portal/conversations', { method: 'POST', body: JSON.stringify({ userId }) } as any),
+
+  getUnreadCount: () =>
+    request<{ count: number }>('/conversations/unread-count'),
+
+  // ── Stripe Connect ────────────────────────────────────────────────────────
+  connectOnboard: () =>
+    request<{ url: string }>('/connect/onboard', 'POST'),
+
+  getConnectStatus: () =>
+    request<{ ready: boolean; accountId?: string }>('/connect/status'),
+
+  // ── Contracts ─────────────────────────────────────────────────────────────
+  getContracts: () =>
+    request<any[]>('/contracts'),
+
+  createContract: (data: any) =>
+    request<any>('/contracts', 'POST', data),
+
+  getContract: (id: string) =>
+    request<any>(`/contracts/${id}`),
+
+  acceptContract: (id: string) =>
+    request<any>(`/contracts/${id}/accept`, 'PATCH'),
+
+  cancelContract: (id: string) =>
+    request<any>(`/contracts/${id}/cancel`, 'PATCH'),
+
+  // ── Milestones ────────────────────────────────────────────────────────────
+  fundMilestone: (id: string) =>
+    request<any>(`/milestones/${id}/fund`, 'POST'),
+
+  submitMilestone: (id: string) =>
+    request<any>(`/milestones/${id}/submit`, 'POST'),
+
+  approveMilestone: (id: string) =>
+    request<any>(`/milestones/${id}/approve`, 'POST'),
+
+  disputeMilestone: (id: string, reason: string) =>
+    request<any>(`/milestones/${id}/dispute`, 'POST', { reason }),
+
+  // ── Reviews ───────────────────────────────────────────────────────────────
+  submitReview: (contractId: string, rating: number, comment: string) =>
+    request<any>('/reviews', 'POST', { contractId, rating, comment }),
+
+  getUserReviews: (userId: string) =>
+    request<any[]>(`/users/${userId}/reviews`),
 
 };

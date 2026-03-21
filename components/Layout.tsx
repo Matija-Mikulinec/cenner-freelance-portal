@@ -1,12 +1,13 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, User as UserIcon, LogOut, ChevronDown, Briefcase, MessageSquare, UserCheck } from 'lucide-react';
+import { Menu, X, User as UserIcon, LogOut, ChevronDown, Briefcase, MessageSquare, UserCheck, FileText } from 'lucide-react';
 import PermissionModal from './PermissionModal';
 import ChatWidget from './ChatWidget';
 import Footer from './Footer';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage, useT } from '../i18n';
+import { API } from '../lib/api';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -31,6 +32,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const { lang, setLang } = useLanguage();
   const t = useT();
   const { user, logout } = useAuth();
+  const [unread, setUnread] = useState(0);
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -54,6 +56,18 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, []);
+
+  useEffect(() => {
+    if (!user) { setUnread(0); return; }
+    const fetchUnread = () => {
+      API.getUnreadCount()
+        .then((data: any) => setUnread(data?.count ?? 0))
+        .catch(() => {});
+    };
+    fetchUnread();
+    const interval = setInterval(fetchUnread, 30000);
+    return () => clearInterval(interval);
+  }, [user]);
 
   const handleLogout = async () => { setIsProfileOpen(false); logout(); navigate('/'); };
   const handleLangSelect = (code: string) => {
@@ -232,7 +246,16 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                         </Link>
                         <Link to="/messages" onClick={() => setIsProfileOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-colors">
                           <MessageSquare size={15} className="text-gray-500" />
-                          {t('Messages')}
+                          <span className="flex-1">{t('Messages')}</span>
+                          {unread > 0 && (
+                            <span className="w-5 h-5 bg-brand-green rounded-full flex items-center justify-center text-brand-black text-[10px] font-black">
+                              {unread > 9 ? '9+' : unread}
+                            </span>
+                          )}
+                        </Link>
+                        <Link to="/contracts" onClick={() => setIsProfileOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-colors">
+                          <FileText size={15} className="text-gray-500" />
+                          {t('Contracts')}
                         </Link>
                         <Link to="/orders" onClick={() => setIsProfileOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-colors">
                           <Briefcase size={15} className="text-gray-500" />
@@ -317,7 +340,15 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   </div>
                   <Link to="/profile"   onClick={() => setIsMenuOpen(false)} className="block py-2.5 text-base font-bold text-white">{t('Profile')}</Link>
                   <Link to="/dashboard" onClick={() => setIsMenuOpen(false)} className="block py-2.5 text-base font-bold text-brand-green">{t('Dashboard')}</Link>
-                  <Link to="/messages"  onClick={() => setIsMenuOpen(false)} className="block py-2.5 text-base font-bold text-white">{t('Messages')}</Link>
+                  <Link to="/messages"   onClick={() => setIsMenuOpen(false)} className="flex items-center justify-between py-2.5 text-base font-bold text-white">
+                    <span>{t('Messages')}</span>
+                    {unread > 0 && (
+                      <span className="w-5 h-5 bg-brand-green rounded-full flex items-center justify-center text-brand-black text-[10px] font-black">
+                        {unread > 9 ? '9+' : unread}
+                      </span>
+                    )}
+                  </Link>
+                  <Link to="/contracts" onClick={() => setIsMenuOpen(false)} className="block py-2.5 text-base font-bold text-white">{t('Contracts')}</Link>
                   <Link to="/orders"    onClick={() => setIsMenuOpen(false)} className="block py-2.5 text-base font-bold text-white">{t('Orders')}</Link>
                   <button onClick={handleLogout} className="block py-2.5 text-base font-bold text-brand-pink w-full text-left">{t('Sign out')}</button>
                 </>

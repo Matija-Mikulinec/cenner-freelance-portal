@@ -27,6 +27,10 @@ const Dashboard = lazy(() => import('./pages/Dashboard'));
 const FreelancerProfile = lazy(() => import('./pages/FreelancerProfile'));
 const Orders = lazy(() => import('./pages/Orders'));
 const Messages = lazy(() => import('./pages/Messages'));
+const Inbox = lazy(() => import('./pages/Inbox'));
+const Chat = lazy(() => import('./pages/Chat'));
+const Contracts = lazy(() => import('./pages/Contracts'));
+const ContractDetail = lazy(() => import('./pages/ContractDetail'));
 const Projects = lazy(() => import('./pages/Projects'));
 const Technology = lazy(() => import('./pages/Technology'));
 const Match = lazy(() => import('./pages/Match'));
@@ -60,7 +64,11 @@ const App: React.FC = () => {
                   <Route path="/dashboard" element={<Dashboard />} />
                   <Route path="/freelancer/:id" element={<FreelancerProfile />} />
                   <Route path="/orders" element={<Orders />} />
-                  <Route path="/messages" element={<Messages />} />
+                  <Route path="/messages" element={<Inbox />} />
+                  <Route path="/messages/:id" element={<Chat />} />
+                  <Route path="/contracts" element={<Contracts />} />
+                  <Route path="/contracts/:id" element={<ContractDetail />} />
+                  <Route path="/messages-legacy" element={<Messages />} />
                   <Route path="/projects" element={<Projects />} />
                   <Route path="/technology" element={<Technology />} />
                   <Route path="/match" element={<Match />} />
