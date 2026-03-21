@@ -6,7 +6,7 @@ import {
   TrendingUp, Clock, CheckCircle, AlertCircle, MoreVertical,
   MoreHorizontal, Edit2, Pause, Trash2, ArrowUpRight, Search,
   Calendar, X, Download, User as UserIcon, ShieldAlert, Rocket, Play, Image as ImageIcon, Smartphone, Mail, Crown, Zap, Globe,
-  Upload, Loader2, ExternalLink, ShieldCheck, MapPin
+  Upload, Loader2, ExternalLink, ShieldCheck, MapPin, Banknote
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useData } from '../contexts/DataContext';
@@ -35,6 +35,30 @@ const SettingsTab: React.FC<{ currentUser: any; updateUser: (u: any) => void; na
   const [savingPwd, setSavingPwd] = React.useState(false);
   const [pwdMsg, setPwdMsg] = React.useState('');
   const [pwdError, setPwdError] = React.useState('');
+
+  // Payout / Stripe Connect
+  const [connectStatus, setConnectStatus] = React.useState<{ connected: boolean; ready: boolean } | null>(null);
+  const [connectLoading, setConnectLoading] = React.useState(false);
+  const [connectError, setConnectError] = React.useState('');
+
+  React.useEffect(() => {
+    if (section !== 'billing') return;
+    API.getConnectStatus()
+      .then(setConnectStatus)
+      .catch(() => setConnectStatus({ connected: false, ready: false }));
+  }, [section]);
+
+  const handleConnectOnboard = async () => {
+    setConnectLoading(true);
+    setConnectError('');
+    try {
+      const { url } = await API.connectOnboard();
+      window.location.href = url;
+    } catch (e: any) {
+      setConnectError(e.message || 'Failed to start payout setup');
+      setConnectLoading(false);
+    }
+  };
 
   const handleSaveAccount = async () => {
     if (!currentUser) return;
@@ -208,6 +232,80 @@ const SettingsTab: React.FC<{ currentUser: any; updateUser: (u: any) => void; na
             </div>
           </div>
 
+          {/* Payout Setup (freelancers only) */}
+          <div className="bg-brand-grey/30 border border-white/5 rounded-3xl p-8">
+            <div className="flex items-center gap-3 mb-2">
+              <Banknote size={20} className="text-brand-green" />
+              <h3 className="text-white font-bold text-lg">{t('Payout Account')}</h3>
+            </div>
+            <p className="text-gray-500 text-sm mb-6">
+              Set up your Stripe payout account to receive payments from clients. Required before clients can fund milestones on your contracts.
+            </p>
+            {connectError && (
+              <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-sm">{connectError}</div>
+            )}
+            {connectStatus === null ? (
+              <div className="flex items-center gap-2 text-gray-500 text-sm"><Loader2 size={14} className="animate-spin" /> Checking status…</div>
+            ) : connectStatus.ready ? (
+              <div className="flex items-center justify-between p-5 bg-brand-black/40 border border-brand-green/20 rounded-2xl">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-brand-green/10 flex items-center justify-center">
+                    <CheckCircle size={20} className="text-brand-green" />
+                  </div>
+                  <div>
+                    <p className="text-white font-bold text-sm">Payout account active</p>
+                    <p className="text-gray-500 text-xs mt-0.5">You can receive payments from clients</p>
+                  </div>
+                </div>
+                <button
+                  onClick={handleConnectOnboard}
+                  disabled={connectLoading}
+                  className="px-4 py-2 border border-white/10 text-gray-400 hover:text-white hover:border-white/20 rounded-xl text-xs font-bold transition-all disabled:opacity-50"
+                >
+                  {connectLoading ? 'Loading…' : 'Manage account'}
+                </button>
+              </div>
+            ) : connectStatus.connected ? (
+              <div className="flex items-center justify-between p-5 bg-brand-black/40 border border-yellow-400/20 rounded-2xl">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-yellow-400/10 flex items-center justify-center">
+                    <AlertCircle size={20} className="text-yellow-400" />
+                  </div>
+                  <div>
+                    <p className="text-white font-bold text-sm">Setup incomplete</p>
+                    <p className="text-gray-500 text-xs mt-0.5">Complete your Stripe onboarding to start receiving payments</p>
+                  </div>
+                </div>
+                <button
+                  onClick={handleConnectOnboard}
+                  disabled={connectLoading}
+                  className="px-4 py-2 bg-yellow-400 text-black font-black rounded-xl text-xs hover:scale-105 transition-all disabled:opacity-50"
+                >
+                  {connectLoading ? 'Loading…' : 'Continue setup'}
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center justify-between p-5 bg-brand-black/40 border border-white/10 rounded-2xl">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center">
+                    <Banknote size={20} className="text-gray-500" />
+                  </div>
+                  <div>
+                    <p className="text-white font-bold text-sm">No payout account</p>
+                    <p className="text-gray-500 text-xs mt-0.5">Connect Stripe to receive milestone payments</p>
+                  </div>
+                </div>
+                <button
+                  onClick={handleConnectOnboard}
+                  disabled={connectLoading}
+                  className="px-4 py-2 bg-brand-green text-brand-black font-black rounded-xl text-xs hover:scale-105 transition-all disabled:opacity-50"
+                >
+                  {connectLoading ? 'Loading…' : 'Set up payouts'}
+                </button>
+              </div>
+            )}
+          </div>
+
           <div className="bg-brand-grey/30 border border-white/5 rounded-3xl p-8">
             <h3 className="text-white font-bold text-lg mb-2">{t('Payment Methods')}</h3>
             <p className="text-gray-500 text-sm mb-6">{t('Manage cards and payment options used for subscriptions.')}</p>
@@ -237,7 +335,8 @@ const Profile: React.FC = () => {
   const t = useT();
   const { listings, addListing } = useData();
   const [searchParams] = useSearchParams();
-  const initialTab = (searchParams.get('tab') as ActiveTab) || 'listings';
+  const connectResult = searchParams.get('connect');
+  const initialTab = (searchParams.get('tab') as ActiveTab) || (connectResult ? 'settings' : 'listings');
   const [activeTab, setActiveTab] = useState<ActiveTab>(initialTab);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -883,7 +982,7 @@ const Profile: React.FC = () => {
           </div>
         );
       case 'settings':
-        return <SettingsTab currentUser={currentUser} updateUser={updateUser} navigate={navigate} initialSection={(searchParams.get('section') as any) || 'account'} />;
+        return <SettingsTab currentUser={currentUser} updateUser={updateUser} navigate={navigate} initialSection={(searchParams.get('section') as any) || (connectResult ? 'billing' : 'account')} />;
       default:
         return null;
     }
