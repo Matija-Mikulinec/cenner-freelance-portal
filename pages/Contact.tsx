@@ -47,7 +47,7 @@ const Contact: React.FC = () => {
     if (window.grecaptcha?.render) {
       render();
     } else {
-      window.onRecaptchaLoad = render;
+      (window as any)._onRecaptchaReady = render;
     }
   }, []);
 
