@@ -44,6 +44,8 @@ export interface ServiceListing {
   imageUrl: string;
   createdAt?: string;
   freelancerTier?: string;
+  isSponsored?: boolean;
+  boostedUntil?: string | null;
 }
 
 export interface JobPosting {

@@ -276,7 +276,11 @@ const Marketplace: React.FC = () => {
                   <Link
                     key={listing.id}
                     to={`/service/${listing.id}`}
-                    className="group bg-brand-grey/90 border border-white/10 rounded-[2.5rem] overflow-hidden hover:border-brand-green/50 transition-all flex flex-col h-full shadow-xl"
+                    className={`group bg-brand-grey/90 border rounded-[2.5rem] overflow-hidden hover:border-brand-green/50 transition-all flex flex-col h-full shadow-xl ${
+                      listing.isSponsored
+                        ? 'border-amber-400/40 shadow-amber-400/5 shadow-2xl'
+                        : 'border-white/10'
+                    }`}
                   >
                     <div className="relative aspect-[16/10] overflow-hidden">
                       <img
@@ -284,6 +288,13 @@ const Marketplace: React.FC = () => {
                         alt={listing.title}
                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                       />
+                      {listing.isSponsored && (
+                        <div className="absolute top-5 right-5">
+                          <span className="bg-amber-400/90 backdrop-blur-md text-black px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest flex items-center gap-1">
+                            <Zap size={9} />Sponsored
+                          </span>
+                        </div>
+                      )}
                       <div className="absolute top-5 left-5">
                         <span className="bg-brand-black/90 backdrop-blur-md text-brand-green px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border border-white/10">
                           {listing.category}

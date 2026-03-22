@@ -177,6 +177,9 @@ export const API = {
   getCompletedContracts: (userId: string) =>
     request<any[]>(`/users/${userId}/completed-contracts`),
 
+  boostListing: (listingId: string) =>
+    request<{ success: boolean; boostedUntil: string; creditsRemaining: number }>(`/listings/${listingId}/boost`, 'POST'),
+
   // ── Stripe Connect ────────────────────────────────────────────────────────
   connectOnboard: () =>
     request<{ url: string }>('/connect/onboard', 'POST'),

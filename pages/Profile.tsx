@@ -333,7 +333,7 @@ const SettingsTab: React.FC<{ currentUser: any; updateUser: (u: any) => void; na
 
 const Profile: React.FC = () => {
   const t = useT();
-  const { listings, addListing } = useData();
+  const { listings, addListing, refreshListings } = useData();
   const [searchParams] = useSearchParams();
   const connectResult = searchParams.get('connect');
   const initialTab = (searchParams.get('tab') as ActiveTab) || (connectResult ? 'settings' : 'listings');
@@ -360,6 +360,28 @@ const Profile: React.FC = () => {
   const [otpInput, setOtpInput] = useState('');
   const [phoneLoading, setPhoneLoading] = useState(false);
   const [phoneError, setPhoneError] = useState('');
+
+  // Boost state
+  const [boostingId, setBoostingId] = useState<string | null>(null);
+  const boostCredits = { free: 0, starter: 1, pro: 3, ultra: 10, enterprise: 10 };
+  const myCredits = boostCredits[(currentUser?.tier || 'free') as keyof typeof boostCredits] ?? 0;
+
+  const handleBoost = async (listingId: string) => {
+    if (myCredits === 0) {
+      alert('Sponsored boosts are available on Pro and Ultra plans.');
+      return;
+    }
+    setBoostingId(listingId);
+    try {
+      const res = await API.boostListing(listingId);
+      alert(`Listing boosted for 7 days! You have ${res.creditsRemaining} boost${res.creditsRemaining === 1 ? '' : 's'} remaining this month.`);
+      await refreshListings();
+    } catch (err: any) {
+      alert(err.message || 'Failed to boost listing.');
+    } finally {
+      setBoostingId(null);
+    }
+  };
 
   // Creating Listing State
   const [isCreatingListing, setIsCreatingListing] = useState(false);
@@ -699,7 +721,25 @@ const Profile: React.FC = () => {
                           <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">{listing.category}</span>
                         </div>
                         <div className="flex items-center space-x-2">
-                           <button className="p-2 text-gray-500 hover:text-white transition-colors" title="Edit"><Edit2 size={16} /></button>
+                          {/* Boost button */}
+                          {myCredits > 0 && (
+                            listing.isSponsored ? (
+                              <span className="flex items-center gap-1 px-3 py-1.5 bg-amber-400/10 border border-amber-400/30 rounded-lg text-amber-400 text-[10px] font-black uppercase tracking-wider">
+                                <Zap size={10} /> Boosted · {new Date(listing.boostedUntil!).toLocaleDateString()}
+                              </span>
+                            ) : (
+                              <button
+                                onClick={() => handleBoost(listing.id)}
+                                disabled={boostingId === listing.id}
+                                className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-400/10 border border-amber-400/20 hover:border-amber-400/50 rounded-lg text-amber-400 text-[10px] font-black uppercase tracking-wider transition-colors disabled:opacity-50"
+                                title={`Boost for 7 days (${myCredits} credit${myCredits === 1 ? '' : 's'} remaining)`}
+                              >
+                                {boostingId === listing.id ? <Loader2 size={10} className="animate-spin" /> : <Zap size={10} />}
+                                Boost
+                              </button>
+                            )
+                          )}
+                          <button className="p-2 text-gray-500 hover:text-white transition-colors" title="Edit"><Edit2 size={16} /></button>
                         </div>
                       </div>
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-4">
