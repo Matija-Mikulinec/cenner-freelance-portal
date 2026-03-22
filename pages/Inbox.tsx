@@ -225,7 +225,9 @@ const MessagingHub: React.FC = () => {
     return new Date(d).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   }
 
-  const filtered = conversations.filter(c => c.other?.name?.toLowerCase().includes(search.toLowerCase()));
+  const filtered = conversations.filter(c =>
+    !search || (c.other?.name ?? '').toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
     <div className="flex h-[calc(100vh-80px)] bg-brand-black overflow-hidden">

@@ -422,7 +422,7 @@ const Profile: React.FC = () => {
   React.useEffect(() => {
     if (currentUser) {
       API.getConversations().then(convs => {
-        setInboxMessages(convs.map(c => ({
+        setInboxMessages((Array.isArray(convs) ? convs : []).map(c => ({
           id: c.id,
           sender: c.other?.name ?? 'Unknown',
           avatar: c.other?.avatar,
