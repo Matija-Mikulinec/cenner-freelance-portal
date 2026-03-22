@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   MessageCircle, Search, Send, AlertTriangle, Loader2,
-  ShieldCheck, Star, X,
+  ShieldCheck, Star, X, BadgeCheck, Mail, Phone,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { API } from '../lib/api';
@@ -461,82 +461,123 @@ const MessagingHub: React.FC = () => {
         )}
       </div>
 
-      {/* ── RIGHT: Reviews panel ──────────────────────────────────── */}
+      {/* ── RIGHT: Profile + Reviews ──────────────────────────────── */}
       <div className="w-64 flex-shrink-0 border-l border-white/5 flex flex-col overflow-y-auto">
         {otherProfile ? (
-          <div className="p-4 space-y-4">
-            {/* Rating summary */}
-            <div>
-              <p className="text-[10px] text-gray-600 uppercase tracking-widest font-bold mb-3">Reviews</p>
-              <div className="flex items-center gap-3 bg-white/3 border border-white/5 rounded-xl px-3 py-3">
-                <div className="text-center">
-                  <div className="text-2xl font-black text-white">
-                    {otherProfile.avgRating ? otherProfile.avgRating.toFixed(1) : '—'}
+          <div className="p-5 space-y-5">
+
+            {/* ── Profile summary ── */}
+            <div className="flex flex-col items-center text-center pt-2">
+              <div className="relative mb-3">
+                {otherProfile.avatar ? (
+                  <img src={otherProfile.avatar} alt={otherProfile.name} className="w-20 h-20 rounded-2xl object-cover border-2 border-brand-green/20" />
+                ) : (
+                  <div className="w-20 h-20 rounded-2xl bg-brand-green/10 border-2 border-brand-green/20 flex items-center justify-center text-brand-green font-black text-2xl">
+                    {otherProfile.name?.[0]?.toUpperCase()}
                   </div>
-                  <div className="flex gap-0.5 justify-center mt-1">
-                    {[1,2,3,4,5].map(s => (
-                      <Star key={s} size={9} className={s <= Math.round(otherProfile.avgRating ?? 0) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-700'} />
-                    ))}
+                )}
+                {otherProfile.kycVerified && (
+                  <div className="absolute -bottom-2 -right-2">
+                    <BadgeCheck size={22} className="text-amber-400 drop-shadow-[0_0_4px_rgba(251,191,36,0.8)]" fill="#1a1a1a" strokeWidth={1.5} />
                   </div>
-                  <div className="text-[10px] text-gray-600 mt-1">{otherProfile.reviewCount ?? 0} reviews</div>
+                )}
+              </div>
+              <h3 className="text-white font-bold text-sm">{otherProfile.name}</h3>
+              {(otherProfile.avgRating ?? 0) > 0 && (
+                <div className="flex items-center gap-1 mt-1">
+                  <Star size={11} className="text-yellow-400 fill-yellow-400" />
+                  <span className="text-gray-400 text-xs font-medium">{otherProfile.avgRating!.toFixed(1)}</span>
+                  <span className="text-gray-600 text-xs">({otherProfile.reviewCount})</span>
                 </div>
+              )}
+            </div>
+
+            {/* Verifications */}
+            <div className="space-y-1.5">
+              <div className={`flex items-center gap-2 text-xs ${otherProfile.kycVerified ? 'text-brand-green' : 'text-gray-600'}`}>
+                <BadgeCheck size={13} className={otherProfile.kycVerified ? 'text-amber-400' : 'text-gray-700'} />
+                Identity {otherProfile.kycVerified ? 'verified' : 'not verified'}
+              </div>
+              <div className={`flex items-center gap-2 text-xs ${otherProfile.emailVerified ? 'text-brand-green' : 'text-gray-600'}`}>
+                <Mail size={13} />
+                Email {otherProfile.emailVerified ? 'verified' : 'not verified'}
+              </div>
+              <div className={`flex items-center gap-2 text-xs ${otherProfile.mobileVerified ? 'text-brand-green' : 'text-gray-600'}`}>
+                <Phone size={13} />
+                Phone {otherProfile.mobileVerified ? 'verified' : 'not verified'}
               </div>
             </div>
 
-            {/* Request review button — only visible to freelancer when there are eligible contracts */}
-            {completedContracts.length > 0 && (
-              <div>
-                <p className="text-[10px] text-gray-600 uppercase tracking-widest font-bold mb-2">Request Review</p>
-                <div className="space-y-1.5">
-                  {completedContracts.map(c => (
-                    <button
-                      key={c.id}
-                      onClick={() => sendReviewRequest(c)}
-                      className="w-full text-left px-3 py-2.5 bg-brand-green/5 border border-brand-green/20 rounded-xl hover:border-brand-green/40 transition-colors group"
-                    >
-                      <div className="flex items-center gap-2">
-                        <Star size={11} className="text-brand-green shrink-0" />
-                        <span className="text-xs text-white font-medium truncate group-hover:text-brand-green transition-colors">{c.title}</span>
-                      </div>
-                      <p className="text-[10px] text-gray-600 mt-0.5 ml-[19px]">Tap to send review request</p>
-                    </button>
-                  ))}
-                </div>
-              </div>
+            {otherProfile.bio && (
+              <p className="text-gray-500 text-[11px] leading-relaxed border-t border-white/5 pt-4">{otherProfile.bio}</p>
             )}
 
-            {/* Review list */}
-            {reviews.length === 0 ? (
-              <p className="text-gray-600 text-xs text-center py-4">No reviews yet</p>
-            ) : (
-              <div className="space-y-3">
-                {reviews.map(r => (
-                  <div key={r.id} className="bg-white/3 border border-white/5 rounded-xl p-3">
-                    <div className="flex items-center gap-2 mb-1.5">
-                      {r.reviewer.avatar ? (
-                        <img src={r.reviewer.avatar} alt={r.reviewer.name} className="w-6 h-6 rounded-lg object-cover" />
-                      ) : (
-                        <div className="w-6 h-6 rounded-lg bg-brand-green/10 flex items-center justify-center text-brand-green text-[9px] font-black">
-                          {r.reviewer.name?.[0]}
-                        </div>
-                      )}
-                      <span className="text-white text-[11px] font-bold truncate flex-1">{r.reviewer.name}</span>
-                      <div className="flex gap-0.5 shrink-0">
-                        {[1,2,3,4,5].map(s => (
-                          <Star key={s} size={8} className={s <= r.rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-700'} />
-                        ))}
-                      </div>
+            {/* ── Reviews — only shown after a deal exists ── */}
+            {(completedContracts.length > 0 || reviews.length > 0) && (
+              <>
+                <div className="border-t border-white/5 pt-4">
+                  <p className="text-[10px] text-gray-600 uppercase tracking-widest font-bold mb-3">Reviews</p>
+
+                  {/* Request review — visible to freelancer only */}
+                  {completedContracts.length > 0 && (
+                    <div className="space-y-1.5 mb-3">
+                      {completedContracts.map(c => (
+                        <button
+                          key={c.id}
+                          onClick={() => sendReviewRequest(c)}
+                          className="w-full text-left px-3 py-2.5 bg-brand-green/5 border border-brand-green/20 rounded-xl hover:border-brand-green/40 transition-colors group"
+                        >
+                          <div className="flex items-center gap-2">
+                            <Star size={11} className="text-brand-green shrink-0" />
+                            <span className="text-xs text-white font-medium truncate group-hover:text-brand-green transition-colors">{c.title}</span>
+                          </div>
+                          <p className="text-[10px] text-gray-600 mt-0.5 ml-[19px]">Tap to send review request</p>
+                        </button>
+                      ))}
                     </div>
-                    {r.comment && <p className="text-gray-400 text-[11px] leading-relaxed">{r.comment}</p>}
-                  </div>
-                ))}
-              </div>
+                  )}
+
+                  {reviews.length === 0 ? (
+                    <p className="text-gray-600 text-xs">No reviews yet</p>
+                  ) : (
+                    <div className="space-y-3">
+                      {reviews.map(r => (
+                        <div key={r.id} className="bg-white/3 border border-white/5 rounded-xl p-3">
+                          <div className="flex items-center gap-2 mb-1.5">
+                            {r.reviewer.avatar ? (
+                              <img src={r.reviewer.avatar} alt={r.reviewer.name} className="w-6 h-6 rounded-lg object-cover" />
+                            ) : (
+                              <div className="w-6 h-6 rounded-lg bg-brand-green/10 flex items-center justify-center text-brand-green text-[9px] font-black">
+                                {r.reviewer.name?.[0]}
+                              </div>
+                            )}
+                            <span className="text-white text-[11px] font-bold truncate flex-1">{r.reviewer.name}</span>
+                            <div className="flex gap-0.5 shrink-0">
+                              {[1,2,3,4,5].map(s => (
+                                <Star key={s} size={8} className={s <= r.rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-700'} />
+                              ))}
+                            </div>
+                          </div>
+                          {r.comment && <p className="text-gray-400 text-[11px] leading-relaxed">{r.comment}</p>}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </>
             )}
+
+            <button
+              onClick={() => navigate(`/freelancer/${otherProfile.id}`)}
+              className="w-full py-2.5 border border-white/10 rounded-xl text-gray-400 text-xs font-bold hover:border-brand-green/30 hover:text-brand-green transition-colors"
+            >
+              View full profile
+            </button>
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center flex-1 p-6 text-center">
-            <Star className="text-gray-700 mb-2" size={24} />
-            <p className="text-gray-600 text-xs">Select a conversation to see reviews</p>
+            <MessageCircle className="text-gray-700 mb-2" size={24} />
+            <p className="text-gray-600 text-xs">Select a conversation</p>
           </div>
         )}
       </div>
