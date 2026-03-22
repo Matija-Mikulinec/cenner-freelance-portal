@@ -361,11 +361,6 @@ const Profile: React.FC = () => {
   const [phoneLoading, setPhoneLoading] = useState(false);
   const [phoneError, setPhoneError] = useState('');
 
-  // Boost state
-  const [boostingId, setBoostingId] = useState<string | null>(null);
-  const boostCredits = { free: 0, starter: 1, pro: 3, ultra: 10, enterprise: 10 };
-  const myCredits = boostCredits[(currentUser?.tier || 'free') as keyof typeof boostCredits] ?? 0;
-
   const handleBoost = async (listingId: string) => {
     if (myCredits === 0) {
       alert('Sponsored boosts are available on Pro and Ultra plans.');
@@ -407,6 +402,11 @@ const Profile: React.FC = () => {
 
   const navigate = useNavigate();
   const { user: currentUser, updateUser } = useAuth();
+
+  // Boost state — must be after currentUser
+  const [boostingId, setBoostingId] = useState<string | null>(null);
+  const boostCredits = { free: 0, starter: 1, pro: 3, ultra: 10, enterprise: 10 };
+  const myCredits = boostCredits[(currentUser?.tier || 'free') as keyof typeof boostCredits] ?? 0;
 
   const [transactions, setTransactions] = React.useState<any[]>([]);
   React.useEffect(() => {

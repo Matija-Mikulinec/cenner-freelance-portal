@@ -1,23 +1,64 @@
 
 import React, { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { Star, Clock, CheckCircle, MessageSquare, ShieldCheck, Share2, Heart, ArrowLeft } from 'lucide-react';
+import { Star, Clock, CheckCircle, MessageSquare, ShieldCheck, Share2, Heart, ArrowLeft, Edit2, Save, X, Loader2 } from 'lucide-react';
 import PermissionModal from '../components/PermissionModal';
 import { useData } from '../contexts/DataContext';
 import { useAuth } from '../contexts/AuthContext';
 import { API } from '../lib/api';
 import SEO from '../components/SEO';
+import { CATEGORIES } from '../constants';
 
 const ServiceDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const { getListingById } = useData();
+  const { getListingById, updateListing, refreshListings } = useData();
   const { user } = useAuth();
   const navigate = useNavigate();
   const [isPermissionModalOpen, setIsPermissionModalOpen] = useState(false);
   const [saved, setSaved] = useState(false);
   const [contacting, setContacting] = useState(false);
 
+  // Edit mode for listing owner
+  const [isEditing, setIsEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [editTitle, setEditTitle] = useState('');
+  const [editDescription, setEditDescription] = useState('');
+  const [editPrice, setEditPrice] = useState('');
+  const [editDelivery, setEditDelivery] = useState('');
+  const [editCategory, setEditCategory] = useState('');
+
   const listing = id ? getListingById(id) : undefined;
+  const isOwner = !!(user && listing && user.id === listing.freelancerId);
+
+  const startEdit = () => {
+    if (!listing) return;
+    setEditTitle(listing.title);
+    setEditDescription(listing.description);
+    setEditPrice(String(listing.price));
+    setEditDelivery(listing.deliveryTime);
+    setEditCategory(listing.category);
+    setIsEditing(true);
+  };
+
+  const saveEdit = async () => {
+    if (!listing) return;
+    setSaving(true);
+    try {
+      await updateListing(listing.id, {
+        title: editTitle,
+        description: editDescription,
+        price: parseFloat(editPrice) || listing.price,
+        deliveryTime: editDelivery,
+        category: editCategory,
+      });
+      await refreshListings();
+      setIsEditing(false);
+    } catch (err: any) {
+      alert(err.message || 'Failed to save changes.');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   if (!listing) {
     return (
@@ -97,7 +138,15 @@ const ServiceDetails: React.FC = () => {
         <span className="text-sm font-medium">Back to Results</span>
       </Link>
 
-      <h1 className="text-4xl font-extrabold text-white mb-10 leading-tight tracking-tight">{listing.title}</h1>
+      {isEditing ? (
+        <input
+          value={editTitle}
+          onChange={e => setEditTitle(e.target.value)}
+          className="w-full text-4xl font-extrabold text-white mb-10 leading-tight tracking-tight bg-white/5 border border-brand-green/30 rounded-xl px-4 py-2 focus:outline-none focus:border-brand-green"
+        />
+      ) : (
+        <h1 className="text-4xl font-extrabold text-white mb-10 leading-tight tracking-tight">{listing.title}</h1>
+      )}
 
       <div className="grid lg:grid-cols-3 gap-12 items-start">
         {/* Main Content */}
@@ -110,9 +159,35 @@ const ServiceDetails: React.FC = () => {
                 className="w-12 h-12 rounded-full border-2 border-brand-green"
               />
               <div>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2 flex-wrap gap-y-1">
                   <span className="text-white font-bold">{listing.freelancerName}</span>
-                  <span className="bg-brand-green/10 text-brand-green text-[10px] px-2 py-0.5 rounded uppercase font-bold">Pro Seller</span>
+                  {listing.freelancerTier && listing.freelancerTier !== 'free' && (
+                    <span className={`text-[10px] px-2 py-0.5 rounded uppercase font-bold ${
+                      listing.freelancerTier === 'ultra' || listing.freelancerTier === 'enterprise'
+                        ? 'bg-brand-pink/10 text-brand-pink'
+                        : 'bg-brand-green/10 text-brand-green'
+                    }`}>
+                      {listing.freelancerTier === 'ultra' || listing.freelancerTier === 'enterprise' ? 'Ultra' : 'Pro'} Seller
+                    </span>
+                  )}
+                  {isOwner && !isEditing && (
+                    <button
+                      onClick={startEdit}
+                      className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded border border-white/10 text-gray-400 hover:text-white hover:border-white/30 transition-colors uppercase font-bold"
+                    >
+                      <Edit2 size={10} /> Edit
+                    </button>
+                  )}
+                  {isOwner && isEditing && (
+                    <div className="flex gap-1">
+                      <button onClick={saveEdit} disabled={saving} className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded bg-brand-green/10 border border-brand-green/30 text-brand-green hover:border-brand-green/60 transition-colors uppercase font-bold disabled:opacity-50">
+                        {saving ? <Loader2 size={10} className="animate-spin" /> : <Save size={10} />} Save
+                      </button>
+                      <button onClick={() => setIsEditing(false)} className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded border border-white/10 text-gray-400 hover:text-white transition-colors uppercase font-bold">
+                        <X size={10} /> Cancel
+                      </button>
+                    </div>
+                  )}
                 </div>
                 <div className="flex items-center space-x-2 text-sm">
                   <div className="flex items-center text-yellow-400">
@@ -134,12 +209,16 @@ const ServiceDetails: React.FC = () => {
 
             <div className="prose prose-invert max-w-none">
               <h3 className="text-xl font-bold text-white mb-4">About This Service</h3>
-              <p className="text-gray-400 leading-relaxed mb-6">
-                {listing.description}
-              </p>
-              <p className="text-gray-400 leading-relaxed">
-                Working with me ensures high-quality output tailored to your specific needs. I use industry-standard tools and follow a rigorous process to deliver projects that not only look good but perform exceptionally well.
-              </p>
+              {isEditing ? (
+                <textarea
+                  value={editDescription}
+                  onChange={e => setEditDescription(e.target.value)}
+                  rows={6}
+                  className="w-full text-gray-300 leading-relaxed bg-white/5 border border-brand-green/30 rounded-xl px-4 py-3 focus:outline-none focus:border-brand-green resize-none"
+                />
+              ) : (
+                <p className="text-gray-400 leading-relaxed">{listing.description}</p>
+              )}
             </div>
           </section>
 
@@ -206,8 +285,15 @@ const ServiceDetails: React.FC = () => {
             <div className="bg-brand-grey/80 border border-white/10 rounded-[2.5rem] overflow-hidden backdrop-blur-xl shadow-2xl">
               <div className="p-8 border-b border-white/5">
                 <div className="flex justify-between items-center mb-6">
-                  <h3 className="text-xl font-black text-white">Elite Package</h3>
-                  <span className="text-2xl font-black text-brand-green">€{listing.price}</span>
+                  <h3 className="text-xl font-black text-white">{listing.title}</h3>
+                  {isEditing ? (
+                    <div className="flex items-center gap-1">
+                      <span className="text-brand-green font-black text-lg">€</span>
+                      <input value={editPrice} onChange={e => setEditPrice(e.target.value)} type="number" min="0" className="w-24 text-right text-brand-green font-black text-xl bg-white/5 border border-brand-green/30 rounded-lg px-2 py-1 focus:outline-none focus:border-brand-green" />
+                    </div>
+                  ) : (
+                    <span className="text-2xl font-black text-brand-green">€{listing.price}</span>
+                  )}
                 </div>
                 <p className="text-gray-400 text-sm mb-6 leading-relaxed">
                   Best for high-stakes professional projects that require absolute attention to detail and precision.
@@ -218,31 +304,59 @@ const ServiceDetails: React.FC = () => {
                       <Clock size={16} className="mr-2 opacity-50" />
                       <span className="font-bold uppercase tracking-tighter">Delivery Time</span>
                     </div>
-                    <span className="text-white font-black">{listing.deliveryTime}</span>
+                    {isEditing ? (
+                      <input value={editDelivery} onChange={e => setEditDelivery(e.target.value)} className="w-28 text-right text-white font-black bg-white/5 border border-brand-green/30 rounded-lg px-2 py-1 text-sm focus:outline-none focus:border-brand-green" />
+                    ) : (
+                      <span className="text-white font-black">{listing.deliveryTime}</span>
+                    )}
                   </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <div className="flex items-center text-gray-500">
-                      <CheckCircle size={16} className="mr-2 opacity-50" />
-                      <span className="font-bold uppercase tracking-tighter">Revisions</span>
+                  {isEditing && (
+                    <div className="flex items-center justify-between text-sm">
+                      <div className="flex items-center text-gray-500">
+                        <span className="font-bold uppercase tracking-tighter ml-6">Category</span>
+                      </div>
+                      <select value={editCategory} onChange={e => setEditCategory(e.target.value)} className="text-right text-white font-black bg-white/5 border border-brand-green/30 rounded-lg px-2 py-1 text-sm focus:outline-none focus:border-brand-green">
+                        {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                      </select>
                     </div>
-                    <span className="text-white font-black">Unlimited</span>
-                  </div>
+                  )}
                 </div>
-                
-                <button 
-                  onClick={handleContinue}
-                  className="w-full py-4 bg-brand-green text-brand-black font-black rounded-2xl hover:scale-[1.02] active:scale-95 transition-all mb-4 shadow-lg shadow-brand-green/20"
-                >
-                  Confirm & Buy (€{listing.price})
-                </button>
-                <button
-                  onClick={handleContactClick}
-                  disabled={contacting}
-                  className="w-full py-3 border border-brand-pink text-brand-pink font-bold rounded-2xl hover:bg-brand-pink/5 transition-all flex items-center justify-center space-x-2 disabled:opacity-50"
-                >
-                  <MessageSquare size={18} />
-                  <span>{contacting ? 'Opening…' : 'Contact Freelancer'}</span>
-                </button>
+
+                {isOwner ? (
+                  <div className="space-y-2">
+                    {isEditing ? (
+                      <div className="flex gap-2">
+                        <button onClick={saveEdit} disabled={saving} className="flex-1 py-4 bg-brand-green text-brand-black font-black rounded-2xl hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-brand-green/20 disabled:opacity-50 flex items-center justify-center gap-2">
+                          {saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />} Save Changes
+                        </button>
+                        <button onClick={() => setIsEditing(false)} className="py-4 px-5 border border-white/10 text-gray-400 font-bold rounded-2xl hover:border-white/30 transition-all">
+                          <X size={16} />
+                        </button>
+                      </div>
+                    ) : (
+                      <button onClick={startEdit} className="w-full py-4 border border-white/10 text-gray-300 font-black rounded-2xl hover:border-brand-green/40 hover:text-brand-green transition-all flex items-center justify-center gap-2">
+                        <Edit2 size={16} /> Edit Listing
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  <>
+                    <button
+                      onClick={handleContinue}
+                      className="w-full py-4 bg-brand-green text-brand-black font-black rounded-2xl hover:scale-[1.02] active:scale-95 transition-all mb-4 shadow-lg shadow-brand-green/20"
+                    >
+                      Confirm & Buy (€{listing.price})
+                    </button>
+                    <button
+                      onClick={handleContactClick}
+                      disabled={contacting}
+                      className="w-full py-3 border border-brand-pink text-brand-pink font-bold rounded-2xl hover:bg-brand-pink/5 transition-all flex items-center justify-center space-x-2 disabled:opacity-50"
+                    >
+                      <MessageSquare size={18} />
+                      <span>{contacting ? 'Opening…' : 'Contact Freelancer'}</span>
+                    </button>
+                  </>
+                )}
               </div>
               <div className="p-6 bg-brand-black/50 text-center">
                 <div className="flex items-center justify-center space-x-2 text-[10px] font-black text-gray-500 uppercase mb-2">
