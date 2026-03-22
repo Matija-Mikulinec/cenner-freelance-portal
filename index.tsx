@@ -4,6 +4,31 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import { LanguageProvider } from './i18n';
 
+class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { error: Error | null }> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { error: null };
+  }
+  static getDerivedStateFromError(error: Error) {
+    return { error };
+  }
+  render() {
+    if (this.state.error) {
+      return (
+        <div style={{ minHeight: '100vh', background: '#0a0a0a', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#fff', fontFamily: 'sans-serif', padding: '2rem', textAlign: 'center' }}>
+          <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>⚠</div>
+          <h2 style={{ marginBottom: '0.5rem', fontWeight: 800 }}>Something went wrong</h2>
+          <p style={{ color: '#666', marginBottom: '1.5rem', fontSize: '0.875rem' }}>Please refresh the page to continue.</p>
+          <button onClick={() => window.location.href = '/'} style={{ padding: '0.75rem 2rem', background: '#4ade80', color: '#000', fontWeight: 800, border: 'none', borderRadius: '12px', cursor: 'pointer', fontSize: '0.875rem' }}>
+            Refresh
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 const rootElement = document.getElementById('root');
 if (!rootElement) {
   throw new Error("Could not find root element to mount to");
@@ -12,8 +37,10 @@ if (!rootElement) {
 const root = ReactDOM.createRoot(rootElement);
 root.render(
   <React.StrictMode>
-    <LanguageProvider>
-      <App />
-    </LanguageProvider>
+    <ErrorBoundary>
+      <LanguageProvider>
+        <App />
+      </LanguageProvider>
+    </ErrorBoundary>
   </React.StrictMode>
 );

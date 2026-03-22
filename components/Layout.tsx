@@ -8,6 +8,7 @@ import Footer from './Footer';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage, useT } from '../i18n';
 import { API } from '../lib/api';
+import { disconnectSocket } from '../hooks/useSocket';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -69,10 +70,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     return () => clearInterval(interval);
   }, [user]);
 
-  const handleLogout = async () => {
+  const handleLogout = () => {
     setIsProfileOpen(false);
     setIsMenuOpen(false);
-    import('../hooks/useSocket').then(({ disconnectSocket }) => disconnectSocket());
+    disconnectSocket();
     logout();
     navigate('/');
   };
