@@ -65,7 +65,7 @@ const App: React.FC = () => {
                   <Route path="/freelancer/:id" element={<FreelancerProfile />} />
                   <Route path="/orders" element={<Orders />} />
                   <Route path="/messages" element={<Inbox />} />
-                  <Route path="/messages/:id" element={<Chat />} />
+                  <Route path="/messages/:id" element={<Inbox />} />
                   <Route path="/contracts" element={<Contracts />} />
                   <Route path="/contracts/:id" element={<ContractDetail />} />
                   <Route path="/messages-legacy" element={<Messages />} />
