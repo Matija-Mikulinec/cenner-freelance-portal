@@ -10,6 +10,12 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { err
     this.state = { error: null };
   }
   static getDerivedStateFromError(error: Error) {
+    // Stale chunk after new deploy — silently reload to get fresh assets
+    if (error.message?.includes('Failed to fetch dynamically imported module') ||
+        error.message?.includes('Importing a module script failed')) {
+      window.location.reload();
+      return { error: null };
+    }
     return { error };
   }
   componentDidCatch(error: Error, info: React.ErrorInfo) {
