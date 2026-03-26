@@ -309,7 +309,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
                 <div className="w-1 h-1 bg-current rounded-full animate-pulse [animation-delay:0.2s]" />
                 <div className="w-1 h-1 bg-current rounded-full animate-pulse [animation-delay:0.4s]" />
               </div>
-              <span className="text-[10px] font-black uppercase tracking-widest">Neural Processing</span>
+              <span className="text-[10px] font-black uppercase tracking-widest">Thinking</span>
             </div>
           )}
         </div>

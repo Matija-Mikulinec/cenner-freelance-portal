@@ -1393,14 +1393,14 @@ const Profile: React.FC = () => {
           {/* CRM Data Section - Visualized */}
           <div className="bg-brand-grey/50 border border-white/10 rounded-[2rem] overflow-hidden">
             <div className="p-6 border-b border-white/5 bg-white/[0.02] flex items-center justify-between">
-              <h4 className="text-[10px] text-gray-500 font-black uppercase tracking-widest">Protocol Status</h4>
+              <h4 className="text-[10px] text-gray-500 font-black uppercase tracking-widest">Verification Status</h4>
               <div className="w-2 h-2 bg-brand-green rounded-full animate-pulse"></div>
             </div>
             <div className="p-6 space-y-4">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3 text-sm text-gray-400">
                         <Mail size={16} />
-                        <span>Email Protocol</span>
+                        <span>Email</span>
                     </div>
                     {currentUser?.emailVerified ? (
                         <CheckCircle size={16} className="text-brand-green" />
@@ -1411,7 +1411,7 @@ const Profile: React.FC = () => {
                 <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3 text-sm text-gray-400">
                         <Smartphone size={16} />
-                        <span>Mobile Node</span>
+                        <span>Phone</span>
                     </div>
                     {currentUser?.mobileVerified ? (
                         <CheckCircle size={16} className="text-brand-green" />
@@ -1563,11 +1563,11 @@ const Profile: React.FC = () => {
           {/* Detailed Activity Log */}
           <section className="mt-12 bg-brand-grey/40 border border-white/5 rounded-3xl p-8">
             <div className="flex items-center justify-between mb-8">
-              <h3 className="text-xl font-bold text-white">{t('Neural Activity Log')}</h3>
+              <h3 className="text-xl font-bold text-white">{t('Recent Activity')}</h3>
             </div>
             <div className="space-y-6">
               {[
-                { type: 'onboarding', text: 'Account successfully initialized on the Cenner Protocol', time: 'Just now', color: 'bg-brand-green' },
+                { type: 'onboarding', text: 'Account created', time: 'Just now', color: 'bg-brand-green' },
               ].map((activity, i) => (
                 <div key={i} className="flex items-start space-x-5 group cursor-default">
                   <div className={`mt-1.5 w-2 h-2 rounded-full ${activity.color} group-hover:scale-150 transition-transform`}></div>

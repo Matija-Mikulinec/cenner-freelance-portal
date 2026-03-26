@@ -42,7 +42,7 @@ const About: React.FC = () => {
             In a world of commoditized labor, Cenner stands apart as a sanctuary for craftsmanship. We believe that the best work happens when the friction of bureaucracy is removed, allowing visionaries to communicate directly with masters.
           </p>
           <p className="text-gray-400 text-lg leading-relaxed">
-            Our neural-matched ecosystem ensures that you're not just finding a 'contractor', but a technical partner who understands the nuance of your specific industry—from algorithmic trading interfaces to generative cinematic environments.
+            Our smart matching ensures that you're not just finding a freelancer, but the right partner who understands your industry and the specifics of your project.
           </p>
           <div className="grid grid-cols-2 gap-8 pt-6">
             <div>
@@ -80,7 +80,7 @@ const About: React.FC = () => {
             </div>
             <h3 className="text-3xl font-black text-white mb-6 tracking-tight uppercase">{t('Our Vision')}</h3>
             <p className="text-gray-400 text-lg leading-relaxed font-medium">
-              To become the neural backbone of the global digital economy. We envision a world where the most complex problems are solved by globally distributed nodes of expertise, perfectly synchronized through the Cenner Protocol.
+              To become the go-to platform for the global digital economy. We envision a world where the most complex problems are solved by talented people from everywhere, working together seamlessly through Cenner.
             </p>
           </div>
         </div>

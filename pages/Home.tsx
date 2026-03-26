@@ -59,7 +59,7 @@ const Home: React.FC = () => {
           <h1 className="text-6xl md:text-8xl font-extrabold text-white mb-8 tracking-tight leading-[0.9]">
             {t('Elite Talent')} <br />
             <span className="bg-clip-text text-transparent bg-gradient-to-r from-brand-green via-brand-pink to-brand-green bg-[length:200%_auto] animate-gradient">
-              {t('Neural Network')}
+              {t('Talent Network')}
             </span>
           </h1>
 
@@ -142,7 +142,7 @@ const Home: React.FC = () => {
           <div className="flex flex-col md:flex-row justify-between items-end mb-16">
             <div className="max-w-2xl">
               <h2 className="text-4xl font-black text-white mb-4 tracking-tighter">{t('Top Specializations')}</h2>
-              <p className="text-gray-400 font-medium">{t('Browse our most sought-after categories indexed by our neural matching engine.')}</p>
+              <p className="text-gray-400 font-medium">{t('Browse our most popular categories.')}</p>
             </div>
             <Link to="/marketplace" className="hidden md:flex items-center space-x-2 text-brand-green font-bold hover:translate-x-1 transition-transform">
               <span>{t('View all categories')}</span>

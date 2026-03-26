@@ -145,8 +145,8 @@ const Blog: React.FC = () => {
         <div className="fixed inset-0 z-[150] bg-black/80 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-300">
            <div className="w-full max-w-2xl bg-brand-grey border border-white/10 rounded-[3rem] p-10 relative">
               <button onClick={() => setIsCreatingPost(false)} className="absolute top-10 right-10 text-gray-500 hover:text-white"><X size={24} /></button>
-              <h2 className="text-4xl font-black text-white mb-2 tracking-tighter">Broadcast Signal</h2>
-              <p className="text-gray-500 mb-8">Share your insights with the neural network.</p>
+              <h2 className="text-4xl font-black text-white mb-2 tracking-tighter">Write a Post</h2>
+              <p className="text-gray-500 mb-8">Share your thoughts with the community.</p>
               
               <form onSubmit={handleCreatePost} className="space-y-6">
                 <div className="space-y-1">
@@ -232,8 +232,8 @@ const Blog: React.FC = () => {
                 <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-6">
                   <Radio size={32} className="text-gray-500 animate-pulse" />
                 </div>
-                <h3 className="text-2xl font-black text-white mb-2">No Neural Signals</h3>
-                <p className="text-gray-500 font-medium mb-8">The community frequency is currently silent.</p>
+                <h3 className="text-2xl font-black text-white mb-2">No Posts Yet</h3>
+                <p className="text-gray-500 font-medium mb-8">Be the first to post something.</p>
                 {isVerified ? (
                   <button 
                     onClick={() => setIsCreatingPost(true)}
@@ -326,7 +326,7 @@ const Blog: React.FC = () => {
                         onClick={() => navigate('/creator-onboarding')}
                         className="text-[10px] font-black uppercase tracking-widest text-brand-pink hover:text-white transition-colors underline decoration-2 underline-offset-4"
                       >
-                        Initiate verification protocol
+                        Verify your account
                       </button>
                     </div>
                   )}
@@ -360,7 +360,7 @@ const Blog: React.FC = () => {
                          </span>
                          <span className="hover:text-white transition-colors flex items-center space-x-2">
                            <Share2 size={12} />
-                           <span>Share Sync</span>
+                           <span>Share</span>
                          </span>
                       </div>
                     </div>
@@ -377,7 +377,7 @@ const Blog: React.FC = () => {
                   <div className="w-10 h-10 rounded-xl bg-brand-green/10 flex items-center justify-center border border-brand-green/20">
                     <Sparkles className="text-brand-green" size={20} />
                   </div>
-                  <h3 className="text-[11px] font-black text-white uppercase tracking-[0.3em]">Trending Syncs</h3>
+                  <h3 className="text-[11px] font-black text-white uppercase tracking-[0.3em]">Trending</h3>
                </div>
                
                {sortedPosts.length > 0 ? (
@@ -402,16 +402,16 @@ const Blog: React.FC = () => {
                  </div>
                ) : (
                  <div className="text-center py-6 text-gray-500 text-xs italic">
-                    No trending signals.
+                    Nothing trending yet.
                  </div>
                )}
              </div>
 
              <div className="bg-brand-grey/30 border border-white/5 rounded-[2rem] p-6 lg:p-8 shadow-2xl">
-               <h3 className="text-[10px] font-black text-white uppercase tracking-[0.3em] mb-6">Community Protocol</h3>
+               <h3 className="text-[10px] font-black text-white uppercase tracking-[0.3em] mb-6">Community Guidelines</h3>
                <div className="space-y-5">
                   {[
-                    { id: 1, title: 'Be respectful and courteous', content: 'Professional sync protocols apply at all times. Disruptive nodes will be disconnected.' },
+                    { id: 1, title: 'Be respectful and courteous', content: 'Keep it professional at all times. Disruptive users will be removed.' },
                     { id: 2, title: 'No Spam or Self-Promo', content: 'Only relevant industry discussion allowed here.' },
                     { id: 3, title: 'Keep it Elite', content: 'Focus on high-quality outputs, advanced workflows, and collaborative growth.' }
                   ].map(rule => (

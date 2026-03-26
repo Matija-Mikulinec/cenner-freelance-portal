@@ -86,7 +86,7 @@ const Marketplace: React.FC = () => {
       <div>
         <h3 className="text-xs font-black text-white uppercase tracking-[0.2em] mb-6 flex items-center space-x-3">
           <Filter size={14} className="text-brand-pink" />
-          <span>Category Protocol</span>
+          <span>Categories</span>
         </h3>
         <div className="space-y-1 max-h-[400px] overflow-y-auto custom-scrollbar pr-2">
           <button
@@ -254,7 +254,7 @@ const Marketplace: React.FC = () => {
           className="lg:hidden flex items-center justify-center space-x-3 bg-brand-grey border border-white/10 rounded-2xl py-5 px-8 text-white font-bold text-sm hover:border-brand-pink transition-all active:scale-95 shadow-2xl"
         >
           <SlidersHorizontal size={18} className="text-brand-pink" />
-          <span>{t('Adjust Protocol')}</span>
+          <span>{t('Filters')}</span>
         </button>
       </div>
 
@@ -422,10 +422,10 @@ const EmptyState: React.FC<{ onReset: () => void, mode: 'freelancers' | 'jobs', 
       <Search size={36} />
     </div>
     <h3 className="text-2xl font-black text-white mb-3">
-      {mode === 'freelancers' ? t('No Expert Nodes Active') : t('No Open Protocols')}
+      {mode === 'freelancers' ? t('No Freelancers Found') : t('No Jobs Posted Yet')}
     </h3>
     <p className="text-gray-500 font-medium max-w-sm mx-auto">
-      {t('The network is currently waiting for new signals. Be the first to synchronize your data.')}
+      {t('Nothing here yet. Be the first to post.')}
     </p>
     <div className="mt-8 flex justify-center gap-4">
       <button

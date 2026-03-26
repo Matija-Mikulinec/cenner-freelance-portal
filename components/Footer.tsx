@@ -63,7 +63,7 @@ const Footer: React.FC = () => {
               <span className="text-2xl font-black tracking-tighter text-white">CENNER</span>
             </div>
             <p className="text-gray-500 text-sm leading-relaxed mb-8">
-              {t("The elite protocol for high-end digital collaboration. Connecting the world's top creators.")}
+              {t("The platform for high-quality digital collaboration. Connecting top creators worldwide.")}
             </p>
             <div className="flex space-x-3">
               {SOCIAL.map(({ Icon, href, label }) => (

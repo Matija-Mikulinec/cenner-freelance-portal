@@ -142,7 +142,7 @@ const tiers: Tier[] = [
         detail: 'Only 3% on long-term retainer clients, 5% on one-off projects. The most competitive fee structure available — designed for freelancers who earn serious revenue.',
       },
       {
-        name: 'Concierge onboarding',
+        name: 'Personal onboarding call',
         detail: 'A 30-minute onboarding call with a Cenner team member to set up your profile, pricing strategy, and first campaign for maximum impact from day one.',
       },
       {

@@ -306,13 +306,13 @@ const SubscriptionCheckout: React.FC = () => {
         <h1 className="text-5xl font-extrabold text-white mb-4 tracking-tight">Upgrade Successful!</h1>
         <p className="text-gray-400 text-lg mb-12">
           Your account has been upgraded to <span className={`${plan.color} font-bold`}>{plan.title}</span>.{' '}
-          Your elite nodes are now synchronizing with enhanced protocol priority.
+          You now have full access to everything included in your plan.
         </p>
 
         <div className="bg-brand-grey/90 border border-white/10 rounded-3xl p-8 mb-12 text-left shadow-2xl">
           <h3 className="text-white font-bold mb-4 uppercase text-xs tracking-widest">Subscription Summary</h3>
           <div className="flex justify-between items-center py-3 border-b border-white/5">
-            <span className="text-gray-500 text-sm">Protocol Tier</span>
+            <span className="text-gray-500 text-sm">Plan</span>
             <span className={`${plan.color} font-black text-sm uppercase`}>{plan.title}</span>
           </div>
           <div className="flex justify-between items-center py-3 border-b border-white/5">
@@ -357,7 +357,7 @@ const SubscriptionCheckout: React.FC = () => {
         <div className="lg:col-span-2 space-y-8">
           {/* Plan confirmation */}
           <section className="bg-brand-grey/90 border border-white/10 rounded-[2.5rem] p-8 shadow-xl">
-            <h3 className="text-xl font-bold text-white mb-6">Confirm Protocol Upgrade</h3>
+            <h3 className="text-xl font-bold text-white mb-6">Confirm Your Plan</h3>
             <div className="flex items-center space-x-4 p-6 bg-brand-black/40 rounded-2xl border border-white/10">
               <div className={`p-4 bg-white/5 rounded-xl ${plan.color}`}>{plan.icon}</div>
               <div>
@@ -424,11 +424,11 @@ const SubscriptionCheckout: React.FC = () => {
               <div className="space-y-3">
                 <div className="flex items-center space-x-3 text-xs text-gray-500 font-bold uppercase tracking-tighter">
                   <ShieldCheck size={14} className="text-brand-green" />
-                  <span>Immediate Protocol Access</span>
+                  <span>Instant Access</span>
                 </div>
                 <div className="flex items-center space-x-3 text-xs text-gray-500 font-bold uppercase tracking-tighter">
                   <Lock size={14} className="text-brand-green" />
-                  <span>Encrypted Payment Node</span>
+                  <span>Secure Payment</span>
                 </div>
               </div>
             </div>
