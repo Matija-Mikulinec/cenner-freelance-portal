@@ -98,7 +98,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 'initial',
-      text: `Greetings. I am the **Cenner Concierge**, your support assistant for Cenner CRM. How can I help you today?`,
+      text: `Hi! I'm the Cenner support assistant. I can help you with your account, listings, payments, contracts, and more. What do you need help with?`,
       sender: 'freelancer',
       timestamp: nowTime(),
     },
@@ -201,7 +201,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
           msg.id === botMessageId
             ? {
                 ...msg,
-                text: 'System Alert: **Neural Link Disrupted**. Please try again shortly.',
+                text: 'Something went wrong. Please try again in a moment.',
                 isStreaming: false,
               }
             : msg,
@@ -236,13 +236,13 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
               <div className="flex items-center space-x-2">
                 <h4 className="text-white font-black text-sm tracking-tight">{freelancerName}</h4>
                 <div className="px-1.5 py-0.5 bg-brand-green/10 rounded text-[8px] font-black text-brand-green uppercase tracking-tighter">
-                  AI CORE
+                  Support
                 </div>
               </div>
               <div className="flex items-center space-x-1">
                 <span className={`w-1.5 h-1.5 rounded-full ${isFlagged ? 'bg-red-500' : 'bg-brand-green animate-pulse'}`} />
                 <p className="text-[10px] text-gray-500 font-bold uppercase tracking-[0.1em]">
-                  {isFlagged ? 'Session Locked' : 'Protocol Active'}
+                  {isFlagged ? 'Account flagged' : 'Online'}
                 </p>
               </div>
             </div>
@@ -328,8 +328,8 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
                   isFlagged
                     ? 'Session locked. Contact support@cenner.app'
                     : isTyping
-                    ? 'Concierge is thinking...'
-                    : 'Ask about Cenner CRM...'
+                    ? 'Support is typing...'
+                    : 'Ask us anything...'
                 }
                 className="w-full bg-brand-black/60 border border-white/10 rounded-2xl py-6 pl-14 pr-16 text-white text-base placeholder:text-gray-600 focus:outline-none focus:border-brand-green/50 focus:ring-4 focus:ring-brand-green/5 transition-all disabled:opacity-50"
               />
@@ -347,7 +347,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
           </form>
 
           <div className="flex items-center justify-end mt-4 px-1">
-            <span className="text-[8px] text-gray-700 font-black uppercase tracking-[0.2em]">Cenner v2.4.1</span>
+            <span className="text-[8px] text-gray-700 font-black uppercase tracking-[0.2em]">Cenner Support</span>
           </div>
         </div>
       </div>

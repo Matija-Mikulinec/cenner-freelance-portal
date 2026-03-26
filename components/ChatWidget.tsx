@@ -20,7 +20,7 @@ const ChatWidget: React.FC = () => {
         <ChatInterface 
           isOpen={isOpen} 
           onClose={() => setIsOpen(false)} 
-          freelancerName="Cenner Concierge"
+          freelancerName="Cenner Support"
           freelancerAvatar="https://picsum.photos/seed/concierge/200"
           onStartCall={() => {}}
         />
