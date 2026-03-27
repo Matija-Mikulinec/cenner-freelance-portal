@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ArrowRight, Star, Shield, Zap, Globe, ChevronRight,
@@ -8,6 +8,8 @@ import {
   ShieldCheck, Cpu, Briefcase, Globe2, Clock, CheckCircle, Lock,
   Link2, Scissors, Store
 } from 'lucide-react';
+
+const ROTATING_TAGS = ['#Links', '#Shorten', '#Freelancer Marketplace'];
 import { MOCK_LISTINGS } from '../constants';
 import SEO from '../components/SEO';
 import { useT } from '../i18n';
@@ -36,6 +38,15 @@ const websiteJsonLd = {
 
 const Home: React.FC = () => {
   const t = useT();
+  const [activeTag, setActiveTag] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveTag((prev) => (prev + 1) % ROTATING_TAGS.length);
+    }, 2500);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <div className="relative min-h-screen">
       <SEO
@@ -43,44 +54,31 @@ const Home: React.FC = () => {
         description="Cenner connects businesses with the top 1% of freelance talent. AI-powered matching, verified creators, and premium collaboration tools for high-end projects."
         jsonLd={[organizationJsonLd, websiteJsonLd] as any}
       />
-      {/* Hero Section — Purple-to-black gradient */}
-      <section className="relative pt-32 pb-24 px-4 z-10 overflow-hidden" style={{ background: 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 25%, #4c1d95 50%, #1e1b4b 75%, #0a0a0a 100%)' }}>
+      {/* Hero Section — Dark purple-to-black gradient */}
+      <section className="relative pt-32 pb-24 px-4 z-10 overflow-hidden" style={{ background: 'linear-gradient(135deg, #0a0a0a 0%, #1a0a2e 30%, #2d1854 60%, #3b1d6e 100%)' }}>
         <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-start gap-12 lg:gap-16">
-          {/* Left side — Cenner branding + text */}
+          {/* Left side — Cenner branding + rotating tags */}
           <div className="flex-1 space-y-8">
-            <div className="flex flex-col sm:flex-row items-start gap-6">
-              {/* Cenner logo */}
-              <div className="flex-shrink-0">
-                <div className="text-3xl font-black text-white tracking-tighter bg-white/10 backdrop-blur-sm rounded-2xl px-6 py-4 border border-white/20">
-                  Cenner
+            {/* Cenner + rotating product name */}
+            <div className="flex items-center gap-4 md:gap-6">
+              <h1 className="text-5xl md:text-7xl font-extrabold text-white tracking-tight leading-none flex-shrink-0">
+                Cenner
+              </h1>
+              <div className="h-[1.1em] text-5xl md:text-7xl font-extrabold overflow-hidden relative">
+                <div
+                  className="transition-transform duration-500 ease-in-out"
+                  style={{ transform: `translateY(-${activeTag * 100}%)` }}
+                >
+                  {ROTATING_TAGS.map((tag, i) => (
+                    <div key={i} className="h-[1.1em] flex items-center text-purple-400 whitespace-nowrap">
+                      {tag}
+                    </div>
+                  ))}
                 </div>
-              </div>
-
-              {/* Product hashtags */}
-              <div className="flex flex-wrap gap-3 pt-2">
-                <span className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/15 rounded-full px-4 py-2 text-sm font-bold text-purple-200">
-                  <Link2 size={14} />
-                  #Links
-                </span>
-                <span className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/15 rounded-full px-4 py-2 text-sm font-bold text-purple-200">
-                  <Scissors size={14} />
-                  #Shorten
-                </span>
-                <span className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/15 rounded-full px-4 py-2 text-sm font-bold text-purple-200">
-                  <Store size={14} />
-                  #Freelancer Marketplace
-                </span>
               </div>
             </div>
 
-            <h1 className="text-5xl md:text-7xl font-extrabold text-white tracking-tight leading-[0.95]">
-              {t('Top Talent')} <br />
-              <span className="text-purple-300">
-                {t('Talent Network')}
-              </span>
-            </h1>
-
-            <p className="text-lg md:text-xl text-purple-100/80 max-w-lg leading-relaxed font-medium">
+            <p className="text-lg md:text-xl text-purple-200/70 max-w-lg leading-relaxed font-medium">
               {t('The high-end freelance portal where projects meet precision. Connect with top 1% creators using modern AI-driven collaboration tools.')}
             </p>
 
@@ -101,9 +99,21 @@ const Home: React.FC = () => {
             </div>
           </div>
 
-          {/* Right side — Scrollable showcase grid */}
-          <div className="flex-1 w-full lg:max-w-md">
-            <div className="h-[420px] overflow-y-auto pr-2 space-y-4 scrollbar-hero" style={{ scrollbarWidth: 'thin', scrollbarColor: 'rgba(139,92,246,0.5) transparent' }}>
+          {/* Right side — Scrollable grid with grid overlay effect */}
+          <div className="flex-1 w-full lg:max-w-md relative">
+            {/* Grid overlay effect */}
+            <div
+              className="absolute inset-0 z-0 pointer-events-none opacity-[0.07]"
+              style={{
+                backgroundImage: 'linear-gradient(rgba(139,92,246,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(139,92,246,0.5) 1px, transparent 1px)',
+                backgroundSize: '40px 40px',
+              }}
+            />
+            {/* Top/bottom fade masks */}
+            <div className="absolute top-0 left-0 right-0 h-12 bg-gradient-to-b from-[#1a0a2e] to-transparent z-10 pointer-events-none" />
+            <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-[#2d1854] to-transparent z-10 pointer-events-none" />
+
+            <div className="h-[420px] overflow-y-auto pr-2 space-y-4 relative z-[1]" style={{ scrollbarWidth: 'thin', scrollbarColor: 'rgba(139,92,246,0.4) transparent' }}>
               {[
                 { title: 'Web Development', desc: 'Full-stack apps & sites', icon: <Code size={20} />, accent: 'from-violet-500 to-purple-600' },
                 { title: 'Brand Design', desc: 'Logos, identity & visuals', icon: <Palette size={20} />, accent: 'from-fuchsia-500 to-purple-600' },
@@ -114,15 +124,15 @@ const Home: React.FC = () => {
                 { title: 'Video & Animation', desc: 'Motion graphics & editing', icon: <Activity size={20} />, accent: 'from-fuchsia-500 to-indigo-600' },
                 { title: 'Cloud & DevOps', desc: 'Infrastructure & deployment', icon: <Server size={20} />, accent: 'from-indigo-500 to-purple-600' },
               ].map((item, i) => (
-                <div key={i} className="bg-white/10 backdrop-blur-md border border-white/10 rounded-2xl p-5 flex items-center gap-4 hover:bg-white/15 hover:border-white/20 transition-all cursor-pointer group">
+                <div key={i} className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-5 flex items-center gap-4 hover:bg-white/10 hover:border-purple-500/30 transition-all cursor-pointer group">
                   <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${item.accent} flex items-center justify-center text-white flex-shrink-0 group-hover:scale-110 transition-transform`}>
                     {item.icon}
                   </div>
                   <div>
                     <h3 className="text-white font-bold text-sm">{item.title}</h3>
-                    <p className="text-purple-200/60 text-xs font-medium">{item.desc}</p>
+                    <p className="text-purple-300/50 text-xs font-medium">{item.desc}</p>
                   </div>
-                  <ChevronRight size={16} className="text-purple-300/40 ml-auto group-hover:text-white transition-colors" />
+                  <ChevronRight size={16} className="text-purple-400/30 ml-auto group-hover:text-white transition-colors" />
                 </div>
               ))}
             </div>
