@@ -64,13 +64,13 @@ const Home: React.FC = () => {
               <h1 className="text-5xl md:text-7xl font-extrabold text-white tracking-tight leading-none flex-shrink-0">
                 Cenner
               </h1>
-              <div className="h-[1.1em] text-5xl md:text-7xl font-extrabold overflow-hidden relative">
+              <div className="h-[48px] md:h-[72px] overflow-hidden relative">
                 <div
                   className="transition-transform duration-500 ease-in-out"
-                  style={{ transform: `translateY(-${activeTag * 100}%)` }}
+                  style={{ transform: `translateY(-${activeTag * (100 / ROTATING_TAGS.length)}%)` }}
                 >
                   {ROTATING_TAGS.map((tag, i) => (
-                    <div key={i} className="h-[1.1em] flex items-center text-purple-400 whitespace-nowrap">
+                    <div key={i} className="h-[48px] md:h-[72px] flex items-center text-5xl md:text-7xl font-extrabold text-purple-400 whitespace-nowrap">
                       {tag}
                     </div>
                   ))}
