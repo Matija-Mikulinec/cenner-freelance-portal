@@ -86,6 +86,29 @@ export interface BlogComment {
 
 export type Category = 'Design' | 'Development' | 'Writing' | 'Marketing' | 'Video' | 'Music';
 
+// ── Messaging ────────────────────────────────────────────────────────────────
+
+export interface DMConversation {
+  id: string;
+  other: { id: string; name: string; avatar?: string } | null;
+  otherUserId?: string;
+  name?: string;
+  avatar?: string;
+  lastMessage?: string;
+  lastMessageAt?: string | null;
+  unread: number;
+}
+
+export interface DMMessage {
+  id: string;
+  content: string;
+  senderId: string;
+  flagged?: boolean;
+  readAt?: string | null;
+  createdAt: string;
+  sender?: { id: string; name: string; avatar?: string };
+}
+
 export interface AuthContextType {
   user: User | null;
   login: (google?: boolean) => void;

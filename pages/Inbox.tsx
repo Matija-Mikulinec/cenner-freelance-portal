@@ -8,23 +8,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { API } from '../lib/api';
 import { connectSocket, getSocket } from '../hooks/useSocket';
 import SEO from '../components/SEO';
-
-interface Conversation {
-  id: string;
-  other: { id: string; name: string; avatar?: string } | null;
-  lastMessage?: string;
-  lastMessageAt?: string;
-  unread: number;
-}
-
-interface Message {
-  id: string;
-  content: string;
-  senderId: string;
-  flagged: boolean;
-  createdAt: string;
-  sender: { id: string; name: string; avatar?: string };
-}
+import type { DMConversation, DMMessage } from '../types';
 
 interface OtherProfile {
   id: string;
@@ -60,12 +44,12 @@ const MessagingHub: React.FC = () => {
   const navigate = useNavigate();
 
   // Conversations
-  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [conversations, setConversations] = useState<DMConversation[]>([]);
   const [convsLoading, setConvsLoading] = useState(true);
   const [search, setSearch] = useState('');
 
   // Active chat
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<DMMessage[]>([]);
   const [messagesLoading, setMessagesLoading] = useState(false);
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
@@ -101,7 +85,7 @@ const MessagingHub: React.FC = () => {
     setOtherProfile(null);
 
     API.getMessages(activeConvId)
-      .then((msgs: Message[]) => {
+      .then((msgs: DMMessage[]) => {
         setMessages(msgs);
         const other = msgs.find(m => m.senderId !== user.id)?.sender;
         if (other) {
@@ -130,7 +114,7 @@ const MessagingHub: React.FC = () => {
     // Update unread count in conversation list
     setConversations(prev => prev.map(c => c.id === activeConvId ? { ...c, unread: 0 } : c));
 
-    const onNewMessage = (msg: Message) => {
+    const onNewMessage = (msg: DMMessage) => {
       setMessages(prev => prev.find(m => m.id === msg.id) ? prev : [...prev, msg]);
       if (msg.senderId !== user.id) {
         socket.emit('mark_read', { conversationId: activeConvId });

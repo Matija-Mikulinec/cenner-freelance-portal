@@ -5,32 +5,15 @@ import { useAuth } from '../contexts/AuthContext';
 import { API } from '../lib/api';
 import NeuralBackground from '../components/NeuralBackground';
 import { useT } from '../i18n';
-
-interface Conversation {
-  id: string;
-  otherUserId: string;
-  name: string;
-  avatar?: string;
-  lastMessage: string;
-  lastMessageAt: string | null;
-  unread: number;
-}
-
-interface Message {
-  id: string;
-  senderId: string;
-  content: string;
-  readAt: string | null;
-  createdAt: string;
-}
+import type { DMConversation, DMMessage } from '../types';
 
 const Messages: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const t = useT();
-  const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [selected, setSelected] = useState<Conversation | null>(null);
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [conversations, setConversations] = useState<DMConversation[]>([]);
+  const [selected, setSelected] = useState<DMConversation | null>(null);
+  const [messages, setMessages] = useState<DMMessage[]>([]);
   const [input, setInput] = useState('');
   const [search, setSearch] = useState('');
   const [loadingConvs, setLoadingConvs] = useState(true);

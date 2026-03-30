@@ -5,21 +5,13 @@ import { useAuth } from '../contexts/AuthContext';
 import { API } from '../lib/api';
 import { connectSocket, getSocket } from '../hooks/useSocket';
 import SEO from '../components/SEO';
-
-interface Message {
-  id: string;
-  content: string;
-  senderId: string;
-  flagged: boolean;
-  createdAt: string;
-  sender: { id: string; name: string; avatar?: string };
-}
+import type { DMMessage } from '../types';
 
 const Chat: React.FC = () => {
   const { id: convId } = useParams<{ id: string }>();
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<DMMessage[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
@@ -33,7 +25,7 @@ const Chat: React.FC = () => {
 
     // Load messages
     API.getMessages(convId)
-      .then((msgs: Message[]) => {
+      .then((msgs: DMMessage[]) => {
         setMessages(msgs);
         // Extract other user from messages
         const other = msgs.find(m => m.senderId !== user.id)?.sender;
@@ -47,7 +39,7 @@ const Chat: React.FC = () => {
     socket.emit('join_conversation', convId);
     socket.emit('mark_read', { conversationId: convId });
 
-    const onNewMessage = (msg: Message) => {
+    const onNewMessage = (msg: DMMessage) => {
       setMessages(prev => {
         if (prev.find(m => m.id === msg.id)) return prev;
         return [...prev, msg];
