@@ -6,7 +6,7 @@ import {
   TrendingUp, Clock, CheckCircle, AlertCircle, MoreVertical,
   MoreHorizontal, Edit2, Pause, Trash2, ArrowUpRight, Search,
   Calendar, X, Download, User as UserIcon, ShieldAlert, Rocket, Play, Image as ImageIcon, Smartphone, Mail, Crown, Zap, Globe,
-  Upload, Loader2, ExternalLink, ShieldCheck, MapPin, Banknote, BadgeCheck
+  Upload, Loader2, ExternalLink, ShieldCheck, MapPin, Banknote, BadgeCheck, Heart, Package
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useData } from '../contexts/DataContext';
@@ -1388,6 +1388,30 @@ const Profile: React.FC = () => {
                 <span>Edit Profile</span>
               </button>
             </div>
+
+            {/* Bio */}
+            {((currentUser as any)?.bio || (currentUser as any)?.location || skills.length > 0) && (
+              <div className="mt-6 pt-6 border-t border-white/10 text-left space-y-3">
+                {(currentUser as any)?.bio && (
+                  <p className="text-gray-400 text-sm leading-relaxed">{(currentUser as any).bio}</p>
+                )}
+                {(currentUser as any)?.location && (
+                  <div className="flex items-center gap-2 text-sm text-gray-500">
+                    <MapPin size={13} className="text-gray-600 shrink-0" />
+                    <span>{(currentUser as any).location}</span>
+                  </div>
+                )}
+                {skills.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 pt-1">
+                    {skills.map(skill => (
+                      <span key={skill} className="px-2.5 py-1 bg-white/5 border border-white/10 rounded-full text-[10px] text-gray-400 font-bold">
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* CRM Data Section - Visualized */}
@@ -1446,10 +1470,10 @@ const Profile: React.FC = () => {
             </div>
             <nav className="flex flex-col">
               {[
-                { id: 'listings', icon: <Briefcase size={18} />, label: t('Manage Listings') },
-                { id: 'portfolio', icon: <ImageIcon size={18} />, label: t('Portfolio') },
+                { id: 'earnings', icon: <TrendingUp size={18} />, label: t('Earnings') },
+                { id: 'listings', icon: <Briefcase size={18} />, label: t('Listings') },
                 { id: 'inbox', icon: <MessageSquare size={18} />, label: t('Messages'), badge: inboxMessages.filter(m => m.unread).length },
-                { id: 'earnings', icon: <CreditCard size={18} />, label: t('Financials') },
+                { id: 'portfolio', icon: <ImageIcon size={18} />, label: t('Portfolio') },
                 { id: 'settings', icon: <Settings size={18} />, label: t('Settings') },
               ].map((item) => (
                 <button
@@ -1465,11 +1489,24 @@ const Profile: React.FC = () => {
                     {item.icon}
                     <span>{item.label}</span>
                   </div>
-                  {item.badge > 0 && (
+                  {(item as any).badge > 0 && (
                     <span className="w-5 h-5 rounded-full bg-brand-pink text-white text-[10px] flex items-center justify-center font-bold">
-                      {item.badge}
+                      {(item as any).badge}
                     </span>
                   )}
+                </button>
+              ))}
+              {[
+                { path: '/saved', icon: <Heart size={18} />, label: t('Saved') },
+                { path: '/orders', icon: <Package size={18} />, label: t('Orders') },
+              ].map((item) => (
+                <button
+                  key={item.path}
+                  onClick={() => navigate(item.path)}
+                  className="flex items-center space-x-4 px-8 py-5 text-sm font-medium text-gray-500 hover:text-white hover:bg-white/5 transition-all border-l-4 border-transparent"
+                >
+                  {item.icon}
+                  <span>{item.label}</span>
                 </button>
               ))}
             </nav>
@@ -1486,75 +1523,6 @@ const Profile: React.FC = () => {
             </div>
             <div className="hidden sm:flex items-center space-x-4 text-xs font-bold text-gray-500">
             </div>
-          </div>
-
-          {/* About Box */}
-          <div className="mb-8 bg-brand-grey/30 border border-white/5 rounded-2xl p-6">
-            <h3 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-4">{t('About')}</h3>
-
-            {/* Bio */}
-            {(currentUser as any)?.bio ? (
-              <p className="text-gray-300 text-sm leading-relaxed whitespace-pre-wrap mb-4">{(currentUser as any).bio}</p>
-            ) : (
-              <p className="text-gray-600 text-sm italic mb-4">
-                {t('No bio yet. Add one')}{' '}
-                <button onClick={() => setIsEditingProfile(true)} className="text-brand-pink hover:underline font-bold not-italic">Add one</button>
-              </p>
-            )}
-
-            {/* Location */}
-            {(currentUser as any)?.location && (
-              <div className="flex items-center gap-2 text-sm text-gray-400 mb-4">
-                <MapPin size={13} className="text-gray-600 shrink-0" />
-                <span>{(currentUser as any).location}</span>
-              </div>
-            )}
-
-            {/* Active Skills */}
-            {(skills.length > 0 || showSkillInput) && (
-              <div className="mt-2 pt-4 border-t border-white/5">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">{t('Skills')}</span>
-                  <button onClick={() => setShowSkillInput(true)} className="text-brand-pink hover:text-white transition-colors">
-                    <PlusCircle size={13} />
-                  </button>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {skills.map(skill => (
-                    <button
-                      key={skill}
-                      onClick={() => handleRemoveSkill(skill)}
-                      className="group relative px-3 py-1 bg-white/5 border border-white/10 rounded-full text-[10px] text-gray-400 font-bold hover:border-red-500/50 hover:text-red-500 transition-all cursor-pointer"
-                    >
-                      <span className="group-hover:opacity-0 transition-opacity">{skill}</span>
-                      <span className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100"><Trash2 size={10} /></span>
-                    </button>
-                  ))}
-                  {showSkillInput && (
-                    <input
-                      autoFocus
-                      type="text"
-                      value={newSkill}
-                      onChange={(e) => setNewSkill(e.target.value)}
-                      onKeyDown={handleAddSkill}
-                      onBlur={() => setShowSkillInput(false)}
-                      placeholder="Type & Enter..."
-                      className="bg-brand-black border border-brand-green/30 rounded-full text-[10px] text-white px-3 py-1 focus:outline-none focus:border-brand-green w-24"
-                    />
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* Show skill input trigger when no skills yet */}
-            {skills.length === 0 && !showSkillInput && (
-              <button
-                onClick={() => setShowSkillInput(true)}
-                className="mt-2 flex items-center gap-1.5 text-[10px] text-gray-600 hover:text-brand-pink transition-colors font-bold uppercase tracking-widest"
-              >
-                <PlusCircle size={11} /> {t('Add skills')}
-              </button>
-            )}
           </div>
 
           {renderTabContent()}
