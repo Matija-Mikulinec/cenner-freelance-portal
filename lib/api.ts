@@ -222,4 +222,76 @@ export const API = {
   getUserReviews: (userId: string) =>
     request<any[]>(`/users/${userId}/reviews`),
 
+  // ── Orders ──────────────────────────────────────────────────────────────
+  createOrder: (listingId: string, paymentIntentId: string) =>
+    request<any>('/orders', 'POST', { listingId, paymentIntentId }),
+
+  getOrders: (role?: 'buyer' | 'seller') =>
+    request<any[]>(`/orders${role ? `?role=${role}` : ''}`),
+
+  updateOrderStatus: (id: string, status: string) =>
+    request<any>(`/orders/${id}/status`, 'PATCH', { status }),
+
+  getInvoice: (orderId: string) =>
+    request<any>(`/invoices/${orderId}`),
+
+  // ── Earnings ────────────────────────────────────────────────────────────
+  getEarnings: () =>
+    request<any>('/earnings'),
+
+  // ── Dashboard Stats ─────────────────────────────────────────────────────
+  getDashboardStats: () =>
+    request<any>('/dashboard/stats'),
+
+  // ── Saved Listings ──────────────────────────────────────────────────────
+  getSavedListings: () =>
+    request<any[]>('/saved-listings'),
+
+  saveListing: (listingId: string) =>
+    request<any>('/saved-listings', 'POST', { listingId }),
+
+  unsaveListing: (listingId: string) =>
+    request<{ success: boolean }>(`/saved-listings/${listingId}`, 'DELETE'),
+
+  // ── Reports ─────────────────────────────────────────────────────────────
+  submitReport: (data: { targetType: string; targetRefId: string; targetId?: string; reason: string; details?: string }) =>
+    request<any>('/reports', 'POST', data),
+
+  // ── Notification Preferences ────────────────────────────────────────────
+  getNotificationPreferences: () =>
+    request<any>('/notification-preferences'),
+
+  updateNotificationPreferences: (data: Record<string, boolean>) =>
+    request<any>('/notification-preferences', 'PUT', data),
+
+  // ── Subscription ────────────────────────────────────────────────────────
+  getSubscriptionStatus: () =>
+    request<any>('/subscription/status'),
+
+  cancelSubscription: () =>
+    request<any>('/subscription/cancel', 'POST'),
+
+  getSubscriptionPortal: () =>
+    request<{ url: string }>('/subscription/portal', 'POST'),
+
+  // ── Dispute Evidence ────────────────────────────────────────────────────
+  submitEvidence: (milestoneId: string, content: string) =>
+    request<any>(`/milestones/${milestoneId}/evidence`, 'POST', { content }),
+
+  getEvidence: (milestoneId: string) =>
+    request<any[]>(`/milestones/${milestoneId}/evidence`),
+
+  // ── Refund ──────────────────────────────────────────────────────────────
+  refundMilestone: (milestoneId: string) =>
+    request<{ success: boolean }>(`/milestones/${milestoneId}/refund`, 'POST'),
+
+  // ── Advanced Search ─────────────────────────────────────────────────────
+  searchListings: (params: Record<string, string>) => {
+    const qs = new URLSearchParams(params).toString();
+    return request<{ data: any[]; total: number; page: number; totalPages: number }>(`/listings/search?${qs}`);
+  },
+
+  // ── Blog Votes ──────────────────────────────────────────────────────────
+  votePost: (postId: string, direction: 'up' | 'down') =>
+    request<{ votes: number }>(`/posts/${postId}/vote`, 'POST', { direction }),
 };

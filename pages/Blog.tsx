@@ -10,19 +10,26 @@ import {
 import { useData } from '../contexts/DataContext';
 import { BlogComment, BlogPost } from '../types';
 import { useAuth } from '../contexts/AuthContext';
+import { API } from '../lib/api';
 import { CATEGORIES } from '../constants';
 
-const VoteControl: React.FC<{ votes: number; orientation?: 'vertical' | 'horizontal' }> = ({ votes, orientation = 'vertical' }) => {
+const VoteControl: React.FC<{ postId?: string; votes: number; orientation?: 'vertical' | 'horizontal' }> = ({ postId, votes, orientation = 'vertical' }) => {
   const [currentVotes, setCurrentVotes] = useState(votes);
   const [voted, setVoted] = useState<'up' | 'down' | null>(null);
 
-  const handleVote = (type: 'up' | 'down') => {
+  const handleVote = async (type: 'up' | 'down') => {
     if (voted === type) {
       setCurrentVotes(votes);
       setVoted(null);
     } else {
       setCurrentVotes(type === 'up' ? votes + 1 : votes - 1);
       setVoted(type);
+      if (postId) {
+        try {
+          const res = await API.votePost(postId, type);
+          if (res.votes !== undefined) setCurrentVotes(res.votes);
+        } catch {}
+      }
     }
   };
 
@@ -250,7 +257,7 @@ const Blog: React.FC = () => {
                 <div className="bg-brand-grey/30 border border-white/5 rounded-3xl overflow-hidden shadow-2xl">
                   <div className="flex">
                     <div className="hidden md:flex flex-col items-center py-6 px-4 bg-white/[0.02]">
-                      <VoteControl votes={selectedPost.votes} />
+                      <VoteControl postId={selectedPost.id} votes={selectedPost.votes} />
                     </div>
                     
                     <div className="flex-grow p-6 md:p-10">
@@ -279,7 +286,7 @@ const Blog: React.FC = () => {
 
                       <div className="flex items-center space-x-6 py-6 border-t border-white/5">
                         <div className="md:hidden">
-                           <VoteControl votes={selectedPost.votes} orientation="horizontal" />
+                           <VoteControl postId={selectedPost.id} votes={selectedPost.votes} orientation="horizontal" />
                         </div>
                         <button className="flex items-center space-x-2 text-gray-500 hover:text-white transition-colors text-xs font-black uppercase tracking-widest">
                           <MessageSquare size={18} />

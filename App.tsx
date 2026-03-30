@@ -26,7 +26,6 @@ const Cookies = lazy(() => import('./pages/Cookies'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const FreelancerProfile = lazy(() => import('./pages/FreelancerProfile'));
 const Orders = lazy(() => import('./pages/Orders'));
-const Messages = lazy(() => import('./pages/Messages'));
 const Inbox = lazy(() => import('./pages/Inbox'));
 const Chat = lazy(() => import('./pages/Chat'));
 const Contracts = lazy(() => import('./pages/Contracts'));
@@ -34,6 +33,10 @@ const ContractDetail = lazy(() => import('./pages/ContractDetail'));
 const Projects = lazy(() => import('./pages/Projects'));
 const Technology = lazy(() => import('./pages/Technology'));
 const Match = lazy(() => import('./pages/Match'));
+const ResetPassword = lazy(() => import('./pages/ResetPassword'));
+const Earnings = lazy(() => import('./pages/Earnings'));
+const SavedListings = lazy(() => import('./pages/SavedListings'));
+const NotFound = lazy(() => import('./pages/NotFound'));
 
 const App: React.FC = () => {
   return (
@@ -68,10 +71,13 @@ const App: React.FC = () => {
                   <Route path="/messages/:id" element={<Inbox />} />
                   <Route path="/contracts" element={<Contracts />} />
                   <Route path="/contracts/:id" element={<ContractDetail />} />
-                  <Route path="/messages-legacy" element={<Messages />} />
                   <Route path="/projects" element={<Projects />} />
                   <Route path="/technology" element={<Technology />} />
                   <Route path="/match" element={<Match />} />
+                  <Route path="/reset-password" element={<ResetPassword />} />
+                  <Route path="/earnings" element={<Earnings />} />
+                  <Route path="/saved" element={<SavedListings />} />
+                  <Route path="*" element={<NotFound />} />
                 </Routes>
               </Suspense>
             </Layout>

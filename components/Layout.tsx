@@ -1,7 +1,8 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, User as UserIcon, LogOut, ChevronDown, Briefcase, MessageSquare, UserCheck, FileText } from 'lucide-react';
+import { Menu, X, User as UserIcon, LogOut, ChevronDown, Briefcase, MessageSquare, UserCheck, FileText, DollarSign, Heart } from 'lucide-react';
+import NotificationBell from './NotificationBell';
 import PermissionModal from './PermissionModal';
 import ChatWidget from './ChatWidget';
 import Footer from './Footer';
@@ -217,6 +218,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
               {/* Conditional: profile avatar or login button */}
               {user ? (
+                <>
+                <NotificationBell />
                 <div ref={profileRef} className="relative">
                   <button
                     onClick={() => setIsProfileOpen(v => !v)}
@@ -283,6 +286,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                           <Briefcase size={15} className="text-gray-500" />
                           {t('Orders')}
                         </Link>
+                        <Link to="/earnings" onClick={() => setIsProfileOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-colors">
+                          <DollarSign size={15} className="text-gray-500" />
+                          {t('Earnings')}
+                        </Link>
+                        <Link to="/saved" onClick={() => setIsProfileOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-colors">
+                          <Heart size={15} className="text-gray-500" />
+                          {t('Saved')}
+                        </Link>
                       </div>
 
                       <div className="border-t border-white/10" />
@@ -297,6 +308,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     </div>
                   )}
                 </div>
+                </>
               ) : (
                 <Link to="/auth" className="px-8 py-3 rounded-xl bg-white text-brand-black font-black text-[10px] uppercase tracking-widest hover:scale-105 transition-all">
                   {t('Login / Signup')}
@@ -372,6 +384,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   </Link>
                   <Link to="/contracts" onClick={() => setIsMenuOpen(false)} className="block py-2.5 text-base font-bold text-white">{t('Contracts')}</Link>
                   <Link to="/orders"    onClick={() => setIsMenuOpen(false)} className="block py-2.5 text-base font-bold text-white">{t('Orders')}</Link>
+                  <Link to="/earnings"  onClick={() => setIsMenuOpen(false)} className="block py-2.5 text-base font-bold text-white">{t('Earnings')}</Link>
+                  <Link to="/saved"     onClick={() => setIsMenuOpen(false)} className="block py-2.5 text-base font-bold text-white">{t('Saved')}</Link>
                   <button onClick={handleLogout} className="block py-2.5 text-base font-bold text-brand-pink w-full text-left">{t('Sign out')}</button>
                 </>
               ) : (

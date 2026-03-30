@@ -1,21 +1,35 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   ShieldCheck, ShieldAlert, Briefcase, MessageSquare,
   Star, TrendingUp, Plus, ArrowRight, User, Zap, Clock
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { API } from '../lib/api';
 import NeuralBackground from '../components/NeuralBackground';
 import { useT } from '../i18n';
+
+interface DashStats {
+  activeListings?: number;
+  avgRating?: number;
+  totalEarned?: number;
+  ordersCompleted?: number;
+  activeJobs?: number;
+  openOrders?: number;
+  totalSpent?: number;
+  hiredFreelancers?: number;
+}
 
 const Dashboard: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const t = useT();
+  const [stats, setStats] = useState<DashStats>({});
 
   useEffect(() => {
     if (!user) navigate('/auth');
+    else API.getDashboardStats().then(setStats).catch(() => {});
   }, [user, navigate]);
 
   if (!user) return null;
@@ -23,18 +37,20 @@ const Dashboard: React.FC = () => {
   const isVerified = user.kycVerified || user.creatorStatus === 'approved';
   const isFreelancer = user.role === 'freelancer';
 
+  const fmt = (v: number | undefined, prefix = '') => v !== undefined ? `${prefix}${v}` : '—';
+
   const quickStats = isFreelancer
     ? [
-        { label: t('Active Listings'), value: '—', icon: <Briefcase size={18} />, color: 'brand-green' },
-        { label: t('Avg. Rating'), value: '—', icon: <Star size={18} />, color: 'brand-pink' },
-        { label: t('Total Earned'), value: '€—', icon: <TrendingUp size={18} />, color: 'brand-green' },
-        { label: t('Orders Completed'), value: '—', icon: <Zap size={18} />, color: 'brand-pink' },
+        { label: t('Active Listings'), value: fmt(stats.activeListings), icon: <Briefcase size={18} />, color: 'brand-green' },
+        { label: t('Avg. Rating'), value: stats.avgRating !== undefined ? stats.avgRating.toFixed(1) : '—', icon: <Star size={18} />, color: 'brand-pink' },
+        { label: t('Total Earned'), value: fmt(stats.totalEarned, '€'), icon: <TrendingUp size={18} />, color: 'brand-green' },
+        { label: t('Orders Completed'), value: fmt(stats.ordersCompleted), icon: <Zap size={18} />, color: 'brand-pink' },
       ]
     : [
-        { label: t('Active Jobs'), value: '—', icon: <Briefcase size={18} />, color: 'brand-green' },
-        { label: t('Open Orders'), value: '—', icon: <Clock size={18} />, color: 'brand-pink' },
-        { label: t('Total Spent'), value: '€—', icon: <TrendingUp size={18} />, color: 'brand-green' },
-        { label: t('Hired Freelancers'), value: '—', icon: <User size={18} />, color: 'brand-pink' },
+        { label: t('Active Jobs'), value: fmt(stats.activeJobs), icon: <Briefcase size={18} />, color: 'brand-green' },
+        { label: t('Open Orders'), value: fmt(stats.openOrders), icon: <Clock size={18} />, color: 'brand-pink' },
+        { label: t('Total Spent'), value: fmt(stats.totalSpent, '€'), icon: <TrendingUp size={18} />, color: 'brand-green' },
+        { label: t('Hired Freelancers'), value: fmt(stats.hiredFreelancers), icon: <User size={18} />, color: 'brand-pink' },
       ];
 
   const quickActions = isFreelancer
