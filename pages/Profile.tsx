@@ -1312,25 +1312,25 @@ const Profile: React.FC = () => {
         </div>
       )}
 
-      {/* Seller Dashboard Summary */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
+      {/* Stat cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         {[
-          { label: t('Response Rate'), value: `N/A`, color: "text-gray-500" },
-          { label: t('Delivered on Time'), value: `N/A`, color: "text-gray-500" },
-          { label: t('Order Completion'), value: `N/A`, color: "text-gray-500" },
-          { label: t('Avg. Rating'), value: `0.0`, color: "text-gray-500", sub: `(No Reviews Yet)` },
+          { label: t('Response Rate'), value: 'N/A' },
+          { label: t('Delivered on Time'), value: 'N/A' },
+          { label: t('Order Completion'), value: 'N/A' },
+          { label: t('Avg. Rating'), value: '0.0', sub: t('No Reviews Yet') },
         ].map((stat, i) => (
           <div key={i} className="bg-brand-grey/40 border border-white/5 rounded-2xl p-6 text-center">
             <p className="text-[10px] text-gray-500 uppercase font-black tracking-widest mb-1">{stat.label}</p>
-            <p className={`text-2xl font-black ${stat.color}`}>{stat.value}</p>
+            <p className="text-2xl font-black text-gray-500">{stat.value}</p>
             {stat.sub && <p className="text-[10px] text-gray-600 mt-1">{stat.sub}</p>}
           </div>
         ))}
       </div>
 
-      <div className="grid lg:grid-cols-4 gap-12">
-        {/* Navigation & Micro-management Sidebar */}
-        <div className="lg:col-span-1 space-y-4 lg:sticky lg:top-24 lg:self-start">
+      <div className="grid lg:grid-cols-4 gap-8">
+        {/* Profile card sidebar — no nav */}
+        <div className="lg:col-span-1 lg:sticky lg:top-24 lg:self-start">
           <div className="bg-brand-grey/50 border border-white/10 rounded-[2.5rem] p-8 text-center relative overflow-hidden group">
             <div className="absolute -top-12 -left-12 w-32 h-32 bg-brand-green/10 rounded-full blur-3xl"></div>
             <div className="relative inline-block mb-6">
@@ -1415,66 +1415,43 @@ const Profile: React.FC = () => {
             )}
           </div>
 
-          <div className="bg-brand-grey/50 border border-white/10 rounded-[2rem] overflow-hidden">
-            <div className="p-5 border-b border-white/5 bg-white/[0.02] flex items-center justify-between">
-              <h4 className="text-[10px] text-gray-500 font-black uppercase tracking-widest">Navigation</h4>
-              <div className="flex items-center gap-2 text-[10px] text-gray-600 font-bold">
-                {!currentUser?.emailVerified && <button onClick={() => handleVerifyContact('email')} className="text-brand-pink hover:underline">Verify email</button>}
-                {!currentUser?.mobileVerified && <button onClick={() => handleVerifyContact('mobile')} className="text-brand-pink hover:underline">Verify phone</button>}
-              </div>
-            </div>
-            <nav className="flex flex-col">
-              {[
-                { id: 'earnings', icon: <TrendingUp size={18} />, label: t('Earnings') },
-                { id: 'listings', icon: <Briefcase size={18} />, label: t('Listings') },
-                { id: 'inbox', icon: <MessageSquare size={18} />, label: t('Messages'), badge: inboxMessages.filter(m => m.unread).length },
-                { id: 'portfolio', icon: <ImageIcon size={18} />, label: t('Portfolio') },
-                { id: 'settings', icon: <Settings size={18} />, label: t('Settings') },
-              ].map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => { setActiveTab(item.id as ActiveTab); setSelectedMessage(null); }}
-                  className={`flex items-center justify-between px-8 py-5 text-sm font-medium transition-all border-l-4 ${
-                    activeTab === item.id
-                      ? 'bg-brand-green/5 border-brand-green text-brand-green'
-                      : 'border-transparent text-gray-500 hover:text-white hover:bg-white/5'
-                  }`}
-                >
-                  <div className="flex items-center space-x-4">
-                    {item.icon}
-                    <span>{item.label}</span>
-                  </div>
-                  {(item as any).badge > 0 && (
-                    <span className="w-5 h-5 rounded-full bg-brand-pink text-white text-[10px] flex items-center justify-center font-bold">
-                      {(item as any).badge}
-                    </span>
-                  )}
-                </button>
-              ))}
-              {[
-                { path: '/saved', icon: <Heart size={18} />, label: t('Saved') },
-                { path: '/orders', icon: <Package size={18} />, label: t('Orders') },
-              ].map((item) => (
-                <button
-                  key={item.path}
-                  onClick={() => navigate(item.path)}
-                  className="flex items-center space-x-4 px-8 py-5 text-sm font-medium text-gray-500 hover:text-white hover:bg-white/5 transition-all border-l-4 border-transparent"
-                >
-                  {item.icon}
-                  <span>{item.label}</span>
-                </button>
-              ))}
-            </nav>
-          </div>
-
         </div>
 
         {/* Dynamic Content Area */}
         <div className="lg:col-span-3">
-          <div className="mb-10">
-            <h2 className="text-4xl font-extrabold text-white tracking-tight capitalize">
-              {{ listings: 'Listings', inbox: 'Messages', earnings: 'Earnings', portfolio: 'Portfolio', settings: 'Settings' }[activeTab] || activeTab}
-            </h2>
+          {/* Horizontal tab nav */}
+          <div className="flex gap-1 overflow-x-auto mb-8 bg-brand-grey/40 border border-white/5 rounded-2xl p-1">
+            {[
+              { id: 'earnings', label: t('Earnings') },
+              { id: 'listings', label: t('Listings') },
+              { id: 'inbox',    label: t('Messages'), badge: inboxMessages.filter(m => m.unread).length },
+              { id: 'portfolio',label: t('Portfolio') },
+              { id: 'settings', label: t('Settings') },
+            ].map(item => (
+              <button key={item.id}
+                onClick={() => { setActiveTab(item.id as ActiveTab); setSelectedMessage(null); }}
+                className={`relative flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest whitespace-nowrap transition-all ${
+                  activeTab === item.id ? 'bg-brand-green text-brand-black shadow-lg' : 'text-gray-500 hover:text-white'
+                }`}>
+                {item.label}
+                {(item as any).badge > 0 && (
+                  <span className={`w-4 h-4 rounded-full text-[9px] flex items-center justify-center font-black ${activeTab === item.id ? 'bg-brand-black/20 text-brand-black' : 'bg-brand-pink text-white'}`}>
+                    {(item as any).badge}
+                  </span>
+                )}
+              </button>
+            ))}
+            <div className="w-px bg-white/10 mx-1 my-1" />
+            {[
+              { path: '/saved',  label: t('Saved') },
+              { path: '/orders', label: t('Orders') },
+            ].map(item => (
+              <button key={item.path}
+                onClick={() => navigate(item.path)}
+                className="px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest whitespace-nowrap text-gray-500 hover:text-white transition-all">
+                {item.label}
+              </button>
+            ))}
           </div>
 
           {renderTabContent()}
