@@ -66,17 +66,20 @@ export interface BlogPost {
   id: string;
   title: string;
   author: string;
+  authorId?: string;
   authorAvatar: string;
   content: string;
   category: string;
   timestamp: string;
   votes: number;
   commentCount: number;
+  isPrivate?: boolean;
 }
 
 export interface BlogComment {
   id: string;
   author: string;
+  authorId?: string;
   authorAvatar: string;
   content: string;
   timestamp: string;

@@ -435,7 +435,7 @@ const OrdersTab: React.FC = () => {
 
 const Profile: React.FC = () => {
   const t = useT();
-  const { listings, addListing, refreshListings } = useData();
+  const { listings, addListing, updateListing, deleteListing, refreshListings } = useData();
   const [searchParams] = useSearchParams();
   const connectResult = searchParams.get('connect');
   const initialTab = (searchParams.get('tab') as ActiveTab) || (connectResult ? 'settings' : 'listings');
@@ -491,6 +491,12 @@ const Profile: React.FC = () => {
     includesInput: '',
   });
   const [includesList, setIncludesList] = useState<string[]>([]);
+
+  // Editing listing
+  const [editingListing, setEditingListing] = useState<any | null>(null);
+  const [editForm, setEditForm] = useState({ title: '', category: CATEGORIES[0], price: '', deliveryTime: '', description: '', includesInput: '' });
+  const [editIncludesList, setEditIncludesList] = useState<string[]>([]);
+  const [savingListing, setSavingListing] = useState(false);
 
   // Portfolio state
   const [portfolioItems, setPortfolioItems] = useState<any[]>([]);
@@ -737,6 +743,47 @@ const Profile: React.FC = () => {
     }
   };
 
+  const handleOpenEditListing = (listing: any) => {
+    setEditingListing(listing);
+    setEditForm({
+      title: listing.title,
+      category: listing.category,
+      price: String(listing.price),
+      deliveryTime: listing.deliveryTime || '',
+      description: listing.description || '',
+      includesInput: '',
+    });
+    setEditIncludesList(listing.includes || []);
+  };
+
+  const handleSaveListing = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingListing) return;
+    setSavingListing(true);
+    try {
+      await updateListing(editingListing.id, {
+        title: editForm.title,
+        category: editForm.category,
+        price: parseInt(editForm.price) || 0,
+        deliveryTime: editForm.deliveryTime,
+        description: editForm.description,
+        includes: editIncludesList,
+      });
+      setEditingListing(null);
+    } catch (err: any) {
+      alert(err.message || 'Failed to save listing.');
+    } finally {
+      setSavingListing(false);
+    }
+  };
+
+  const handleDeleteListing = async (id: string) => {
+    if (!window.confirm('Delete this listing? This cannot be undone.')) return;
+    try {
+      await deleteListing(id);
+    } catch {}
+  };
+
   const renderTabContent = () => {
     switch (activeTab) {
       case 'listings':
@@ -842,7 +889,8 @@ const Profile: React.FC = () => {
                               </button>
                             )
                           )}
-                          <button className="p-2 text-gray-500 hover:text-white transition-colors" title="Edit"><Edit2 size={16} /></button>
+                          <button onClick={() => handleOpenEditListing(listing)} className="p-2 text-gray-500 hover:text-white transition-colors" title="Edit"><Edit2 size={16} /></button>
+                          <button onClick={() => handleDeleteListing(listing.id)} className="p-2 text-gray-500 hover:text-brand-pink transition-colors" title="Delete"><Trash2 size={16} /></button>
                         </div>
                       </div>
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-4">
@@ -1397,6 +1445,92 @@ const Profile: React.FC = () => {
         </div>
       )}
 
+      {/* Edit Listing Modal */}
+      {editingListing && (
+        <div className="fixed inset-0 z-[150] bg-black/80 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-300">
+          <div className="w-full max-w-2xl bg-brand-grey border border-white/10 rounded-[3rem] p-10 relative overflow-y-auto max-h-[90vh] custom-scrollbar">
+            <button onClick={() => setEditingListing(null)} className="absolute top-10 right-10 text-gray-500 hover:text-white"><X size={24} /></button>
+            <h2 className="text-4xl font-black text-white mb-2 tracking-tighter">{t('Edit Listing')}</h2>
+            <p className="text-gray-500 mb-8">Update your service details. Cover image cannot be changed.</p>
+
+            <div className="flex items-center gap-4 mb-8 p-4 bg-brand-black/40 rounded-2xl border border-white/5">
+              <img src={editingListing.imageUrl} alt="" className="w-16 h-16 rounded-xl object-cover border border-white/10" />
+              <div>
+                <p className="text-xs text-gray-500 font-bold uppercase tracking-widest mb-1">Current cover image</p>
+                <p className="text-[11px] text-gray-600">Cover images are generated automatically and cannot be changed.</p>
+              </div>
+            </div>
+
+            <form onSubmit={handleSaveListing} className="space-y-6">
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">{t('Service Title')}</label>
+                <input required type="text"
+                  className="w-full bg-brand-black border border-white/10 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-brand-green"
+                  value={editForm.title} onChange={e => setEditForm({...editForm, title: e.target.value})} />
+              </div>
+
+              <div className="grid grid-cols-2 gap-6">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Category</label>
+                  <select className="w-full bg-brand-black border border-white/10 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-brand-green appearance-none"
+                    value={editForm.category} onChange={e => setEditForm({...editForm, category: e.target.value})}>
+                    {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">{t('Base Price (€)')}</label>
+                  <input required type="number"
+                    className="w-full bg-brand-black border border-white/10 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-brand-green"
+                    value={editForm.price} onChange={e => setEditForm({...editForm, price: e.target.value})} />
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">{t('Delivery Time')}</label>
+                <input required type="text"
+                  className="w-full bg-brand-black border border-white/10 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-brand-green"
+                  value={editForm.deliveryTime} onChange={e => setEditForm({...editForm, deliveryTime: e.target.value})} />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Description</label>
+                <textarea required rows={5}
+                  className="w-full bg-brand-black border border-white/10 rounded-xl py-3 px-4 text-white resize-none focus:outline-none focus:border-brand-green"
+                  value={editForm.description} onChange={e => setEditForm({...editForm, description: e.target.value})}></textarea>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">What's Included</label>
+                <div className="flex gap-2">
+                  <input type="text" placeholder="e.g. Source Files, 2 Revisions…"
+                    className="flex-1 bg-brand-black border border-white/10 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-brand-green text-sm"
+                    value={editForm.includesInput} onChange={e => setEditForm({...editForm, includesInput: e.target.value})}
+                    onKeyDown={e => {
+                      if (e.key === 'Enter') { e.preventDefault(); const val = editForm.includesInput.trim(); if (val && editIncludesList.length < 10) { setEditIncludesList(prev => [...prev, val]); setEditForm(prev => ({...prev, includesInput: ''})); } }
+                    }} />
+                  <button type="button" onClick={() => { const val = editForm.includesInput.trim(); if (val && editIncludesList.length < 10) { setEditIncludesList(prev => [...prev, val]); setEditForm(prev => ({...prev, includesInput: ''})); } }}
+                    className="px-4 py-3 bg-brand-green text-brand-black font-bold rounded-xl text-sm hover:scale-105 transition-transform">Add</button>
+                </div>
+                {editIncludesList.length > 0 && (
+                  <div className="flex flex-wrap gap-2 pt-2">
+                    {editIncludesList.map((item, i) => (
+                      <span key={i} className="flex items-center gap-1.5 bg-brand-green/10 border border-brand-green/20 text-brand-green text-xs px-3 py-1.5 rounded-lg">
+                        {item}
+                        <button type="button" onClick={() => setEditIncludesList(prev => prev.filter((_, j) => j !== i))} className="text-brand-green/60 hover:text-brand-green">×</button>
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <button type="submit" disabled={savingListing} className="w-full py-4 bg-brand-green text-brand-black font-black rounded-xl hover:scale-[1.02] transition-all disabled:opacity-50">
+                {savingListing ? 'Saving...' : t('Save Changes')}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
       {/* Edit Profile Modal */}
       {isEditingProfile && (
         <div className="fixed inset-0 z-[150] bg-black/80 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-300">
@@ -1467,7 +1601,7 @@ const Profile: React.FC = () => {
                   subscriptionTier === 'ultra' ? 'text-brand-pink' :
                   subscriptionTier === 'pro' ? 'text-brand-green' : 'text-gray-500'
               }`}>
-                  {subscriptionTier} Plan
+                  {subscriptionTier.charAt(0).toUpperCase() + subscriptionTier.slice(1)}
               </p>
 
               {canCreateListings ? (

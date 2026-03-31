@@ -101,6 +101,12 @@ export const API = {
   deletePost: (id: string) =>
     request<{ success: boolean }>(`/posts/${id}`, 'DELETE'),
 
+  getComments: (postId: string) =>
+    request<any[]>(`/posts/${postId}/comments`),
+
+  addComment: (postId: string, content: string) =>
+    request<any>(`/posts/${postId}/comments`, 'POST', { content }),
+
   // ── Contact form ─────────────────────────────────────────────────────
   contact: (data: { name: string; email: string; subject: string; message: string }) =>
     request<{ success: boolean }>('/contact', 'POST', data),

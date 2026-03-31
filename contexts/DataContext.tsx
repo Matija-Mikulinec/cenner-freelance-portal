@@ -11,6 +11,8 @@ interface DataContextType {
   addListing: (listing: Omit<ServiceListing, 'id'>) => Promise<ServiceListing>;
   addJob: (job: Omit<JobPosting, 'id'>) => Promise<JobPosting>;
   addBlogPost: (post: Omit<BlogPost, 'id'>) => Promise<BlogPost>;
+  updateBlogPost: (id: string, data: Partial<BlogPost>) => Promise<BlogPost>;
+  deleteBlogPost: (id: string) => Promise<void>;
   updateListing: (id: string, data: Partial<ServiceListing>) => Promise<ServiceListing>;
   deleteListing: (id: string) => Promise<void>;
   getListingById: (id: string) => ServiceListing | undefined;
@@ -54,6 +56,17 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return post;
   };
 
+  const updateBlogPost = async (id: string, data: Partial<BlogPost>): Promise<BlogPost> => {
+    const post = await API.updatePost(id, data);
+    setBlogPosts(prev => prev.map(p => p.id === id ? { ...p, ...post } : p));
+    return post;
+  };
+
+  const deleteBlogPost = async (id: string): Promise<void> => {
+    await API.deletePost(id);
+    setBlogPosts(prev => prev.filter(p => p.id !== id));
+  };
+
   const updateListing = async (id: string, data: Partial<ServiceListing>): Promise<ServiceListing> => {
     const listing = await API.updateListing(id, data);
     setListings(prev => prev.map(l => l.id === id ? listing : l));
@@ -75,7 +88,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   return (
     <DataContext.Provider value={{
       listings, jobs, blogPosts, loading,
-      addListing, addJob, addBlogPost,
+      addListing, addJob, addBlogPost, updateBlogPost, deleteBlogPost,
       updateListing, deleteListing,
       getListingById, refreshListings,
     }}>

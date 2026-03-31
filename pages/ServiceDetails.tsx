@@ -167,7 +167,7 @@ const ServiceDetails: React.FC = () => {
                         ? 'bg-brand-pink/10 text-brand-pink'
                         : 'bg-brand-green/10 text-brand-green'
                     }`}>
-                      {listing.freelancerTier === 'ultra' || listing.freelancerTier === 'enterprise' ? 'Ultra' : 'Pro'} Seller
+                      {listing.freelancerTier === 'ultra' || listing.freelancerTier === 'enterprise' ? 'Ultra' : 'Pro'}
                     </span>
                   )}
                   {isOwner && !isEditing && (
