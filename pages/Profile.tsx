@@ -14,7 +14,7 @@ import { CATEGORIES } from '../constants';
 import { API } from '../lib/api';
 import { useT } from '../i18n';
 
-type ActiveTab = 'listings' | 'inbox' | 'earnings' | 'settings' | 'portfolio' | 'saved' | 'orders';
+type ActiveTab = 'listings' | 'inbox' | 'earnings' | 'settings' | 'portfolio' | 'saved' | 'orders' | 'stats';
 
 // ─── Settings Tab ────────────────────────────────────────────────────────────
 const SettingsTab: React.FC<{ currentUser: any; updateUser: (u: any) => void; navigate: any; initialSection?: string }> = ({ currentUser, updateUser, navigate, initialSection = 'account' }) => {
@@ -1136,6 +1136,25 @@ const Profile: React.FC = () => {
         return <SavedTab />;
       case 'orders':
         return <OrdersTab />;
+      case 'stats':
+        return (
+          <div className="animate-in fade-in duration-500">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {[
+                { label: t('Response Rate'), value: 'N/A' },
+                { label: t('Delivered on Time'), value: 'N/A' },
+                { label: t('Order Completion'), value: 'N/A' },
+                { label: t('Avg. Rating'), value: '0.0', sub: t('No Reviews Yet') },
+              ].map((stat, i) => (
+                <div key={i} className="bg-brand-grey/40 border border-white/5 rounded-2xl p-6 text-center">
+                  <p className="text-[10px] text-gray-500 uppercase font-black tracking-widest mb-1">{stat.label}</p>
+                  <p className="text-2xl font-black text-gray-500">{stat.value}</p>
+                  {stat.sub && <p className="text-[10px] text-gray-600 mt-1">{stat.sub}</p>}
+                </div>
+              ))}
+            </div>
+          </div>
+        );
       default:
         return null;
     }
@@ -1417,22 +1436,6 @@ const Profile: React.FC = () => {
         </div>
       )}
 
-      {/* Stat cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        {[
-          { label: t('Response Rate'), value: 'N/A' },
-          { label: t('Delivered on Time'), value: 'N/A' },
-          { label: t('Order Completion'), value: 'N/A' },
-          { label: t('Avg. Rating'), value: '0.0', sub: t('No Reviews Yet') },
-        ].map((stat, i) => (
-          <div key={i} className="bg-brand-grey/40 border border-white/5 rounded-2xl p-6 text-center">
-            <p className="text-[10px] text-gray-500 uppercase font-black tracking-widest mb-1">{stat.label}</p>
-            <p className="text-2xl font-black text-gray-500">{stat.value}</p>
-            {stat.sub && <p className="text-[10px] text-gray-600 mt-1">{stat.sub}</p>}
-          </div>
-        ))}
-      </div>
-
       <div className="grid lg:grid-cols-4 gap-8">
         {/* Profile card sidebar — no nav */}
         <div className="lg:col-span-1 lg:sticky lg:top-24 lg:self-start">
@@ -1533,6 +1536,7 @@ const Profile: React.FC = () => {
               { id: 'saved',     label: t('Saved') },
               { id: 'orders',    label: t('Orders') },
               { id: 'portfolio', label: t('Portfolio') },
+              { id: 'stats',     label: t('Stats') },
               { id: 'settings',  label: t('Settings') },
             ] as { id: ActiveTab; label: string; badge?: number }[]).map(item => (
               <button key={item.id}

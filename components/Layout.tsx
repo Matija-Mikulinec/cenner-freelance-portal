@@ -1,7 +1,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, User as UserIcon, LogOut, ChevronDown, Briefcase, MessageSquare, UserCheck, FileText, DollarSign, Heart } from 'lucide-react';
+import { Menu, X, User as UserIcon, LogOut, ChevronDown, MessageSquare, UserCheck, FileText } from 'lucide-react';
 import NotificationBell from './NotificationBell';
 import PermissionModal from './PermissionModal';
 import ChatWidget from './ChatWidget';
@@ -282,18 +282,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                           <FileText size={15} className="text-gray-500" />
                           {t('Contracts')}
                         </Link>
-                        <Link to="/orders" onClick={() => setIsProfileOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-colors">
-                          <Briefcase size={15} className="text-gray-500" />
-                          {t('Orders')}
-                        </Link>
-                        <Link to="/earnings" onClick={() => setIsProfileOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-colors">
-                          <DollarSign size={15} className="text-gray-500" />
-                          {t('Earnings')}
-                        </Link>
-                        <Link to="/saved" onClick={() => setIsProfileOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-colors">
-                          <Heart size={15} className="text-gray-500" />
-                          {t('Saved')}
-                        </Link>
                       </div>
 
                       <div className="border-t border-white/10" />
@@ -383,9 +371,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     )}
                   </Link>
                   <Link to="/contracts" onClick={() => setIsMenuOpen(false)} className="block py-2.5 text-base font-bold text-white">{t('Contracts')}</Link>
-                  <Link to="/orders"    onClick={() => setIsMenuOpen(false)} className="block py-2.5 text-base font-bold text-white">{t('Orders')}</Link>
-                  <Link to="/earnings"  onClick={() => setIsMenuOpen(false)} className="block py-2.5 text-base font-bold text-white">{t('Earnings')}</Link>
-                  <Link to="/saved"     onClick={() => setIsMenuOpen(false)} className="block py-2.5 text-base font-bold text-white">{t('Saved')}</Link>
                   <button onClick={handleLogout} className="block py-2.5 text-base font-bold text-brand-pink w-full text-left">{t('Sign out')}</button>
                 </>
               ) : (
