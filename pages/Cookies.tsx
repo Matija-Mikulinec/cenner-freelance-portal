@@ -1,10 +1,12 @@
 
 import React from 'react';
 import { Cookie, Settings, ShieldCheck, Info } from 'lucide-react';
+import SEO from '../components/SEO';
 
 const Cookies: React.FC = () => {
   return (
     <div className="pt-20 pb-32 max-w-4xl mx-auto px-4">
+      <SEO title="Cookie Policy" canonical="/cookies" description="Learn how Cenner uses cookies and similar technologies to improve your experience on our platform." />
       <div className="mb-16">
         <div className="w-16 h-16 bg-brand-green/10 rounded-2xl flex items-center justify-center text-brand-green mb-6">
           <Cookie size={32} />

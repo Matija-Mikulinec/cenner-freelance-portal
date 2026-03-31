@@ -1,10 +1,12 @@
 
 import React from 'react';
 import { Shield, Lock, Eye, FileText } from 'lucide-react';
+import SEO from '../components/SEO';
 
 const PrivacyPolicy: React.FC = () => {
   return (
     <div className="pt-20 pb-32 max-w-4xl mx-auto px-4">
+      <SEO title="Privacy Policy" canonical="/privacy" description="Cenner's privacy policy. Learn how we collect, use, and protect your personal data on our freelance talent platform." />
       <div className="mb-16">
         <div className="w-16 h-16 bg-brand-green/10 rounded-2xl flex items-center justify-center text-brand-green mb-6">
           <Shield size={32} />

@@ -9,5 +9,9 @@ Disallow: /projects
 Disallow: /checkout/
 Disallow: /checkout-subscription/
 Disallow: /creator-onboarding
+Disallow: /earnings
+Disallow: /saved
+Disallow: /contracts
+Disallow: /reset-password
 
 Sitemap: https://cenner.hr/sitemap.xml

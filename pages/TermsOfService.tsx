@@ -1,10 +1,12 @@
 
 import React from 'react';
 import { FileText, Scale, AlertTriangle, CheckSquare } from 'lucide-react';
+import SEO from '../components/SEO';
 
 const TermsOfService: React.FC = () => {
   return (
     <div className="pt-20 pb-32 max-w-4xl mx-auto px-4">
+      <SEO title="Terms of Service" canonical="/terms" description="Cenner's terms of service. Read the terms and conditions governing the use of our freelance talent marketplace." />
       <div className="mb-16">
         <div className="w-16 h-16 bg-brand-pink/10 rounded-2xl flex items-center justify-center text-brand-pink mb-6">
           <Scale size={32} />

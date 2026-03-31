@@ -5,6 +5,7 @@ import { Tag, X, Search, Briefcase, Clock, Zap, ArrowUpRight, ChevronDown } from
 import NeuralBackground from '../components/NeuralBackground';
 import { useData } from '../contexts/DataContext';
 import { CATEGORIES } from '../constants';
+import SEO from '../components/SEO';
 
 const URGENCY_LABEL: Record<string, string> = {
   high: 'Urgent',
@@ -76,6 +77,7 @@ const Match: React.FC = () => {
 
   return (
     <div className="relative min-h-screen pt-16 pb-24 overflow-hidden">
+      <SEO title="Match" canonical="/match" description="Find your perfect freelancer-client match on Cenner. AI-powered matching connects talent with the right projects." />
       <NeuralBackground parallax={false} />
 
       <div className="relative z-10 max-w-5xl mx-auto px-4">

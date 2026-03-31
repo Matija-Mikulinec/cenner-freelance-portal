@@ -9,6 +9,7 @@ import {
 import { API } from '../lib/api';
 import { useAuth } from '../contexts/AuthContext';
 import NeuralBackground from '../components/NeuralBackground';
+import SEO from '../components/SEO';
 
 // ── Create Contract Modal ─────────────────────────────────────────────────────
 
@@ -307,6 +308,7 @@ const FreelancerProfile: React.FC = () => {
 
   return (
     <div className="relative min-h-screen pt-12 pb-24 px-4 overflow-hidden">
+      <SEO title={profile?.name || 'Freelancer'} canonical={`/freelancer/${id}`} description={profile?.bio || 'View freelancer profile on Cenner.'} />
       <NeuralBackground parallax={false} />
 
       {showContractModal && id && (
