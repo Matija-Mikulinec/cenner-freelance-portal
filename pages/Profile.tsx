@@ -450,6 +450,7 @@ const Profile: React.FC = () => {
   const [newSkill, setNewSkill] = useState('');
   const [isDownloading, setIsDownloading] = useState(false);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [confirmDialog, setConfirmDialog] = useState<{ message: string; onConfirm: () => void } | null>(null);
   const [editName, setEditName] = useState('');
   const [editBio, setEditBio] = useState('');
   const [editLocation, setEditLocation] = useState('');
@@ -777,11 +778,14 @@ const Profile: React.FC = () => {
     }
   };
 
-  const handleDeleteListing = async (id: string) => {
-    if (!window.confirm('Delete this listing? This cannot be undone.')) return;
-    try {
-      await deleteListing(id);
-    } catch {}
+  const handleDeleteListing = (id: string) => {
+    setConfirmDialog({
+      message: 'Delete this listing? This cannot be undone.',
+      onConfirm: async () => {
+        setConfirmDialog(null);
+        try { await deleteListing(id); } catch {}
+      },
+    });
   };
 
   const renderTabContent = () => {
@@ -1210,6 +1214,19 @@ const Profile: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-12">
+
+      {/* Confirm Dialog */}
+      {confirmDialog && (
+        <div className="fixed inset-0 z-[200] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-[#1a1a1a] border border-white/10 rounded-2xl p-8 max-w-sm w-full shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+            <p className="text-white font-bold text-base mb-6 leading-relaxed">{confirmDialog.message}</p>
+            <div className="flex gap-3">
+              <button onClick={() => setConfirmDialog(null)} className="flex-1 py-3 bg-white/5 border border-white/10 rounded-xl text-gray-400 font-bold text-sm hover:bg-white/10 transition-colors">Cancel</button>
+              <button onClick={confirmDialog.onConfirm} className="flex-1 py-3 bg-brand-pink text-white font-black rounded-xl text-sm hover:scale-105 transition-all">Delete</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Phone Verification Modal */}
       {isPhoneModalOpen && (

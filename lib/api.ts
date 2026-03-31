@@ -104,8 +104,8 @@ export const API = {
   getComments: (postId: string) =>
     request<any[]>(`/posts/${postId}/comments`),
 
-  addComment: (postId: string, content: string) =>
-    request<any>(`/posts/${postId}/comments`, 'POST', { content }),
+  addComment: (postId: string, content: string, parentId?: string) =>
+    request<any>(`/posts/${postId}/comments`, 'POST', { content, ...(parentId && { parentId }) }),
 
   // ── Contact form ─────────────────────────────────────────────────────
   contact: (data: { name: string; email: string; subject: string; message: string }) =>
