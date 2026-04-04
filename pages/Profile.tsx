@@ -454,6 +454,8 @@ const Profile: React.FC = () => {
   const [editName, setEditName] = useState('');
   const [editBio, setEditBio] = useState('');
   const [editLocation, setEditLocation] = useState('');
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const avatarFileRef = useRef<HTMLInputElement>(null);
   const [isSavingProfile, setIsSavingProfile] = useState(false);
 
   // Phone verification modal state
@@ -492,15 +494,17 @@ const Profile: React.FC = () => {
     includesInput: '',
   });
   const [includesList, setIncludesList] = useState<string[]>([]);
+  const [newListingImages, setNewListingImages] = useState<string[]>([]);
+  const [uploadingListingImage, setUploadingListingImage] = useState(false);
+  const newListingImageRef = useRef<HTMLInputElement>(null);
 
   // Editing listing
   const [editingListing, setEditingListing] = useState<any | null>(null);
   const [editForm, setEditForm] = useState({ title: '', category: CATEGORIES[0], price: '', deliveryTime: '', description: '', includesInput: '' });
   const [editIncludesList, setEditIncludesList] = useState<string[]>([]);
-  const [savingListing, setSavingListing] = useState(false);
-  const [editListingImageFile, setEditListingImageFile] = useState<File | null>(null);
-  const [editListingImagePreview, setEditListingImagePreview] = useState<string | null>(null);
+  const [editListingImages, setEditListingImages] = useState<string[]>([]);
   const editListingImageRef = useRef<HTMLInputElement>(null);
+  const [savingListing, setSavingListing] = useState(false);
 
   // Portfolio state
   const [portfolioItems, setPortfolioItems] = useState<any[]>([]);
@@ -713,8 +717,8 @@ const Profile: React.FC = () => {
     e.preventDefault();
     if (!currentUser) return;
 
-    const randomImageId = Math.floor(Math.random() * 1000);
-    const imageUrl = `https://picsum.photos/seed/${randomImageId}/800/600`;
+    const imageUrl = newListingImages[0] || `https://picsum.photos/seed/${Math.floor(Math.random() * 1000)}/800/600`;
+    const galleryImages = newListingImages.length > 0 ? newListingImages : [];
 
     try {
       await addListing({
@@ -730,10 +734,12 @@ const Profile: React.FC = () => {
         rating: 0,
         reviewsCount: 0,
         imageUrl,
+        galleryImages,
       });
 
       setIsCreatingListing(false);
       setIncludesList([]);
+      setNewListingImages([]);
       setNewListing({
         title: '',
         category: CATEGORIES[0],
@@ -758,8 +764,10 @@ const Profile: React.FC = () => {
       includesInput: '',
     });
     setEditIncludesList(listing.includes || []);
-    setEditListingImageFile(null);
-    setEditListingImagePreview(null);
+    // Build gallery: start with imageUrl then any additional galleryImages (excluding imageUrl to avoid duplicates)
+    const cover = listing.imageUrl ? [listing.imageUrl] : [];
+    const extras = (listing.galleryImages || []).filter((u: string) => u !== listing.imageUrl);
+    setEditListingImages([...cover, ...extras]);
   };
 
   const handleSaveListing = async (e: React.FormEvent) => {
@@ -767,9 +775,8 @@ const Profile: React.FC = () => {
     if (!editingListing) return;
     setSavingListing(true);
     try {
-      if (editListingImageFile) {
-        await API.uploadListingImage(editingListing.id, editListingImageFile);
-      }
+      const imageUrl = editListingImages[0] || editingListing.imageUrl;
+      const galleryImages = editListingImages;
       await updateListing(editingListing.id, {
         title: editForm.title,
         category: editForm.category,
@@ -777,8 +784,11 @@ const Profile: React.FC = () => {
         deliveryTime: editForm.deliveryTime,
         description: editForm.description,
         includes: editIncludesList,
+        imageUrl,
+        galleryImages,
       });
       setEditingListing(null);
+      setEditListingImages([]);
     } catch (err: any) {
       alert(err.message || 'Failed to save listing.');
     } finally {
@@ -1455,11 +1465,58 @@ const Profile: React.FC = () => {
                   )}
                 </div>
 
-                <div className="p-4 bg-brand-black/50 rounded-xl border border-white/10 flex items-center space-x-4">
-                  <div className="p-3 bg-white/5 rounded-lg text-brand-green">
-                    <ImageIcon size={20} />
+                {/* Gallery Upload */}
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Gallery Images (up to 5)</label>
+                  <input
+                    ref={newListingImageRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    className="hidden"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file || newListingImages.length >= 5) return;
+                      setUploadingListingImage(true);
+                      try {
+                        const url = await API.uploadListingImage(file);
+                        setNewListingImages(prev => [...prev, url]);
+                      } catch (err: any) {
+                        alert(err.message || 'Upload failed');
+                      } finally {
+                        setUploadingListingImage(false);
+                        if (newListingImageRef.current) newListingImageRef.current.value = '';
+                      }
+                    }}
+                  />
+                  <div className="flex flex-wrap gap-2">
+                    {newListingImages.map((url, i) => (
+                      <div key={i} className="relative group w-20 h-20">
+                        <img src={url} alt="" className="w-20 h-20 rounded-xl object-cover border border-white/10" />
+                        {i === 0 && <span className="absolute bottom-1 left-1 text-[9px] font-black bg-brand-green text-brand-black px-1.5 py-0.5 rounded-md">Cover</span>}
+                        <button
+                          type="button"
+                          onClick={() => setNewListingImages(prev => prev.filter((_, j) => j !== i))}
+                          className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-brand-black border border-white/20 rounded-full flex items-center justify-center text-gray-400 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <X size={10} />
+                        </button>
+                      </div>
+                    ))}
+                    {newListingImages.length < 5 && (
+                      <button
+                        type="button"
+                        disabled={uploadingListingImage}
+                        onClick={() => newListingImageRef.current?.click()}
+                        className="w-20 h-20 rounded-xl border border-dashed border-white/20 flex flex-col items-center justify-center gap-1 text-gray-500 hover:border-brand-green/50 hover:text-brand-green transition-colors disabled:opacity-50"
+                      >
+                        {uploadingListingImage ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
+                        <span className="text-[9px] font-bold">Add</span>
+                      </button>
+                    )}
                   </div>
-                  <p className="text-xs text-gray-500">A high-quality abstract cover image will be generated for your listing automatically.</p>
+                  {newListingImages.length === 0 && (
+                    <p className="text-[11px] text-gray-600">First image becomes the cover. Leave empty for auto-generated cover.</p>
+                  )}
                 </div>
 
                 <button type="submit" className="w-full py-4 bg-brand-green text-brand-black font-black rounded-xl hover:scale-[1.02] transition-all">
@@ -1474,55 +1531,60 @@ const Profile: React.FC = () => {
       {editingListing && (
         <div className="fixed inset-0 z-[150] bg-black/80 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-300">
           <div className="w-full max-w-2xl bg-brand-grey border border-white/10 rounded-[3rem] p-10 relative overflow-y-auto max-h-[90vh] custom-scrollbar">
-            <button onClick={() => { setEditingListing(null); setEditListingImageFile(null); setEditListingImagePreview(null); }} className="absolute top-10 right-10 text-gray-500 hover:text-white"><X size={24} /></button>
+            <button onClick={() => { setEditingListing(null); setEditListingImages([]); }} className="absolute top-10 right-10 text-gray-500 hover:text-white"><X size={24} /></button>
             <h2 className="text-4xl font-black text-white mb-2 tracking-tighter">{t('Edit Listing')}</h2>
-            <p className="text-gray-500 mb-8">Update your service details.</p>
+            <p className="text-gray-500 mb-8">Update your service details and gallery images.</p>
 
-            <div className="mb-8">
-              <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest block mb-3">Cover Image</label>
-              <div className="flex items-center gap-4">
-                <div className="relative w-24 h-24 flex-shrink-0">
-                  <img
-                    src={editListingImagePreview || editingListing.imageUrl}
-                    alt=""
-                    className="w-24 h-24 rounded-2xl object-cover border border-white/10"
-                  />
-                  {editListingImagePreview && (
-                    <span className="absolute -top-1.5 -right-1.5 bg-brand-green text-brand-black text-[9px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-wide">New</span>
-                  )}
-                </div>
-                <div className="flex-grow">
-                  <button
-                    type="button"
-                    onClick={() => editListingImageRef.current?.click()}
-                    className="flex items-center gap-2 px-4 py-2.5 bg-white/5 border border-white/10 hover:border-brand-green/50 text-white rounded-xl text-xs font-bold transition-all"
-                  >
-                    <Upload size={14} />
-                    {editListingImagePreview ? 'Change Image' : 'Upload New Image'}
-                  </button>
-                  <p className="text-[10px] text-gray-600 mt-1.5">JPG, PNG or WebP · max 5MB</p>
-                  {editListingImagePreview && (
-                    <button
-                      type="button"
-                      onClick={() => { setEditListingImageFile(null); setEditListingImagePreview(null); if (editListingImageRef.current) editListingImageRef.current.value = ''; }}
-                      className="text-[10px] text-brand-pink hover:underline mt-1 block"
-                    >
-                      Remove
-                    </button>
-                  )}
-                </div>
-              </div>
+            {/* Gallery editor */}
+            <div className="space-y-2 mb-8">
+              <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Gallery Images (up to 5)</label>
               <input
                 ref={editListingImageRef}
                 type="file"
                 accept="image/jpeg,image/png,image/webp"
                 className="hidden"
-                onChange={e => {
-                  const file = e.target.files?.[0] || null;
-                  setEditListingImageFile(file);
-                  setEditListingImagePreview(file ? URL.createObjectURL(file) : null);
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (!file || editListingImages.length >= 5) return;
+                  setUploadingListingImage(true);
+                  try {
+                    const url = await API.uploadListingImage(file);
+                    setEditListingImages(prev => [...prev, url]);
+                  } catch (err: any) {
+                    alert(err.message || 'Upload failed');
+                  } finally {
+                    setUploadingListingImage(false);
+                    if (editListingImageRef.current) editListingImageRef.current.value = '';
+                  }
                 }}
               />
+              <div className="flex flex-wrap gap-2">
+                {editListingImages.map((url, i) => (
+                  <div key={i} className="relative group w-20 h-20">
+                    <img src={url} alt="" className="w-20 h-20 rounded-xl object-cover border border-white/10" />
+                    {i === 0 && <span className="absolute bottom-1 left-1 text-[9px] font-black bg-brand-green text-brand-black px-1.5 py-0.5 rounded-md">Cover</span>}
+                    <button
+                      type="button"
+                      onClick={() => setEditListingImages(prev => prev.filter((_, j) => j !== i))}
+                      className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-brand-black border border-white/20 rounded-full flex items-center justify-center text-gray-400 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <X size={10} />
+                    </button>
+                  </div>
+                ))}
+                {editListingImages.length < 5 && (
+                  <button
+                    type="button"
+                    disabled={uploadingListingImage}
+                    onClick={() => editListingImageRef.current?.click()}
+                    className="w-20 h-20 rounded-xl border border-dashed border-white/20 flex flex-col items-center justify-center gap-1 text-gray-500 hover:border-brand-green/50 hover:text-brand-green transition-colors disabled:opacity-50"
+                  >
+                    {uploadingListingImage ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
+                    <span className="text-[9px] font-bold">Add</span>
+                  </button>
+                )}
+              </div>
+              <p className="text-[11px] text-gray-600">First image is the cover.</p>
             </div>
 
             <form onSubmit={handleSaveListing} className="space-y-6">
@@ -1603,7 +1665,27 @@ const Profile: React.FC = () => {
               <h2 className="text-4xl font-black text-white mb-10 tracking-tighter">{t('Edit Your Identity')}</h2>
               <div className="space-y-8">
                 <div className="flex items-center space-x-8">
-                  <div className="relative">
+                  <div className="relative group/avatar">
+                    <input
+                      ref={avatarFileRef}
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp,image/gif,image/avif"
+                      className="hidden"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        setUploadingAvatar(true);
+                        try {
+                          const url = await API.uploadProfileAvatar(file);
+                          updateUser({ avatar: url } as any);
+                        } catch (err: any) {
+                          alert(err.message || 'Failed to upload avatar');
+                        } finally {
+                          setUploadingAvatar(false);
+                          if (avatarFileRef.current) avatarFileRef.current.value = '';
+                        }
+                      }}
+                    />
                     {currentUser?.avatar ? (
                         <img src={currentUser?.avatar} className="w-24 h-24 rounded-full border-4 border-brand-green" alt="" />
                     ) : (
@@ -1611,7 +1693,14 @@ const Profile: React.FC = () => {
                             <UserIcon size={40} className="text-brand-green"/>
                         </div>
                     )}
-                    <button className="absolute bottom-0 right-0 p-2 bg-brand-pink text-white rounded-full"><Edit2 size={12} /></button>
+                    <button
+                      type="button"
+                      disabled={uploadingAvatar}
+                      onClick={() => avatarFileRef.current?.click()}
+                      className="absolute bottom-0 right-0 p-2 bg-brand-pink text-white rounded-full hover:scale-110 transition-transform disabled:opacity-50"
+                    >
+                      {uploadingAvatar ? <Loader2 size={12} className="animate-spin" /> : <Edit2 size={12} />}
+                    </button>
                   </div>
                   <div className="flex-grow space-y-4">
                     <div className="space-y-1">

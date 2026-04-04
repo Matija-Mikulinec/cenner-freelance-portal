@@ -61,6 +61,22 @@ export const API = {
   updateProfile: (id: string, data: Partial<any>) =>
     request<any>(`/profile/${id}`, 'PUT', data),
 
+  uploadProfileAvatar: async (file: File): Promise<string> => {
+    const formData = new FormData();
+    formData.append('avatar', file);
+    const res = await fetch(`${API_BASE}/profile/avatar`, {
+      method: 'POST',
+      credentials: 'include',
+      body: formData,
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: res.statusText }));
+      throw new Error(err.error || `HTTP ${res.status}`);
+    }
+    const { url } = await res.json();
+    return url;
+  },
+
   // ── Listings ──────────────────────────────────────────────────────────
   getListings: (category?: string, search?: string) => {
     const params = new URLSearchParams();
@@ -75,24 +91,24 @@ export const API = {
   updateListing: (id: string, data: any) =>
     request<any>(`/listings/${id}`, 'PUT', data),
 
-  uploadListingImage: (id: string, file: File): Promise<any> => {
-    const formData = new FormData();
-    formData.append('image', file);
-    return fetch(`${API_BASE}/listings/${id}/image`, {
-      method: 'PATCH',
-      credentials: 'include',
-      body: formData,
-    }).then(async res => {
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({ error: res.statusText }));
-        throw new Error(err.error || `HTTP ${res.status}`);
-      }
-      return res.json();
-    });
-  },
-
   deleteListing: (id: string) =>
     request<{ success: boolean }>(`/listings/${id}`, 'DELETE'),
+
+  uploadListingImage: async (file: File): Promise<string> => {
+    const formData = new FormData();
+    formData.append('image', file);
+    const res = await fetch(`${API_BASE}/listings/images`, {
+      method: 'POST',
+      credentials: 'include',
+      body: formData,
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: res.statusText }));
+      throw new Error(err.error || `HTTP ${res.status}`);
+    }
+    const { url } = await res.json();
+    return url;
+  },
 
   // ── Jobs ──────────────────────────────────────────────────────────────
   getJobs: (category?: string) =>

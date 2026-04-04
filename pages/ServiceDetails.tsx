@@ -1,7 +1,7 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { Star, Clock, CheckCircle, MessageSquare, ShieldCheck, Share2, Heart, ArrowLeft, Edit2, Save, X, Loader2 } from 'lucide-react';
+import { Star, Clock, CheckCircle, MessageSquare, ShieldCheck, Share2, Heart, ArrowLeft, Edit2, Save, X, Loader2, Upload } from 'lucide-react';
 import PermissionModal from '../components/PermissionModal';
 import { useData } from '../contexts/DataContext';
 import { useAuth } from '../contexts/AuthContext';
@@ -18,6 +18,8 @@ const ServiceDetails: React.FC = () => {
   const [saved, setSaved] = useState(false);
   const [contacting, setContacting] = useState(false);
 
+  const [activeImage, setActiveImage] = useState(0);
+
   // Edit mode for listing owner
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -26,6 +28,9 @@ const ServiceDetails: React.FC = () => {
   const [editPrice, setEditPrice] = useState('');
   const [editDelivery, setEditDelivery] = useState('');
   const [editCategory, setEditCategory] = useState('');
+  const [editGallery, setEditGallery] = useState<string[]>([]);
+  const [uploadingImg, setUploadingImg] = useState(false);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
 
   const listing = id ? getListingById(id) : undefined;
   const isOwner = !!(user && listing && user.id === listing.freelancerId);
@@ -37,6 +42,10 @@ const ServiceDetails: React.FC = () => {
     setEditPrice(String(listing.price));
     setEditDelivery(listing.deliveryTime);
     setEditCategory(listing.category);
+    // Build gallery: cover first, then extras
+    const cover = listing.imageUrl ? [listing.imageUrl] : [];
+    const extras = (listing.galleryImages || []).filter((u: string) => u !== listing.imageUrl);
+    setEditGallery([...cover, ...extras]);
     setIsEditing(true);
   };
 
@@ -44,14 +53,18 @@ const ServiceDetails: React.FC = () => {
     if (!listing) return;
     setSaving(true);
     try {
+      const imageUrl = editGallery[0] || listing.imageUrl;
       await updateListing(listing.id, {
         title: editTitle,
         description: editDescription,
         price: parseFloat(editPrice) || listing.price,
         deliveryTime: editDelivery,
         category: editCategory,
+        imageUrl,
+        galleryImages: editGallery,
       });
       await refreshListings();
+      setActiveImage(0);
       setIsEditing(false);
     } catch (err: any) {
       alert(err.message || 'Failed to save changes.');
@@ -199,13 +212,89 @@ const ServiceDetails: React.FC = () => {
               </div>
             </div>
 
-            <div className="rounded-3xl overflow-hidden border border-white/10 aspect-video mb-8 bg-brand-black shadow-2xl">
-              <img
-                src={listing.imageUrl}
-                alt={listing.title}
-                className="w-full h-full object-cover"
-              />
-            </div>
+            {/* Gallery */}
+            {isEditing ? (
+              <div className="mb-8">
+                <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-3">Gallery Images (up to 5) — First is the cover</p>
+                <input
+                  ref={galleryInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  className="hidden"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file || editGallery.length >= 5) return;
+                    setUploadingImg(true);
+                    try {
+                      const url = await API.uploadListingImage(file);
+                      setEditGallery(prev => [...prev, url]);
+                    } catch (err: any) {
+                      alert(err.message || 'Upload failed');
+                    } finally {
+                      setUploadingImg(false);
+                      if (galleryInputRef.current) galleryInputRef.current.value = '';
+                    }
+                  }}
+                />
+                <div className="flex flex-wrap gap-2">
+                  {editGallery.map((url, i) => (
+                    <div key={i} className="relative group/img">
+                      <div className={`rounded-2xl overflow-hidden border-2 ${i === 0 ? 'w-48 h-32 border-brand-green' : 'w-24 h-16 border-white/10'}`}>
+                        <img src={url} alt="" className="w-full h-full object-cover" />
+                      </div>
+                      {i === 0 && <span className="absolute bottom-1 left-1 text-[9px] font-black bg-brand-green text-brand-black px-1.5 py-0.5 rounded-md">Cover</span>}
+                      <button
+                        type="button"
+                        onClick={() => setEditGallery(prev => prev.filter((_, j) => j !== i))}
+                        className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-brand-black border border-white/20 rounded-full flex items-center justify-center text-gray-400 hover:text-white opacity-0 group-hover/img:opacity-100 transition-opacity"
+                      >
+                        <X size={10} />
+                      </button>
+                    </div>
+                  ))}
+                  {editGallery.length < 5 && (
+                    <button
+                      type="button"
+                      disabled={uploadingImg}
+                      onClick={() => galleryInputRef.current?.click()}
+                      className="w-24 h-16 rounded-2xl border border-dashed border-white/20 flex flex-col items-center justify-center gap-1 text-gray-500 hover:border-brand-green/50 hover:text-brand-green transition-colors disabled:opacity-50"
+                    >
+                      {uploadingImg ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
+                      <span className="text-[9px] font-bold">Add</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+            ) : (
+              (() => {
+                const allImages = listing.imageUrl
+                  ? [listing.imageUrl, ...(listing.galleryImages || []).filter((u: string) => u !== listing.imageUrl)]
+                  : (listing.galleryImages || []);
+                const current = allImages[activeImage] || listing.imageUrl;
+                return (
+                  <div className="mb-8">
+                    <div className="rounded-3xl overflow-hidden border border-white/10 aspect-video bg-brand-black shadow-2xl">
+                      <img src={current} alt={listing.title} className="w-full h-full object-cover" />
+                    </div>
+                    {allImages.length > 1 && (
+                      <div className="flex gap-2 mt-3">
+                        {allImages.map((url: string, i: number) => (
+                          <button
+                            key={i}
+                            onClick={() => setActiveImage(i)}
+                            className={`w-16 h-12 rounded-xl overflow-hidden border-2 transition-colors flex-shrink-0 ${
+                              i === activeImage ? 'border-brand-green' : 'border-white/10 hover:border-white/30'
+                            }`}
+                          >
+                            <img src={url} alt="" className="w-full h-full object-cover" />
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })()
+            )}
 
             <div className="prose prose-invert max-w-none">
               <h3 className="text-xl font-bold text-white mb-4">About This Service</h3>

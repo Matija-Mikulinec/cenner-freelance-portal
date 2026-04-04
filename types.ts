@@ -42,6 +42,7 @@ export interface ServiceListing {
   rating: number;
   reviewsCount: number;
   imageUrl: string;
+  galleryImages?: string[];
   createdAt?: string;
   freelancerTier?: string;
   isSponsored?: boolean;

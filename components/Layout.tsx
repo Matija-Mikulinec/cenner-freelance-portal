@@ -129,7 +129,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             </Link>
 
             {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center space-x-8">
+            <div className="hidden lg:flex items-center space-x-8">
 
               {/* Marketplace Dropdown */}
               <div ref={marketRef} className="relative">
@@ -305,7 +305,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             </div>
 
             {/* Mobile Toggle */}
-            <div className="md:hidden flex items-center gap-3">
+            <div className="lg:hidden flex items-center gap-3">
               <div ref={langRefMobile} className="relative">
                 <button onClick={() => setIsLangOpen(v => !v)} className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-white/10 text-gray-400">
                   <span className="text-sm">{currentLang.flag}</span>
@@ -332,7 +332,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="md:hidden bg-brand-black border-b border-white/10 pb-8 px-6 space-y-1">
+          <div className="lg:hidden bg-brand-black border-b border-white/10 pb-8 px-6 space-y-1">
             <p className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-700 pt-5 pb-1">{t('Marketplace')}</p>
             {marketDropdownItems.map(item => (
               <Link key={item.label} to={item.path} onClick={() => setIsMenuOpen(false)} className="block py-2.5 text-base font-bold text-white border-b border-white/5 pl-2">{item.label}</Link>
