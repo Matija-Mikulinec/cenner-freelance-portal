@@ -1,7 +1,7 @@
 
 import React, { useState, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { Star, Clock, CheckCircle, MessageSquare, ShieldCheck, Share2, Heart, ArrowLeft, Edit2, Save, X, Loader2, Upload, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Star, Clock, CheckCircle, MessageSquare, ShieldCheck, Share2, Heart, ArrowLeft, Edit2, Save, X, Loader2, Upload, ChevronLeft, ChevronRight, Trash2 } from 'lucide-react';
 import PermissionModal from '../components/PermissionModal';
 import { useData } from '../contexts/DataContext';
 import { useAuth } from '../contexts/AuthContext';
@@ -31,6 +31,7 @@ const ServiceDetails: React.FC = () => {
   const [editGallery, setEditGallery] = useState<string[]>([]);
   const [uploadingImg, setUploadingImg] = useState(false);
   const galleryInputRef = useRef<HTMLInputElement>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const listing = id ? getListingById(id) : undefined;
   const isOwner = !!(user && listing && user.id === listing.freelancerId);
@@ -70,6 +71,19 @@ const ServiceDetails: React.FC = () => {
       alert(err.message || 'Failed to save changes.');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!listing) return;
+    if (!window.confirm('Delete this listing? This cannot be undone.')) return;
+    setDeleting(true);
+    try {
+      await API.deleteListing(listing.id);
+      navigate('/profile');
+    } catch (err: any) {
+      alert(err.message || 'Failed to delete listing.');
+      setDeleting(false);
     }
   };
 
@@ -457,6 +471,16 @@ const ServiceDetails: React.FC = () => {
                     ) : (
                       <button onClick={startEdit} className="w-full py-4 border border-white/10 text-gray-300 font-black rounded-2xl hover:border-brand-green/40 hover:text-brand-green transition-all flex items-center justify-center gap-2">
                         <Edit2 size={16} /> Edit Listing
+                      </button>
+                    )}
+                    {!isEditing && (
+                      <button
+                        onClick={handleDelete}
+                        disabled={deleting}
+                        className="w-full py-3 border border-brand-pink/20 text-brand-pink/60 font-bold rounded-2xl hover:border-brand-pink/60 hover:text-brand-pink transition-all flex items-center justify-center gap-2 text-sm disabled:opacity-40"
+                      >
+                        {deleting ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
+                        {deleting ? 'Deleting…' : 'Delete Listing'}
                       </button>
                     )}
                   </div>
