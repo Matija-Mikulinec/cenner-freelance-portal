@@ -36,12 +36,22 @@ const ServiceDetails: React.FC = () => {
   const [deleting, setDeleting] = useState(false);
   const [imgLoaded, setImgLoaded] = useState(false);
   const [imgError, setImgError] = useState(false);
+  const wasEditingRef = useRef(false);
 
   // Reset load state whenever the active image changes
   useEffect(() => {
     setImgLoaded(false);
     setImgError(false);
   }, [activeImage]);
+
+  // Reset load state when exiting edit mode so the gallery image reloads cleanly
+  useEffect(() => {
+    if (!isEditing && wasEditingRef.current) {
+      setImgLoaded(false);
+      setImgError(false);
+    }
+    wasEditingRef.current = isEditing;
+  }, [isEditing]);
 
   const listing = id ? getListingById(id) : undefined;
   const isOwner = !!(user && listing && user.id === listing.freelancerId);
