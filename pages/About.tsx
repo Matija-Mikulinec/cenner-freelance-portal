@@ -10,9 +10,10 @@ const About: React.FC = () => {
   return (
     <div className="pt-16 pb-24 max-w-7xl mx-auto px-4">
       <SEO
-        title="About"
+        title="O Nama — Freelance Platforma Hrvatska"
         canonical="/about"
-        description="Learn about Cenner's mission to connect the world's best freelance talent with ambitious businesses through AI-powered matching and verified creator profiles."
+        description="Cenner je hrvatska freelance platforma osnovana s misijom povezivanja tvrtki s najboljim slobodnim radnicima iz Hrvatske i EU. Saznaj više o nama i našoj viziji."
+        keywords="o cenner platformi, freelance platforma hrvatska priča, tko je cenner, hrvatska startup freelance"
       />
       {/* Hero Section */}
       <div className="max-w-4xl mb-32">

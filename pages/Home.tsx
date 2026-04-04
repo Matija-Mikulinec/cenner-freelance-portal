@@ -16,10 +16,24 @@ const organizationJsonLd = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
   name: 'Cenner',
+  alternateName: 'Cenner Freelance Platforma',
   url: 'https://cenner.hr',
   logo: 'https://cenner.hr/favicon.svg',
-  description: 'Elite freelance talent network connecting businesses with the top 1% of creators using AI-powered matching.',
-  sameAs: [],
+  image: 'https://cenner.hr/og-image.png',
+  description: 'Vodeća freelance platforma u Hrvatskoj i EU. Cenner povezuje tvrtke s provjerenim freelancerima za web razvoj, dizajn, marketing i više. Honorarni posao — brzo, sigurno, profesionalno.',
+  address: {
+    '@type': 'PostalAddress',
+    addressCountry: 'HR',
+    addressRegion: 'Croatia',
+  },
+  areaServed: ['HR', 'EU'],
+  contactPoint: {
+    '@type': 'ContactPoint',
+    contactType: 'customer support',
+    url: 'https://cenner.hr/contact',
+    availableLanguage: ['Croatian', 'English'],
+  },
+  sameAs: ['https://twitter.com/cennerhr'],
 };
 
 const websiteJsonLd = {
@@ -27,11 +41,59 @@ const websiteJsonLd = {
   '@type': 'WebSite',
   name: 'Cenner',
   url: 'https://cenner.hr',
+  inLanguage: ['hr', 'en'],
   potentialAction: {
     '@type': 'SearchAction',
     target: 'https://cenner.hr/marketplace?q={search_term_string}',
     'query-input': 'required name=search_term_string',
   },
+};
+
+const faqJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: [
+    {
+      '@type': 'Question',
+      name: 'Što je Cenner i kako funkcionira freelance platforma?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Cenner je vodeća freelance platforma u Hrvatskoj i EU koja povezuje tvrtke i poduzetnike s provjerenim freelancerima. Klijenti objavljuju projekte ili pretražuju usluge, freelanceri apliciraju ili nude gotove pakete, a plaćanje se odvija sigurno kroz platformu.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Kako pronaći freelancera u Hrvatskoj za honorarni posao?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Na Cenner platformi možeš pregledati stotine verificiranih freelancera iz Hrvatske i EU. Filtriraj po kategoriji (web razvoj, dizajn, marketing, pisanje), proračunu i roku isporuke. Svaki freelancer prolazi KYC verifikaciju što garantira profesionalnost.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Je li Cenner dostupan za freelancere iz cijele EU?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Da, Cenner je dostupan za freelancere i klijente iz cijele Europske unije. Platforma podržava plaćanje u eurima i usklađena je s EU propisima. Freelanceri iz Hrvatske, Austrije, Njemačke, Italije i ostalih EU država mogu se registrirati i odmah početi nuditi usluge.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Što je honorarni posao i kako se razlikuje od stalnog zaposlenja?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Honorarni posao (freelancing) znači rad na projektima bez stalnog ugovora o radu. Kao slobodni radnik (freelancer) sam odabireš projekte, radne sate i cijene. Cenner ti omogućuje siguran honorarni rad s ugovorima, escrow plaćanjem i zaštitom obje strane.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Koje vrste usluga nude freelanceri na Cenner platformi?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Cenner freelanceri nude usluge u kategorijama: web razvoj i programiranje, grafički dizajn i UI/UX, digitalni marketing i SEO, pisanje sadržaja, video produkcija, glazba i audio produkcija. Sve usluge su dostupne za klijente iz Hrvatske i cijele EU.',
+      },
+    },
+  ],
 };
 
 const Home: React.FC = () => {
@@ -40,8 +102,9 @@ const Home: React.FC = () => {
     <div className="relative min-h-screen">
       <SEO
         canonical="/"
-        description="Cenner connects businesses with the top 1% of freelance talent. AI-powered matching, verified creators, and premium collaboration tools for high-end projects."
-        jsonLd={[organizationJsonLd, websiteJsonLd] as any}
+        description="Cenner — vodeća freelance platforma u Hrvatskoj i EU. Pronađi provjerene freelancere za web razvoj, dizajn i marketing. Honorarni posao brzo i sigurno."
+        keywords="freelance hrvatska, honorarni posao, slobodni radnik hrvatska, freelance platforma hrvatska, online posao hrvatska, najam freelancera hrvatska"
+        jsonLd={[organizationJsonLd, websiteJsonLd, faqJsonLd]}
       />
       <NeuralBackground parallax={true} />
 

@@ -7,13 +7,18 @@ interface SEOProps {
   canonical?: string;
   ogImage?: string;
   ogType?: string;
+  ogLocale?: string;
   noIndex?: boolean;
-  jsonLd?: object;
+  jsonLd?: object | object[];
+  keywords?: string;
 }
 
 const BASE_URL = 'https://cenner.hr';
 const DEFAULT_OG_IMAGE = `${BASE_URL}/og-image.png`;
 const SITE_NAME = 'Cenner';
+
+// Core keyword set injected on every page
+const BASE_KEYWORDS = 'freelance hrvatska, freelancing hrvatska, honorarni posao, freelance eu, slobodni radnik hrvatska, online posao hrvatska, freelance platforma, honorarni rad, outsourcing hrvatska, najam freelancera, freelance Croatia, hire freelancer Croatia, Croatian freelancer, EU freelance marketplace, cenner';
 
 const SEO: React.FC<SEOProps> = ({
   title,
@@ -21,18 +26,37 @@ const SEO: React.FC<SEOProps> = ({
   canonical,
   ogImage = DEFAULT_OG_IMAGE,
   ogType = 'website',
+  ogLocale = 'hr_HR',
   noIndex = false,
   jsonLd,
+  keywords,
 }) => {
-  const fullTitle = title ? `${title} | ${SITE_NAME}` : `${SITE_NAME} — Freelance Talent Network`;
+  const fullTitle = title ? `${title} | ${SITE_NAME}` : `${SITE_NAME} — Freelance Platforma Hrvatska`;
   const fullCanonical = canonical ? `${BASE_URL}${canonical}` : undefined;
+  const fullKeywords = keywords ? `${keywords}, ${BASE_KEYWORDS}` : BASE_KEYWORDS;
+
+  // Support both a single JSON-LD object and an array of schemas
+  const schemas = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
 
   return (
     <Helmet>
       <title>{fullTitle}</title>
       {description && <meta name="description" content={description} />}
-      {noIndex && <meta name="robots" content="noindex, nofollow" />}
+      <meta name="keywords" content={fullKeywords} />
+      <meta name="author" content="Cenner" />
+      <meta name="geo.region" content="HR" />
+      <meta name="geo.placename" content="Croatia" />
+      {noIndex ? (
+        <meta name="robots" content="noindex, nofollow" />
+      ) : (
+        <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+      )}
       {fullCanonical && <link rel="canonical" href={fullCanonical} />}
+
+      {/* hreflang — signals Croatian & EU relevance to Google */}
+      {fullCanonical && <link rel="alternate" hrefLang="hr" href={fullCanonical} />}
+      {fullCanonical && <link rel="alternate" hrefLang="en" href={fullCanonical} />}
+      {fullCanonical && <link rel="alternate" hrefLang="x-default" href={fullCanonical} />}
 
       {/* Open Graph */}
       <meta property="og:title" content={fullTitle} />
@@ -40,20 +64,25 @@ const SEO: React.FC<SEOProps> = ({
       <meta property="og:type" content={ogType} />
       {fullCanonical && <meta property="og:url" content={fullCanonical} />}
       <meta property="og:image" content={ogImage} />
+      <meta property="og:image:width" content="1200" />
+      <meta property="og:image:height" content="630" />
       <meta property="og:site_name" content={SITE_NAME} />
+      <meta property="og:locale" content={ogLocale} />
+      <meta property="og:locale:alternate" content="en_US" />
 
-      {/* Twitter */}
+      {/* Twitter / X */}
       <meta name="twitter:card" content="summary_large_image" />
+      <meta name="twitter:site" content="@cennerhr" />
       <meta name="twitter:title" content={fullTitle} />
       {description && <meta name="twitter:description" content={description} />}
       <meta name="twitter:image" content={ogImage} />
 
-      {/* JSON-LD */}
-      {jsonLd && (
-        <script type="application/ld+json">
-          {JSON.stringify(jsonLd)}
+      {/* JSON-LD — each schema as its own script block for AI Overview compatibility */}
+      {schemas.map((schema, i) => (
+        <script key={i} type="application/ld+json">
+          {JSON.stringify(schema)}
         </script>
-      )}
+      ))}
     </Helmet>
   );
 };

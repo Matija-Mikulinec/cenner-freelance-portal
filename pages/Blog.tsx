@@ -301,8 +301,12 @@ const Blog: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-brand-black pt-12 pb-24">
-      <SEO title="Blog" canonical="/blog"
-        description="Insights, tips, and stories from the Cenner community." />
+      <SEO
+        title="Blog — Freelance Savjeti i Vijesti"
+        canonical="/blog"
+        description="Savjeti, trendovi i priče iz Cenner zajednice. Sve o freelancingu u Hrvatskoj i EU — honorarni rad, cijene, ugovori, alati i karijera slobodnog radnika."
+        keywords="freelance blog hrvatska, honorarni rad savjeti, slobodni radnik blog, freelancing hrvatska vijesti, online posao hrvatska savjeti"
+      />
 
       {/* Custom confirm */}
       {confirmDialog && (

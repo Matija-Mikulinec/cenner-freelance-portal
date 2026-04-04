@@ -172,9 +172,10 @@ const Marketplace: React.FC = () => {
   return (
     <div className="pt-12 pb-24 px-4 max-w-7xl mx-auto">
       <SEO
-        title="Marketplace"
+        title="Marketplace — Freelanceri Hrvatska"
         canonical="/marketplace"
-        description="Browse the top 1% of freelance talent on Cenner. Find verified creators for design, development, marketing, and more."
+        description="Pronađi verificirane freelancere u Hrvatskoj i EU na Cenner marketplaceu. Web razvoj, dizajn, marketing, pisanje i više — honorarni posao na jednom mjestu."
+        keywords="freelance marketplace hrvatska, freelanceri hrvatska, najam freelancera, web developer hrvatska, grafički dizajner hrvatska, digitalni marketing hrvatska, honorarni posao eu"
       />
       {/* Mobile Filter Drawer */}
       {isFilterDrawerOpen && (

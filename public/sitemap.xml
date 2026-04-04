@@ -1,81 +1,97 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+
+  <!-- High priority — core pages -->
   <url>
     <loc>https://cenner.hr/</loc>
-    <lastmod>2026-03-31</lastmod>
+    <lastmod>2026-04-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://cenner.hr/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://cenner.hr/"/>
   </url>
   <url>
     <loc>https://cenner.hr/marketplace</loc>
-    <lastmod>2026-03-31</lastmod>
+    <lastmod>2026-04-04</lastmod>
     <changefreq>daily</changefreq>
-    <priority>0.9</priority>
+    <priority>0.95</priority>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://cenner.hr/marketplace"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://cenner.hr/marketplace"/>
   </url>
   <url>
     <loc>https://cenner.hr/services</loc>
-    <lastmod>2026-03-31</lastmod>
+    <lastmod>2026-04-04</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://cenner.hr/subscription</loc>
-    <lastmod>2026-03-31</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://cenner.hr/services"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://cenner.hr/services"/>
   </url>
   <url>
     <loc>https://cenner.hr/match</loc>
-    <lastmod>2026-03-31</lastmod>
+    <lastmod>2026-04-04</lastmod>
     <changefreq>daily</changefreq>
+    <priority>0.85</priority>
+  </url>
+
+  <!-- Medium priority -->
+  <url>
+    <loc>https://cenner.hr/subscription</loc>
+    <lastmod>2026-04-04</lastmod>
+    <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://cenner.hr/blog</loc>
-    <lastmod>2026-03-31</lastmod>
+    <lastmod>2026-04-04</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
+    <priority>0.75</priority>
+    <xhtml:link rel="alternate" hreflang="hr" href="https://cenner.hr/blog"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://cenner.hr/blog"/>
   </url>
   <url>
     <loc>https://cenner.hr/about</loc>
-    <lastmod>2026-03-31</lastmod>
+    <lastmod>2026-04-04</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
+    <priority>0.65</priority>
   </url>
   <url>
     <loc>https://cenner.hr/contact</loc>
-    <lastmod>2026-03-31</lastmod>
+    <lastmod>2026-04-04</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
+    <priority>0.65</priority>
   </url>
   <url>
     <loc>https://cenner.hr/technology</loc>
-    <lastmod>2026-03-31</lastmod>
+    <lastmod>2026-04-04</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
+    <priority>0.55</priority>
   </url>
+
+  <!-- Low priority — utility pages (still indexed) -->
   <url>
     <loc>https://cenner.hr/auth</loc>
-    <lastmod>2026-03-31</lastmod>
+    <lastmod>2026-04-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
   </url>
   <url>
     <loc>https://cenner.hr/privacy</loc>
-    <lastmod>2026-03-31</lastmod>
+    <lastmod>2026-04-04</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
     <loc>https://cenner.hr/terms</loc>
-    <lastmod>2026-03-31</lastmod>
+    <lastmod>2026-04-04</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
     <loc>https://cenner.hr/cookies</loc>
-    <lastmod>2026-03-31</lastmod>
+    <lastmod>2026-04-04</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
+
 </urlset>

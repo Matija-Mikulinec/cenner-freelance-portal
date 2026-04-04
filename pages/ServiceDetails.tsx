@@ -156,31 +156,52 @@ const ServiceDetails: React.FC = () => {
     '@type': 'Service',
     name: listing.title,
     description: listing.description,
+    areaServed: ['HR', 'EU'],
     provider: {
       '@type': 'Person',
       name: listing.freelancerName,
       image: listing.freelancerAvatar,
+      jobTitle: 'Freelancer',
+      worksFor: { '@type': 'Organization', name: 'Cenner', url: 'https://cenner.hr' },
     },
     offers: {
       '@type': 'Offer',
       priceCurrency: 'EUR',
       price: listing.price,
       availability: 'https://schema.org/InStock',
+      url: `https://cenner.hr/service/${listing.id}`,
+      seller: { '@type': 'Organization', name: 'Cenner', url: 'https://cenner.hr' },
     },
-    aggregateRating: {
-      '@type': 'AggregateRating',
-      ratingValue: listing.rating,
-      reviewCount: listing.reviewsCount,
-    },
+    ...(listing.reviewsCount > 0 && {
+      aggregateRating: {
+        '@type': 'AggregateRating',
+        ratingValue: listing.rating,
+        reviewCount: listing.reviewsCount,
+        bestRating: 5,
+        worstRating: 1,
+      },
+    }),
+  };
+
+  const breadcrumbJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Marketplace', item: 'https://cenner.hr/marketplace' },
+      { '@type': 'ListItem', position: 2, name: listing.category, item: `https://cenner.hr/marketplace?category=${encodeURIComponent(listing.category)}` },
+      { '@type': 'ListItem', position: 3, name: listing.title, item: `https://cenner.hr/service/${listing.id}` },
+    ],
   };
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-12">
       <SEO
-        title={listing.title}
+        title={`${listing.title} — ${listing.freelancerName} | Freelancer Hrvatska`}
         canonical={`/service/${listing.id}`}
-        description={`${listing.description.slice(0, 150)}... Delivered by ${listing.freelancerName} — rated ${listing.rating}/5.`}
-        jsonLd={serviceJsonLd}
+        description={`${listing.description.slice(0, 140)}... Usluga dostupna u Hrvatskoj i EU. Isporučuje ${listing.freelancerName}${listing.reviewsCount > 0 ? ` — ocjena ${listing.rating}/5` : ''}.`}
+        keywords={`${listing.category.toLowerCase()} freelancer hrvatska, ${listing.title.toLowerCase()}, honorarni posao ${listing.category.toLowerCase()}`}
+        ogType="product"
+        jsonLd={[serviceJsonLd, breadcrumbJsonLd]}
       />
       <PermissionModal isOpen={isPermissionModalOpen} onClose={() => setIsPermissionModalOpen(false)} />
       

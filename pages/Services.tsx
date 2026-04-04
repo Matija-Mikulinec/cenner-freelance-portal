@@ -137,9 +137,10 @@ const Services: React.FC = () => {
   return (
     <div className="relative min-h-screen bg-brand-black">
       <SEO
-        title="Services"
+        title="Usluge — Web Razvoj, Dizajn i Marketing Hrvatska"
         canonical="/services"
-        description="Explore Cenner's premium freelance services — web development, design, AI, marketing, video production and more from elite verified creators."
+        description="Freelance usluge u Hrvatskoj i EU: web razvoj, grafički dizajn, digitalni marketing, AI razvoj, video produkcija. Verificirani freelanceri, sigurno plaćanje, zajamčena kvaliteta."
+        keywords="web razvoj hrvatska freelance, grafički dizajn freelancer hrvatska, digitalni marketing freelancer, AI razvoj hrvatska, video produkcija freelancer, freelance usluge eu"
       />
       <div className="relative z-10 max-w-7xl mx-auto px-4 py-32">
 
