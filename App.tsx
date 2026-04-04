@@ -6,6 +6,7 @@ import Layout from './components/Layout';
 import ScrollToTop from './components/ScrollToTop';
 import { AuthProvider } from './contexts/AuthContext';
 import { DataProvider } from './contexts/DataContext';
+import { NotifyProvider } from './contexts/NotifyContext';
 
 const Home = lazy(() => import('./pages/Home'));
 const Marketplace = lazy(() => import('./pages/Marketplace'));
@@ -41,6 +42,7 @@ const NotFound = lazy(() => import('./pages/NotFound'));
 const App: React.FC = () => {
   return (
     <HelmetProvider>
+      <NotifyProvider>
       <AuthProvider>
         <DataProvider>
           <Router>
@@ -84,6 +86,7 @@ const App: React.FC = () => {
           </Router>
         </DataProvider>
       </AuthProvider>
+      </NotifyProvider>
     </HelmetProvider>
   );
 };

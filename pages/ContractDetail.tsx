@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { API } from '../lib/api';
+import { useNotify } from '../contexts/NotifyContext';
 import NeuralBackground from '../components/NeuralBackground';
 import SEO from '../components/SEO';
 
@@ -57,6 +58,7 @@ const ContractDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const notify = useNotify();
   const [contract, setContract] = useState<Contract | null>(null);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
@@ -303,7 +305,15 @@ const ContractDetail: React.FC = () => {
         {['DRAFT', 'ACTIVE'].includes(contract.status) && (
           <div className="mt-4 text-center">
             <button
-              onClick={() => { if (window.confirm('Cancel this contract?')) doAction(() => API.cancelContract(contract.id), 'cancel'); }}
+              onClick={async () => {
+                const ok = await notify.confirm('Are you sure you want to cancel this contract? This cannot be undone.', {
+                  title: 'Cancel contract?',
+                  confirmLabel: 'Yes, cancel',
+                  cancelLabel: 'Keep it',
+                  variant: 'danger',
+                });
+                if (ok) doAction(() => API.cancelContract(contract.id), 'cancel');
+              }}
               disabled={!!actionLoading}
               className="text-gray-600 hover:text-red-400 text-xs transition-colors"
             >

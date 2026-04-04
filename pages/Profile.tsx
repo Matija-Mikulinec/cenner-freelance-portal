@@ -13,6 +13,7 @@ import { useData } from '../contexts/DataContext';
 import { CATEGORIES } from '../constants';
 import { API } from '../lib/api';
 import { useT } from '../i18n';
+import { useNotify } from '../contexts/NotifyContext';
 
 type ActiveTab = 'listings' | 'inbox' | 'earnings' | 'settings' | 'portfolio' | 'saved' | 'orders' | 'stats';
 
@@ -435,6 +436,7 @@ const OrdersTab: React.FC = () => {
 
 const Profile: React.FC = () => {
   const t = useT();
+  const notify = useNotify();
   const { listings, addListing, updateListing, deleteListing, refreshListings } = useData();
   const [searchParams] = useSearchParams();
   const connectResult = searchParams.get('connect');
@@ -468,16 +470,16 @@ const Profile: React.FC = () => {
 
   const handleBoost = async (listingId: string) => {
     if (myCredits === 0) {
-      alert('Sponsored boosts are available on Pro and Ultra plans.');
+      notify.toast('Sponsored boosts are available on Pro and Ultra plans.', 'info');
       return;
     }
     setBoostingId(listingId);
     try {
       const res = await API.boostListing(listingId);
-      alert(`Listing boosted for 7 days! You have ${res.creditsRemaining} boost${res.creditsRemaining === 1 ? '' : 's'} remaining this month.`);
+      notify.toast(`Listing boosted for 7 days! You have ${res.creditsRemaining} boost${res.creditsRemaining === 1 ? '' : 's'} remaining this month.`, 'success');
       await refreshListings();
     } catch (err: any) {
-      alert(err.message || 'Failed to boost listing.');
+      notify.toast(err.message || 'Failed to boost listing.', 'error');
     } finally {
       setBoostingId(null);
     }
@@ -605,7 +607,7 @@ const Profile: React.FC = () => {
       updateUser({ name: editName, bio: editBio, location: editLocation } as any);
       setIsEditingProfile(false);
     } catch (err: any) {
-      alert(err.message || 'Failed to save profile.');
+      notify.toast(err.message || 'Failed to save profile.', 'error');
     } finally {
       setIsSavingProfile(false);
     }
@@ -619,7 +621,7 @@ const Profile: React.FC = () => {
     setIsDownloading(true);
     setTimeout(() => {
       setIsDownloading(false);
-      alert('Report empty. No transactions recorded.');
+      notify.toast('Report empty. No transactions recorded.', 'info');
     }, 1500);
   };
 
@@ -628,7 +630,7 @@ const Profile: React.FC = () => {
     if (type === 'email') {
       // Trigger re-send of verification email via backend
       await API.requestPasswordReset(currentUser.email).catch(() => {});
-      alert('Verification email sent. Check your inbox.');
+      notify.toast('Verification email sent. Check your inbox.', 'success');
     } else {
       // Open phone verification modal
       setPhoneInput((currentUser as any).mobile || '');
@@ -709,7 +711,7 @@ const Profile: React.FC = () => {
       await API.deletePortfolioItem(itemId);
       setPortfolioItems(prev => prev.filter(i => i.id !== itemId));
     } catch (err: any) {
-      alert(err.message || 'Failed to delete item.');
+      notify.toast(err.message || 'Failed to delete item.', 'error');
     }
   };
 
@@ -749,7 +751,7 @@ const Profile: React.FC = () => {
         includesInput: '',
       });
     } catch (err: any) {
-      alert(err.message || 'Failed to create listing.');
+      notify.toast(err.message || 'Failed to create listing.', 'error');
     }
   };
 
@@ -790,7 +792,7 @@ const Profile: React.FC = () => {
       setEditingListing(null);
       setEditListingImages([]);
     } catch (err: any) {
-      alert(err.message || 'Failed to save listing.');
+      notify.toast(err.message || 'Failed to save listing.', 'error');
     } finally {
       setSavingListing(false);
     }
@@ -1481,7 +1483,7 @@ const Profile: React.FC = () => {
                         const url = await API.uploadListingImage(file);
                         setNewListingImages(prev => [...prev, url]);
                       } catch (err: any) {
-                        alert(err.message || 'Upload failed');
+                        notify.toast(err.message || 'Upload failed', 'error');
                       } finally {
                         setUploadingListingImage(false);
                         if (newListingImageRef.current) newListingImageRef.current.value = '';
@@ -1551,7 +1553,7 @@ const Profile: React.FC = () => {
                     const url = await API.uploadListingImage(file);
                     setEditListingImages(prev => [...prev, url]);
                   } catch (err: any) {
-                    alert(err.message || 'Upload failed');
+                    notify.toast(err.message || 'Upload failed', 'error');
                   } finally {
                     setUploadingListingImage(false);
                     if (editListingImageRef.current) editListingImageRef.current.value = '';
@@ -1679,7 +1681,7 @@ const Profile: React.FC = () => {
                           const url = await API.uploadProfileAvatar(file);
                           updateUser({ avatar: url } as any);
                         } catch (err: any) {
-                          alert(err.message || 'Failed to upload avatar');
+                          notify.toast(err.message || 'Failed to upload avatar', 'error');
                         } finally {
                           setUploadingAvatar(false);
                           if (avatarFileRef.current) avatarFileRef.current.value = '';

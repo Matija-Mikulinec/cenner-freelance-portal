@@ -53,11 +53,16 @@
             animation: {
               'gradient': 'gradient 8s linear infinite',
               'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+              'notify-in': 'notifySlideIn 0.25s cubic-bezier(0.16,1,0.3,1) both',
             },
             keyframes: {
               gradient: {
                 '0%, 100%': { backgroundPosition: '0% 50%' },
                 '50%': { backgroundPosition: '100% 50%' },
+              },
+              notifySlideIn: {
+                '0%':   { opacity: '0', transform: 'translateX(16px) scale(0.97)' },
+                '100%': { opacity: '1', transform: 'translateX(0)    scale(1)' },
               },
             },
           },
@@ -69,6 +74,11 @@
       
       :root {
         --transition-speed: 0.3s;
+      }
+
+      @keyframes notifySlideIn {
+        0%   { opacity: 0; transform: translateX(16px) scale(0.97); }
+        100% { opacity: 1; transform: translateX(0)    scale(1); }
       }
 
       html, body {

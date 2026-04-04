@@ -8,12 +8,14 @@ import { useAuth } from '../contexts/AuthContext';
 import { API } from '../lib/api';
 import SEO from '../components/SEO';
 import { CATEGORIES } from '../constants';
+import { useNotify } from '../contexts/NotifyContext';
 
 const ServiceDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { getListingById, updateListing, refreshListings } = useData();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const notify = useNotify();
   const [isPermissionModalOpen, setIsPermissionModalOpen] = useState(false);
   const [saved, setSaved] = useState(false);
   const [contacting, setContacting] = useState(false);
@@ -32,7 +34,6 @@ const ServiceDetails: React.FC = () => {
   const [uploadingImg, setUploadingImg] = useState(false);
   const galleryInputRef = useRef<HTMLInputElement>(null);
   const [deleting, setDeleting] = useState(false);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [imgLoaded, setImgLoaded] = useState(false);
   const [imgError, setImgError] = useState(false);
 
@@ -77,7 +78,7 @@ const ServiceDetails: React.FC = () => {
       setActiveImage(0);
       setIsEditing(false);
     } catch (err: any) {
-      alert(err.message || 'Failed to save changes.');
+      notify.toast(err.message || 'Failed to save changes.', 'error');
     } finally {
       setSaving(false);
     }
@@ -85,13 +86,17 @@ const ServiceDetails: React.FC = () => {
 
   const handleDelete = async () => {
     if (!listing) return;
-    setShowDeleteConfirm(false);
+    const ok = await notify.confirm(
+      `This will permanently remove "${listing.title}". This cannot be undone.`,
+      { title: 'Delete listing?', confirmLabel: 'Delete', cancelLabel: 'Cancel', variant: 'danger' }
+    );
+    if (!ok) return;
     setDeleting(true);
     try {
       await API.deleteListing(listing.id);
       navigate('/profile');
     } catch (err: any) {
-      alert(err.message || 'Failed to delete listing.');
+      notify.toast(err.message || 'Failed to delete listing.', 'error');
       setDeleting(false);
     }
   };
@@ -161,38 +166,6 @@ const ServiceDetails: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-12">
-      {/* Delete confirmation modal */}
-      {showDeleteConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setShowDeleteConfirm(false)}>
-          <div className="absolute inset-0 bg-brand-black/80 backdrop-blur-sm" />
-          <div
-            className="relative bg-brand-grey border border-white/10 rounded-3xl p-8 w-full max-w-sm shadow-2xl"
-            onClick={e => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-center w-14 h-14 rounded-2xl bg-brand-pink/10 border border-brand-pink/20 mx-auto mb-5">
-              <Trash2 size={22} className="text-brand-pink" />
-            </div>
-            <h3 className="text-xl font-black text-white text-center mb-2">Delete listing?</h3>
-            <p className="text-gray-400 text-sm text-center mb-7 leading-relaxed">
-              This will permanently remove <span className="text-white font-bold">"{listing?.title}"</span>. This cannot be undone.
-            </p>
-            <div className="flex gap-3">
-              <button
-                onClick={() => setShowDeleteConfirm(false)}
-                className="flex-1 py-3 border border-white/10 text-gray-300 font-bold rounded-2xl hover:border-white/30 hover:text-white transition-all"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleDelete}
-                className="flex-1 py-3 bg-brand-pink/10 border border-brand-pink/30 text-brand-pink font-black rounded-2xl hover:bg-brand-pink/20 hover:border-brand-pink/60 transition-all"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
       <SEO
         title={listing.title}
         canonical={`/service/${listing.id}`}
@@ -284,7 +257,7 @@ const ServiceDetails: React.FC = () => {
                       const url = await API.uploadListingImage(file);
                       setEditGallery(prev => [...prev, url]);
                     } catch (err: any) {
-                      alert(err.message || 'Upload failed');
+                      notify.toast(err.message || 'Upload failed', 'error');
                     } finally {
                       setUploadingImg(false);
                       if (galleryInputRef.current) galleryInputRef.current.value = '';
@@ -532,7 +505,7 @@ const ServiceDetails: React.FC = () => {
                     )}
                     {!isEditing && (
                       <button
-                        onClick={() => setShowDeleteConfirm(true)}
+                        onClick={handleDelete}
                         disabled={deleting}
                         className="w-full py-3 border border-brand-pink/20 text-brand-pink/60 font-bold rounded-2xl hover:border-brand-pink/60 hover:text-brand-pink transition-all flex items-center justify-center gap-2 text-sm disabled:opacity-40"
                       >
