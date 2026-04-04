@@ -32,11 +32,14 @@ const ServiceDetails: React.FC = () => {
   const [uploadingImg, setUploadingImg] = useState(false);
   const galleryInputRef = useRef<HTMLInputElement>(null);
   const [deleting, setDeleting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [imgLoaded, setImgLoaded] = useState(false);
+  const [imgError, setImgError] = useState(false);
 
   // Reset load state whenever the active image changes
   useEffect(() => {
     setImgLoaded(false);
+    setImgError(false);
   }, [activeImage]);
 
   const listing = id ? getListingById(id) : undefined;
@@ -82,7 +85,7 @@ const ServiceDetails: React.FC = () => {
 
   const handleDelete = async () => {
     if (!listing) return;
-    if (!window.confirm('Delete this listing? This cannot be undone.')) return;
+    setShowDeleteConfirm(false);
     setDeleting(true);
     try {
       await API.deleteListing(listing.id);
@@ -158,6 +161,38 @@ const ServiceDetails: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-12">
+      {/* Delete confirmation modal */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setShowDeleteConfirm(false)}>
+          <div className="absolute inset-0 bg-brand-black/80 backdrop-blur-sm" />
+          <div
+            className="relative bg-brand-grey border border-white/10 rounded-3xl p-8 w-full max-w-sm shadow-2xl"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-center w-14 h-14 rounded-2xl bg-brand-pink/10 border border-brand-pink/20 mx-auto mb-5">
+              <Trash2 size={22} className="text-brand-pink" />
+            </div>
+            <h3 className="text-xl font-black text-white text-center mb-2">Delete listing?</h3>
+            <p className="text-gray-400 text-sm text-center mb-7 leading-relaxed">
+              This will permanently remove <span className="text-white font-bold">"{listing?.title}"</span>. This cannot be undone.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className="flex-1 py-3 border border-white/10 text-gray-300 font-bold rounded-2xl hover:border-white/30 hover:text-white transition-all"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDelete}
+                className="flex-1 py-3 bg-brand-pink/10 border border-brand-pink/30 text-brand-pink font-black rounded-2xl hover:bg-brand-pink/20 hover:border-brand-pink/60 transition-all"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <SEO
         title={listing.title}
         canonical={`/service/${listing.id}`}
@@ -298,9 +333,16 @@ const ServiceDetails: React.FC = () => {
                     {/* Main image with arrow navigation */}
                     <div className="relative rounded-3xl overflow-hidden border border-white/10 aspect-video bg-brand-black shadow-2xl group">
                       {/* Skeleton shown while image loads */}
-                      {!imgLoaded && (
+                      {!imgLoaded && !imgError && (
                         <div className="absolute inset-0 z-10 bg-brand-grey/60 animate-pulse flex items-center justify-center">
                           <div className="w-10 h-10 rounded-full border-2 border-brand-green/30 border-t-brand-green animate-spin" />
+                        </div>
+                      )}
+                      {/* Broken image fallback */}
+                      {imgError && (
+                        <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-gray-600">
+                          <Upload size={32} className="opacity-30" />
+                          <span className="text-xs font-bold uppercase tracking-widest opacity-40">Image unavailable</span>
                         </div>
                       )}
                       <img
@@ -308,8 +350,8 @@ const ServiceDetails: React.FC = () => {
                         src={current}
                         alt={listing.title}
                         onLoad={() => setImgLoaded(true)}
-                        onError={() => setImgLoaded(true)}
-                        className={`w-full h-full object-cover transition-opacity duration-300 ${imgLoaded ? 'opacity-100' : 'opacity-0'}`}
+                        onError={() => { setImgLoaded(true); setImgError(true); }}
+                        className={`w-full h-full object-cover transition-opacity duration-300 ${imgLoaded && !imgError ? 'opacity-100' : 'opacity-0'}`}
                       />
                       {allImages.length > 1 && (
                         <>
@@ -490,7 +532,7 @@ const ServiceDetails: React.FC = () => {
                     )}
                     {!isEditing && (
                       <button
-                        onClick={handleDelete}
+                        onClick={() => setShowDeleteConfirm(true)}
                         disabled={deleting}
                         className="w-full py-3 border border-brand-pink/20 text-brand-pink/60 font-bold rounded-2xl hover:border-brand-pink/60 hover:text-brand-pink transition-all flex items-center justify-center gap-2 text-sm disabled:opacity-40"
                       >
