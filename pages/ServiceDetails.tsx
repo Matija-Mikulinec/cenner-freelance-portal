@@ -1,5 +1,5 @@
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Star, Clock, CheckCircle, MessageSquare, ShieldCheck, Share2, Heart, ArrowLeft, Edit2, Save, X, Loader2, Upload, ChevronLeft, ChevronRight, Trash2 } from 'lucide-react';
 import PermissionModal from '../components/PermissionModal';
@@ -32,6 +32,12 @@ const ServiceDetails: React.FC = () => {
   const [uploadingImg, setUploadingImg] = useState(false);
   const galleryInputRef = useRef<HTMLInputElement>(null);
   const [deleting, setDeleting] = useState(false);
+  const [imgLoaded, setImgLoaded] = useState(false);
+
+  // Reset load state whenever the active image changes
+  useEffect(() => {
+    setImgLoaded(false);
+  }, [activeImage]);
 
   const listing = id ? getListingById(id) : undefined;
   const isOwner = !!(user && listing && user.id === listing.freelancerId);
@@ -291,10 +297,19 @@ const ServiceDetails: React.FC = () => {
                   <div className="mb-8">
                     {/* Main image with arrow navigation */}
                     <div className="relative rounded-3xl overflow-hidden border border-white/10 aspect-video bg-brand-black shadow-2xl group">
+                      {/* Skeleton shown while image loads */}
+                      {!imgLoaded && (
+                        <div className="absolute inset-0 z-10 bg-brand-grey/60 animate-pulse flex items-center justify-center">
+                          <div className="w-10 h-10 rounded-full border-2 border-brand-green/30 border-t-brand-green animate-spin" />
+                        </div>
+                      )}
                       <img
+                        key={current}
                         src={current}
                         alt={listing.title}
-                        className="w-full h-full object-cover transition-opacity duration-300"
+                        onLoad={() => setImgLoaded(true)}
+                        onError={() => setImgLoaded(true)}
+                        className={`w-full h-full object-cover transition-opacity duration-300 ${imgLoaded ? 'opacity-100' : 'opacity-0'}`}
                       />
                       {allImages.length > 1 && (
                         <>
