@@ -5,7 +5,7 @@ import {
   ArrowRight, Star, Shield, Zap, Globe, ChevronRight,
   Layers, Users, Search, Code, Palette,
   Terminal, BarChart3, Rocket, Activity, Server,
-  ShieldCheck, Cpu, Briefcase, Globe2, Clock, CheckCircle, Lock
+  ShieldCheck, Cpu, Briefcase, Globe2, Clock, CheckCircle, Lock, Plus, Minus
 } from 'lucide-react';
 import NeuralBackground from '../components/NeuralBackground';
 import { MOCK_LISTINGS } from '../constants';
@@ -94,6 +94,65 @@ const faqJsonLd = {
       },
     },
   ],
+};
+
+const FAQ_ITEMS = [
+  {
+    q: 'Što je Cenner i kako funkcionira freelance platforma?',
+    a: 'Cenner je vodeća freelance platforma u Hrvatskoj i EU koja povezuje tvrtke i poduzetnike s provjerenim freelancerima. Klijenti pretražuju usluge ili objavljuju projekte, freelanceri apliciraju ili nude gotove pakete, a plaćanje se odvija sigurno kroz platformu s escrow zaštitom.',
+  },
+  {
+    q: 'Kako pronaći freelancera u Hrvatskoj za honorarni posao?',
+    a: 'Na Cenner platformi možeš pregledati stotine verificiranih freelancera iz Hrvatske i EU. Filtriraj po kategoriji (web razvoj, dizajn, marketing, pisanje), proračunu i roku isporuke. Svaki freelancer prolazi KYC verifikaciju što garantira profesionalnost i sigurnost suradnje.',
+  },
+  {
+    q: 'Je li Cenner dostupan za freelancere iz cijele EU?',
+    a: 'Da, Cenner je dostupan za freelancere i klijente iz cijele Europske unije. Platforma podržava plaćanje u eurima i usklađena je s EU propisima. Freelanceri iz Hrvatske, Austrije, Njemačke, Italije i ostalih EU država mogu se odmah registrirati i početi nuditi usluge.',
+  },
+  {
+    q: 'Što je honorarni posao i kako se razlikuje od stalnog zaposlenja?',
+    a: 'Honorarni posao (freelancing) znači rad na projektima bez stalnog ugovora o radu. Kao slobodni radnik sam odabireš projekte, radne sate i cijene. Cenner osigurava sigurne ugovore, escrow plaćanje i zaštitu obje strane — idealano za početnike i iskusne freelancere.',
+  },
+  {
+    q: 'Koje vrste usluga nude freelanceri na Cenner platformi?',
+    a: 'Cenner freelanceri nude usluge u kategorijama: web razvoj i programiranje, grafički dizajn i UI/UX, digitalni marketing i SEO, pisanje sadržaja, video produkcija te glazba i audio produkcija. Sve usluge dostupne su klijentima iz Hrvatske i cijele EU.',
+  },
+];
+
+const FAQ: React.FC = () => {
+  const [open, setOpen] = React.useState<number | null>(null);
+  return (
+    <section className="relative py-24 z-10">
+      <div className="max-w-3xl mx-auto px-4">
+        <div className="text-center mb-14">
+          <p className="text-[10px] font-black text-brand-green uppercase tracking-[0.2em] mb-3">FAQ</p>
+          <h2 className="text-4xl font-extrabold text-white tracking-tight">Često postavljana pitanja</h2>
+          <p className="text-gray-400 mt-3 text-base">Sve o freelancingu u Hrvatskoj i EU na jednom mjestu.</p>
+        </div>
+        <div className="space-y-3">
+          {FAQ_ITEMS.map((item, i) => (
+            <div key={i} className="border border-white/10 rounded-2xl overflow-hidden bg-brand-grey/40 backdrop-blur-sm">
+              <button
+                className="w-full flex items-center justify-between gap-4 px-6 py-5 text-left"
+                onClick={() => setOpen(open === i ? null : i)}
+                aria-expanded={open === i}
+              >
+                <span className="text-white font-bold text-sm leading-snug">{item.q}</span>
+                {open === i
+                  ? <Minus size={16} className="text-brand-green flex-shrink-0" />
+                  : <Plus size={16} className="text-gray-500 flex-shrink-0" />}
+              </button>
+              {open === i && (
+                <div className="px-6 pb-5">
+                  <p className="text-gray-400 text-sm leading-relaxed">{item.a}</p>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
 };
 
 const Home: React.FC = () => {
@@ -266,6 +325,9 @@ const Home: React.FC = () => {
       </section>
 
       {/* Final Call to Action */}
+      {/* FAQ section — matches FAQPage JSON-LD schema, required by Google guidelines */}
+      <FAQ />
+
       <section className="relative py-32 z-10 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4">
           <div className="relative bg-gradient-to-br from-brand-grey to-brand-black border border-white/10 rounded-[4rem] p-12 md:p-24 text-center overflow-hidden">
